@@ -184,7 +184,7 @@ export function getAvailableBackups(): Array<{ name: string, path: string, time:
     }
     
     return fs.readdirSync(backupDir)
-      .filter(file => file.startsWith('backup-') && file.endsWith('.sql'))
+      .filter(file => file.startsWith('backup-') && (file.endsWith('.json') || file.endsWith('.sql')))
       .map(file => {
         const filePath = path.join(backupDir, file);
         const stats = fs.statSync(filePath);
