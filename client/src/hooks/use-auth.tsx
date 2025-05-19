@@ -33,16 +33,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+          credentials: "include",
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          // إذا كان الخادم أرسل رسالة خطأ محددة، استخدمها
+          throw new Error(data.message || `${res.status}: ${res.statusText}`);
+        }
+        
+        return data;
+      } catch (err) {
+        if (err instanceof Error) {
+          throw err;
+        }
+        throw new Error("حدث خطأ غير متوقع أثناء تسجيل الدخول");
+      }
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
     },
     onError: (error: Error) => {
+      // استخدام رسائل خطأ أكثر وضوحًا بناءً على نوع الخطأ
+      let title = "فشل تسجيل الدخول";
+      let description = error.message;
+      
+      // استبدال رسائل الخطأ العامة (مثل 401) برسائل أكثر وضوحًا
+      if (description.includes("401")) {
+        description = "اسم المستخدم أو كلمة المرور غير صحيحة";
+      }
+      
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: title,
+        description: description,
         variant: "destructive",
       });
     },
