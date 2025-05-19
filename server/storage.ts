@@ -839,57 +839,74 @@ export class DatabaseStorage implements IStorage {
   
   // Signal usage methods
   async trackSignalUsage(userId: number, type: 'generated' | 'viewed' | 'analyzed'): Promise<void> {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    // Check if there's an entry for today
-    const [existingUsage] = await db
-      .select()
-      .from(userSignalUsage)
-      .where(
-        and(
-          eq(userSignalUsage.userId, userId),
-          gte(userSignalUsage.date, today)
-        )
-      );
-    
-    if (existingUsage) {
-      // Update existing usage
-      const updateData: any = {};
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       
-      if (type === 'generated') {
-        updateData.signalsGenerated = existingUsage.signalsGenerated + 1;
-      } else if (type === 'viewed') {
-        updateData.signalsViewed = existingUsage.signalsViewed + 1;
-      } else if (type === 'analyzed') {
-        updateData.analysisRequested = existingUsage.analysisRequested + 1;
+      // التحقق من وجود سجل للمستخدم اليوم
+      const checkQuery = `
+        SELECT * FROM user_signal_usage
+        WHERE user_id = $1 AND date >= $2
+        ORDER BY date DESC
+        LIMIT 1
+      `;
+      
+      const existingResults = await db.query(checkQuery, [userId, today]);
+      const existingUsage = existingResults && existingResults.length > 0 ? existingResults[0] : null;
+      
+      if (existingUsage) {
+        // تحديث السجل الموجود
+        let updateQuery = '';
+        let updateParam = 0;
+        
+        if (type === 'generated') {
+          updateQuery = `
+            UPDATE user_signal_usage
+            SET signals_generated = $1
+            WHERE id = $2
+          `;
+          updateParam = existingUsage.signals_generated + 1;
+        } else if (type === 'viewed') {
+          updateQuery = `
+            UPDATE user_signal_usage
+            SET signals_viewed = $1
+            WHERE id = $2
+          `;
+          updateParam = existingUsage.signals_viewed + 1;
+        } else if (type === 'analyzed') {
+          updateQuery = `
+            UPDATE user_signal_usage
+            SET analysis_requested = $1
+            WHERE id = $2
+          `;
+          updateParam = existingUsage.analysis_requested + 1;
+        }
+        
+        await db.query(updateQuery, [updateParam, existingUsage.id]);
+      } else {
+        // إنشاء سجل استخدام جديد
+        const signalsGenerated = type === 'generated' ? 1 : 0;
+        const signalsViewed = type === 'viewed' ? 1 : 0;
+        const analysisRequested = type === 'analyzed' ? 1 : 0;
+        
+        const insertQuery = `
+          INSERT INTO user_signal_usage (user_id, date, signals_generated, signals_viewed, analysis_requested, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `;
+        
+        await db.query(insertQuery, [
+          userId, 
+          today, 
+          signalsGenerated, 
+          signalsViewed, 
+          analysisRequested,
+          new Date(),
+          new Date()
+        ]);
       }
-      
-      await db
-        .update(userSignalUsage)
-        .set(updateData)
-        .where(eq(userSignalUsage.id, existingUsage.id));
-    } else {
-      // Create new usage entry
-      const newUsage: any = {
-        userId,
-        date: today,
-        signalsGenerated: 0,
-        signalsViewed: 0,
-        analysisRequested: 0,
-      };
-      
-      if (type === 'generated') {
-        newUsage.signalsGenerated = 1;
-      } else if (type === 'viewed') {
-        newUsage.signalsViewed = 1;
-      } else if (type === 'analyzed') {
-        newUsage.analysisRequested = 1;
-      }
-      
-      await db
-        .insert(userSignalUsage)
-        .values(newUsage);
+    } catch (error) {
+      console.error("خطأ في تتبع استخدام الإشارات:", error);
+      throw error;
     }
   }
   
