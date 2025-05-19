@@ -177,26 +177,71 @@ export function startBackupSystem(intervalMinutes: number = 5): void {
  * الحصول على قائمة بالنسخ الاحتياطية المتاحة
  * @returns مصفوفة من كائنات تحتوي على معلومات عن النسخ الاحتياطية
  */
-export function getAvailableBackups(): Array<{ name: string, path: string, time: Date, size: number }> {
+export function getAvailableBackups(): Array<{ name: string, path: string, time: Date, size: number, userCount?: number }> {
   try {
     if (!fs.existsSync(backupDir)) {
+      console.log('[خدمة النسخ الاحتياطي] مجلد النسخ الاحتياطية غير موجود');
       return [];
     }
     
-    return fs.readdirSync(backupDir)
+    // جمع معلومات عن ملفات النسخ الاحتياطية
+    const backupFiles = fs.readdirSync(backupDir)
       .filter(file => file.startsWith('backup-') && (file.endsWith('.json') || file.endsWith('.sql')))
       .map(file => {
         const filePath = path.join(backupDir, file);
         const stats = fs.statSync(filePath);
+        let userCount = 0;
+        
+        // محاولة قراءة محتوى الملف لمعرفة عدد المستخدمين
+        if (file.endsWith('.json')) {
+          try {
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            const data = JSON.parse(fileContent);
+            
+            // فحص مختلف هياكل ملفات النسخ الاحتياطية
+            if (data.data && data.data.users && Array.isArray(data.data.users)) {
+              userCount = data.data.users.length;
+            } else if (data.users && Array.isArray(data.users)) {
+              userCount = data.users.length;
+            }
+          } catch (err) {
+            console.log(`[خدمة النسخ الاحتياطي] خطأ في قراءة ملف ${file}:`, err);
+          }
+        }
         
         return {
           name: file,
           path: filePath,
           time: new Date(stats.mtime),
-          size: stats.size
+          size: stats.size,
+          userCount: userCount
         };
-      })
-      .sort((a, b) => b.time.getTime() - a.time.getTime()); // ترتيب من الأحدث للأقدم
+      });
+    
+    console.log(`[خدمة النسخ الاحتياطي] تم العثور على ${backupFiles.length} ملفات نسخ احتياطية`);
+    
+    // ترتيب الملفات بناءً على معايير متعددة
+    backupFiles.sort((a, b) => {
+      // 1. ترتيب حسب عدد المستخدمين (تصاعدي) - الملفات التي تحتوي على أكبر عدد من المستخدمين أولاً
+      if ((a.userCount || 0) !== (b.userCount || 0)) {
+        return (b.userCount || 0) - (a.userCount || 0);
+      }
+      
+      // 2. ترتيب حسب حجم الملف (تصاعدي) - الملفات الأكبر أولاً
+      if (a.size !== b.size) {
+        return b.size - a.size;
+      }
+      
+      // 3. ترتيب حسب التاريخ (تصاعدي) - الملفات الأحدث أولاً
+      return b.time.getTime() - a.time.getTime();
+    });
+    
+    if (backupFiles.length > 0) {
+      const bestBackup = backupFiles[0];
+      console.log(`[خدمة النسخ الاحتياطي] أفضل ملف نسخة احتياطية هو: ${bestBackup.name} (الحجم: ${bestBackup.size} بايت، عدد المستخدمين: ${bestBackup.userCount || 0})`);
+    }
+    
+    return backupFiles;
   } catch (error) {
     console.error('[خدمة النسخ الاحتياطي] خطأ في قراءة النسخ الاحتياطية المتاحة:', error);
     return [];
