@@ -125,13 +125,13 @@ router.post("/generate", async (req: Request, res: Response) => {
     // الحصول على لغة المستخدم المفضلة
     let userLanguage: SupportedLanguages = 'ar';
     
-    // محاولة الحصول على لغة المستخدم من الإعدادات
-    if (req.user?.id) {
+    // محاولة الحصول على لغة المستخدم من كائن المستخدم
+    if (req.user) {
       try {
-        const userSettings = await storage.getUserSettings(req.user.id);
-        if (userSettings?.language) {
+        const user = await storage.getUser(req.user.id);
+        if (user && user.language) {
           // التحقق من أن اللغة مدعومة
-          userLanguage = (userSettings.language === 'en' ? 'en' : 'ar') as SupportedLanguages;
+          userLanguage = (user.language === 'en' ? 'en' : 'ar') as SupportedLanguages;
         }
       } catch (error) {
         logger.warn("SignalGenerator", "فشل في الحصول على لغة المستخدم", { userId: req.user.id });
