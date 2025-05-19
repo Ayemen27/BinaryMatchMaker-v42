@@ -73,12 +73,17 @@ export function createBackup(): void {
     
     // 2. استخراج البيانات من كل جدول رئيسي باستخدام SQL
     const {
-      PGHOST,
-      PGPORT,
-      PGUSER,
-      PGPASSWORD,
-      PGDATABASE
+      PGHOST = '',
+      PGPORT = '',
+      PGUSER = '',
+      PGPASSWORD = '',
+      PGDATABASE = ''
     } = process.env;
+    
+    if (!PGHOST || !PGPORT || !PGUSER || !PGPASSWORD || !PGDATABASE) {
+      console.error(`[نظام النسخ الاحتياطي] خطأ: متغيرات البيئة لقاعدة البيانات غير مكتملة!`);
+      return;
+    }
     
     // الحصول على قائمة جميع الجداول في قاعدة البيانات - هذا يضمن نسخ جميع الجداول
     execQuery(
@@ -109,7 +114,7 @@ export function createBackup(): void {
       // نستخدم Promise.all لتنفيذ جميع عمليات استخراج البيانات بالتوازي
       const extractPromises = tables.map(tableName => 
         new Promise((resolve) => {
-          // استخدام دالة execQuery المساعدة
+          // استخدام دالة execQuery المساعدة مع التأكد من وجود متغيرات البيئة
           execQuery(
             `SELECT row_to_json(t) FROM ${tableName} t`,
             PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
@@ -167,7 +172,8 @@ export function createBackup(): void {
  */
 function execQuery(query: string, host: string, port: string, user: string, password: string, database: string): Promise<any[]> {
   return new Promise((resolve, reject) => {
-    const command = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${user} -d ${database} -c "\\copy (${query}) to stdout csv" | jq -c .`;
+    // استخدام طريقة أبسط لا تعتمد على أداة jq
+    const command = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${user} -d ${database} -t -A -c "${query}"`;
     
     exec(command, (error, stdout, stderr) => {
       if (error) {
@@ -180,21 +186,34 @@ function execQuery(query: string, host: string, port: string, user: string, pass
       }
       
       try {
-        // تحويل كل سطر JSON إلى كائن
+        // معالجة مخرجات الاستعلام
         const rows = stdout.trim().split('\n')
-          .filter(line => line.trim() !== '')
-          .map(line => {
+          .filter(line => line.trim() !== '');
+          
+        // إذا كان الاستعلام هو طلب أسماء الجداول، نعيد مصفوفة من الكائنات
+        if (query.includes('information_schema.tables')) {
+          resolve(rows.map(tableName => ({ table_name: tableName.trim() })));
+        } else {
+          // في حالة استخراج البيانات، نحاول تحليلها كـ JSON
+          const parsedRows = rows.map(line => {
             try {
-              return JSON.parse(line.trim());
+              // إذا كان النص يبدأ بـ { فمن المحتمل أنه JSON
+              if (line.trim().startsWith('{')) {
+                return JSON.parse(line.trim());
+              } else {
+                // إذا لم يكن JSON صالح، نعيده كسلسلة نصية عادية
+                return { data: line.trim() };
+              }
             } catch (e) {
-              console.error(`[نظام النسخ الاحتياطي] خطأ في تحليل JSON:`, e);
-              return null;
+              console.error(`[نظام النسخ الاحتياطي] خطأ في تحليل البيانات: ${e}`);
+              return { raw: line.trim() };
             }
-          })
-          .filter(row => row !== null);
-        
-        resolve(rows);
+          });
+          
+          resolve(parsedRows);
+        }
       } catch (e) {
+        console.error(`[نظام النسخ الاحتياطي] خطأ في معالجة نتائج الاستعلام: ${e}`);
         reject(e);
       }
     });
