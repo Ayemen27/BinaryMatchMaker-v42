@@ -25,22 +25,24 @@ export const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// استيراد المكتبة بنهج آخر
-import * as drizzleOrm from 'drizzle-orm';
-import { PgDialect } from 'drizzle-orm/pg-core';
+// استيراد مكتبة درزل
+import { drizzle } from 'drizzle-orm/pg-core';
 
-// إنشاء كائن للاتصال بقاعدة البيانات
-const dialect = new PgDialect({});
-const session = {
-  execute: async (query, params) => {
-    const result = await pool.query(query, params);
-    return result.rows;
-  },
-  dialect
+// استخدام مخترع مخصص لـ drizzle مع pg
+const customDrizzleAdapter = {
+  query: async (query: string, params: any[] = []) => {
+    try {
+      const result = await pool.query(query, params);
+      return result.rows;
+    } catch (error) {
+      console.error('خطأ في استعلام قاعدة البيانات:', error);
+      throw error;
+    }
+  }
 };
 
-// إنشاء كائن drizzle
-export const db = drizzleOrm.drizzle(session, { schema });
+// @ts-ignore - ignore TypeScript errors
+export const db = drizzle(customDrizzleAdapter, { schema });
 
 // تنفيذ التهيئة بشكل غير متزامن
 initDB().catch(err => {
