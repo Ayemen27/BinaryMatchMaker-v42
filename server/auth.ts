@@ -132,15 +132,39 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", passport.authenticate("local"), async (req, res) => {
+    try {
+      // تحديث وقت آخر تسجيل دخول للمستخدم
+      await storage.updateUserLastLogin(req.user.id);
+      
+      // تسجيل حدث تسجيل الدخول
+      console.log(`تم تسجيل دخول المستخدم: ${req.user.username} (${req.user.id}) بنجاح`);
+      
+      // إرجاع بيانات المستخدم
+      res.status(200).json(req.user);
+    } catch (error) {
+      console.error("خطأ في تحديث وقت آخر تسجيل دخول:", error);
+      // إرجاع بيانات المستخدم حتى لو فشل تحديث وقت آخر تسجيل دخول
+      res.status(200).json(req.user);
+    }
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
-      if (err) return next(err);
+    // تسجيل حدث تسجيل الخروج إذا كان المستخدم مسجل دخوله
+    if (req.isAuthenticated()) {
+      const userId = req.user.id;
+      const username = req.user.username;
+      
+      console.log(`تسجيل خروج المستخدم: ${username} (${userId})`);
+      
+      req.logout((err) => {
+        if (err) return next(err);
+        res.sendStatus(200);
+      });
+    } else {
+      // المستخدم غير مسجل دخوله أصلاً
       res.sendStatus(200);
-    });
+    }
   });
 
   app.get("/api/user", (req, res) => {
