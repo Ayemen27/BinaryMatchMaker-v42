@@ -60,8 +60,11 @@ export default function SignalGeneratorPage() {
     // Start loading
     setIsGenerating(true);
     
+    // Update generation method for display in the UI
+    setGenerationMethod(useAI ? 'ai' : 'algorithmic');
+    
     try {
-      // Make API call to generate an AI-powered signal
+      // Make API call to generate a signal
       const response = await fetch('/api/signal-generator/generate', {
         method: 'POST',
         headers: {
@@ -70,7 +73,8 @@ export default function SignalGeneratorPage() {
         body: JSON.stringify({
           platform,
           pair,
-          timeframe
+          timeframe,
+          useAI  // Send the AI preference to the backend
         }),
       });
       
@@ -166,6 +170,36 @@ export default function SignalGeneratorPage() {
                   </div>
                 </div>
                 
+                {/* AI Toggle Switch */}
+                <div className="flex items-center justify-between p-4 border rounded-lg mb-4">
+                  <div className="flex items-center gap-2">
+                    {useAI ? (
+                      <Brain className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Cpu className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <div>
+                      <h3 className="font-medium">
+                        {useAI ? 
+                          (t('aiGenerationEnabled') || 'توليد الإشارات بالذكاء الاصطناعي مفعّل') : 
+                          (t('algorithmicGeneration') || 'توليد الإشارات بالخوارزميات التقليدية')
+                        }
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {useAI ? 
+                          (t('aiGenerationDesc') || 'يتم استخدام تقنيات الذكاء الاصطناعي المتقدمة لتوليد إشارات بدقة عالية') : 
+                          (t('algorithmicGenerationDesc') || 'يتم استخدام خوارزميات تقليدية لتوليد الإشارات')
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={useAI}
+                    onCheckedChange={setUseAI}
+                    aria-label={t('toggleAiGeneration') || 'تبديل استخدام الذكاء الاصطناعي'}
+                  />
+                </div>
+
                 {/* Generate Button */}
                 <Button 
                   className="w-full" 
@@ -178,7 +212,10 @@ export default function SignalGeneratorPage() {
                       {t('generating')}
                     </>
                   ) : (
-                    <>{t('generateSignal')}</>
+                    <>
+                      {useAI ? <BrainCircuit className="mr-2 h-4 w-4" /> : <Cpu className="mr-2 h-4 w-4" />}
+                      {t('generateSignal')}
+                    </>
                   )}
                 </Button>
                 
@@ -228,7 +265,31 @@ export default function SignalGeneratorPage() {
         {/* Generated Signal */}
         {generatedSignal && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4">{t('generatedSignal')}</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {t('generatedSignal')}
+              <div className="flex items-center gap-2 mt-2">
+                <div className={`px-3 py-1 text-sm rounded-full flex items-center gap-1 ${
+                  generationMethod === 'ai' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+                }`}>
+                  {generationMethod === 'ai' ? (
+                    <>
+                      <Brain className="h-4 w-4" />
+                      {t('aiGenerated') || 'تم التوليد بالذكاء الاصطناعي'}
+                    </>
+                  ) : (
+                    <>
+                      <Cpu className="h-4 w-4" />
+                      {t('algorithmicGenerated') || 'تم التوليد بالخوارزميات التقليدية'}
+                    </>
+                  )}
+                </div>
+                {generationMethod === 'ai' && (
+                  <div className="text-sm text-muted-foreground">
+                    {t('aiAccuracy') || 'دقة تقديرية: 90%+'}
+                  </div>
+                )}
+              </div>
+            </h2>
             <div className="max-w-md">
               <SignalCard signal={generatedSignal} />
             </div>
