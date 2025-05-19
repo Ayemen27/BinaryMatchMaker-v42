@@ -57,8 +57,16 @@ export function setupAuth(app: Express) {
 
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
-    const user = await storage.getUser(id);
-    done(null, user);
+    try {
+      const user = await storage.getUser(id);
+      if (!user) {
+        return done(null, false);
+      }
+      return done(null, user);
+    } catch (error) {
+      console.error("خطأ في استعادة بيانات المستخدم من الجلسة:", error);
+      return done(error);
+    }
   });
 
   app.post("/api/register", async (req, res, next) => {

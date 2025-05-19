@@ -262,7 +262,7 @@ export default function SettingsPage() {
   const handleNotificationChange = (key: keyof NotificationSettings, value: boolean) => {
     const updatedSettings = { ...notificationSettings, [key]: value };
     setNotificationSettings(updatedSettings);
-    // notificationsMutation.mutate(updatedSettings);
+    notificationsMutation.mutate(updatedSettings);
   };
   
   return (
