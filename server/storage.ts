@@ -906,14 +906,16 @@ export class DatabaseStorage implements IStorage {
   
   // Market data methods
   async getMarketData(asset: string): Promise<MarketData | undefined> {
-    const [data] = await db
-      .select()
-      .from(marketData)
-      .where(eq(marketData.asset, asset))
-      .orderBy(desc(marketData.timestamp))
-      .limit(1);
-    
-    return data;
+    try {
+      const result = await db.query(
+        'SELECT * FROM market_data WHERE asset = $1 ORDER BY timestamp DESC LIMIT 1',
+        [asset]
+      );
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في الحصول على بيانات السوق:', error);
+      return undefined;
+    }
   }
   
   async saveMarketData(data: {
@@ -926,32 +928,71 @@ export class DatabaseStorage implements IStorage {
     marketCap?: string;
     dataSource?: string;
   }): Promise<MarketData> {
-    // التحقق أولاً مما إذا كانت هناك بيانات موجودة لهذا الزوج
-    const existingData = await this.getMarketData(data.asset);
-    
-    if (existingData) {
-      // تحديث البيانات الموجودة بدلاً من إنشاء سجل جديد
-      const [updatedData] = await db
-        .update(marketData)
-        .set({
-          ...data,
-          timestamp: new Date(),
-        })
-        .where(eq(marketData.asset, data.asset))
-        .returning();
+    try {
+      // التحقق أولاً مما إذا كانت هناك بيانات موجودة لهذا الزوج
+      const existingData = await this.getMarketData(data.asset);
       
-      return updatedData;
-    } else {
-      // إنشاء سجل جديد إذا لم تكن هناك بيانات موجودة
-      const [savedData] = await db
-        .insert(marketData)
-        .values({
-          ...data,
-          timestamp: new Date(),
-        })
-        .returning();
-      
-      return savedData;
+      if (existingData) {
+        // تحديث البيانات الموجودة بدلاً من إنشاء سجل جديد
+        const result = await db.query(
+          `UPDATE market_data 
+           SET price = $1, 
+               change_24h = $2, 
+               high_24h = $3, 
+               low_24h = $4, 
+               volume_24h = $5, 
+               market_cap = $6, 
+               data_source = $7, 
+               timestamp = $8 
+           WHERE asset = $9 
+           RETURNING *`,
+          [
+            data.price,
+            data.change24h || existingData.change24h || null,
+            data.high24h || existingData.high24h || null,
+            data.low24h || existingData.low24h || null,
+            data.volume24h || existingData.volume24h || null,
+            data.marketCap || existingData.marketCap || null,
+            data.dataSource || existingData.dataSource || null,
+            new Date(),
+            data.asset
+          ]
+        );
+        
+        if (result.length === 0) {
+          throw new Error(`فشل في تحديث بيانات السوق للزوج ${data.asset}`);
+        }
+        
+        return result[0];
+      } else {
+        // إنشاء سجل جديد إذا لم تكن هناك بيانات موجودة
+        const result = await db.query(
+          `INSERT INTO market_data 
+           (asset, price, change_24h, high_24h, low_24h, volume_24h, market_cap, data_source, timestamp) 
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+           RETURNING *`,
+          [
+            data.asset,
+            data.price,
+            data.change24h || null,
+            data.high24h || null,
+            data.low24h || null,
+            data.volume24h || null,
+            data.marketCap || null,
+            data.dataSource || null,
+            new Date()
+          ]
+        );
+        
+        if (result.length === 0) {
+          throw new Error(`فشل في حفظ بيانات السوق للزوج ${data.asset}`);
+        }
+        
+        return result[0];
+      }
+    } catch (error) {
+      console.error('خطأ في حفظ بيانات السوق:', error);
+      throw error;
     }
   }
   
