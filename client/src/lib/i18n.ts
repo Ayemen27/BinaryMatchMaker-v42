@@ -378,6 +378,12 @@ const resources = {
       medium: 'متوسط',
       high: 'مرتفع',
       expiresIn: 'ينتهي في',
+      refreshSignals: 'تحديث الإشارات',
+      resetFilters: 'إعادة ضبط التصفيات',
+      activeSignalsCount: 'عدد الإشارات النشطة',
+      historicalSignalsCount: 'عدد الإشارات السابقة',
+      noSignalsSelected: 'لم يتم اختيار أي إشارات',
+      tryDifferentFilters: 'جرب معايير تصفية مختلفة',
       
       // Auth
       login: 'تسجيل الدخول',

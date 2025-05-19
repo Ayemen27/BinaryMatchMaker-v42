@@ -9,8 +9,11 @@ export interface Signal {
   time: string;
   status: 'active' | 'completed';
   indicators: string[];
+  timeframes?: string[];
   createdAt?: Date;
   result?: 'success' | 'failure' | null;
+  expiresAt?: string;
+  platform?: string;
 }
 
 export interface User {
