@@ -88,7 +88,7 @@ export async function createBackup(): Promise<string | null> {
         metadata: {
           version: '1.0',
           timestamp: new Date().toISOString(),
-          database: PGDATABASE,
+          database: process.env.PGDATABASE || 'postgres',
           tablesCount: tables.length,
           createdAt: new Date().toISOString()
         },

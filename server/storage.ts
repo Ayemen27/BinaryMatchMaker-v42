@@ -883,8 +883,10 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log(`[نظام البذور] البدء في فحص وتهيئة البيانات الأولية...`);
       
-      // التحقق من وجود مستخدمين
-      const existingUsers = await db.select().from(users).limit(1);
+      // التحقق من وجود مستخدمين بواسطة استعلام SQL مباشر
+      const { pool } = await import('./db');
+      const userResult = await pool.query('SELECT * FROM users LIMIT 1');
+      const existingUsers = userResult.rows;
       
       if (existingUsers.length === 0) {
         console.log(`[نظام البذور] عدم وجود مستخدمين، إنشاء المستخدم الافتراضي...`);
@@ -896,60 +898,94 @@ export class DatabaseStorage implements IStorage {
         // حاليًا نستخدم القيمة المشفرة مسبقًا لكلمة المرور "Ay**--772293228"
         const hashedPassword = "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f";
         
-        // إنشاء المستخدم الافتراضي
-        const [user] = await db.insert(users).values({
-          username: "Binarjoinanalytic",
-          password: hashedPassword,
-          language: "ar",
-          createdAt: new Date(),
-          isActive: true
-        }).returning();
+        // إنشاء المستخدم الافتراضي باستخدام استعلام SQL مباشر
+        const insertUserQuery = `
+          INSERT INTO users (username, email, password, full_name, profile_image, role, language, created_at, last_login)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          RETURNING *
+        `;
+        const userValues = [
+          "binarjoinanalytic", // username
+          "admin@binarjoin.com", // email
+          hashedPassword, // password
+          "مشرف النظام", // full_name
+          "/assets/default-avatar.png", // profile_image
+          "admin", // role
+          "ar", // language
+          new Date(), // created_at
+          new Date() // last_login
+        ];
+        
+        const userResult = await pool.query(insertUserQuery, userValues);
+        const user = userResult.rows[0];
         
         console.log(`[نظام البذور] تم إنشاء المستخدم الافتراضي بنجاح مع المعرف: ${user.id}`);
         
-        // إنشاء إعدادات المستخدم
-        await db.insert(userSettings).values({
-          userId: user.id,
-          theme: "dark",
-          defaultAsset: "BTC/USDT",
-          defaultTimeframe: "1h",
-          chartType: "candlestick",
-          showTradingTips: true,
-          autoRefreshData: true,
-          refreshInterval: 60,
-          useAiForSignals: true,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        // إنشاء إعدادات المستخدم باستخدام استعلام SQL مباشر
+        const insertUserSettingsQuery = `
+          INSERT INTO user_settings (user_id, theme, default_asset, default_timeframe, chart_type, show_trading_tips, auto_refresh_data, refresh_interval, use_ai_for_signals, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          RETURNING *
+        `;
+        const userSettingsValues = [
+          user.id,
+          "dark",
+          "BTC/USDT",
+          "1h",
+          "candlestick",
+          true,
+          true,
+          60,
+          true,
+          new Date(),
+          new Date()
+        ];
         
+        const userSettingsResult = await pool.query(insertUserSettingsQuery, userSettingsValues);
         console.log(`[نظام البذور] تم إنشاء إعدادات المستخدم بنجاح`);
         
-        // إنشاء إعدادات إشعارات المستخدم
-        await db.insert(userNotificationSettings).values({
-          userId: user.id,
-          emailNotifications: true,
-          pushNotifications: true,
-          signalAlerts: true,
-          marketUpdates: true,
-          accountAlerts: true,
-          promotionalEmails: false,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        // إنشاء إعدادات إشعارات المستخدم باستخدام استعلام SQL مباشر
+        const insertNotificationSettingsQuery = `
+          INSERT INTO user_notification_settings (user_id, email_notifications, push_notifications, signal_alerts, market_updates, account_alerts, promotional_emails, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          RETURNING *
+        `;
+        const notificationSettingsValues = [
+          user.id,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          new Date(),
+          new Date()
+        ];
         
+        const notificationSettingsResult = await pool.query(insertNotificationSettingsQuery, notificationSettingsValues);
         console.log(`[نظام البذور] تم إنشاء إعدادات إشعارات المستخدم بنجاح`);
         
-        // إنشاء اشتراك للمستخدم
-        await db.insert(subscriptions).values({
-          userId: user.id,
-          type: "free",
-          startDate: new Date(),
-          isActive: true,
-          dailySignalLimit: 5,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+        // إنشاء اشتراك للمستخدم باستخدام استعلام SQL مباشر
+        const insertSubscriptionQuery = `
+          INSERT INTO subscriptions (user_id, type, status, plan_name, start_date, end_date, price, payment_method, auto_renew, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          RETURNING *
+        `;
+        const subscriptionValues = [
+          user.id, // user_id
+          "free", // type
+          "active", // status
+          "مجاني", // plan_name
+          new Date(), // start_date
+          new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // end_date
+          "0.00", // price
+          "none", // payment_method
+          false, // auto_renew
+          new Date(), // created_at
+          new Date() // updated_at
+        ];
         
+        const subscriptionResult = await pool.query(insertSubscriptionQuery, subscriptionValues);
         console.log(`[نظام البذور] تم إنشاء اشتراك المستخدم بنجاح`);
       } else {
         console.log(`[نظام البذور] تم العثور على مستخدمين موجودين بالفعل، تخطي إنشاء المستخدم الافتراضي`);
