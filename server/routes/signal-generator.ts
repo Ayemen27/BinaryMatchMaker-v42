@@ -8,6 +8,9 @@ import { getAIErrorMessage, SupportedLanguages } from "../i18n/translations";
 // إنشاء موجه الطرق
 const router = express.Router();
 
+// الحد الأقصى للإشارات اليومية للمستخدم المجاني
+const FREE_USER_DAILY_SIGNAL_LIMIT = 3;
+
 // مخطط التحقق من صحة البيانات
 const generateSignalSchema = z.object({
   platform: z.string().min(1, "المنصة مطلوبة"),
@@ -60,8 +63,8 @@ router.post("/generate", async (req: Request, res: Response) => {
       // الحصول على عدد الإشارات المولدة اليوم من هذا المستخدم
       const dailyUsage = await storage.getUserSignalUsageToday(user.id);
       
-      // التحقق من الحد اليومي للمستخدم المجاني (3 إشارات يومياً)
-      if (dailyUsage >= 3) {
+      // التحقق من الحد اليومي للمستخدم المجاني
+      if (dailyUsage >= FREE_USER_DAILY_SIGNAL_LIMIT) {
         logger.warn("SignalGenerator", "تجاوز حد الاستخدام المجاني", { 
           userId: user.id, 
           dailyUsage 
@@ -165,6 +168,48 @@ router.post("/generate", async (req: Request, res: Response) => {
     
     // أخطاء أخرى
     return res.status(500).json(getAIErrorMessage(errorType, userLanguage));
+  }
+});
+
+// طريقة API للحصول على معلومات استخدام الإشارات للمستخدم
+router.get("/usage-info", async (req: Request, res: Response) => {
+  try {
+    // التحقق من أن المستخدم مسجل دخوله
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "غير مصرح. يرجى تسجيل الدخول." });
+    }
+
+    const user = req.user;
+    const userId = user.id;
+    
+    // المعلومات الافتراضية
+    const usageInfo = {
+      subscriptionLevel: user.subscriptionLevel || 'free',
+      dailyLimit: FREE_USER_DAILY_SIGNAL_LIMIT, // الحد الافتراضي للمستخدم المجاني
+      usedToday: 0,
+      remainingToday: FREE_USER_DAILY_SIGNAL_LIMIT
+    };
+    
+    // إذا كان المستخدم مدفوع، قم بتحديث حد الإشارات اليومي
+    if (user.subscriptionLevel === 'premium') {
+      usageInfo.dailyLimit = 50; // مثال: 50 إشارة للمستوى المتميز
+      usageInfo.remainingToday = 50;
+    } else if (user.subscriptionLevel === 'pro') {
+      usageInfo.dailyLimit = 100; // مثال: 100 إشارة للمستوى الاحترافي
+      usageInfo.remainingToday = 100;
+    }
+    
+    // الحصول على عدد الإشارات المستخدمة اليوم
+    const dailyUsage = await storage.getUserSignalUsageToday(userId);
+    usageInfo.usedToday = dailyUsage;
+    
+    // حساب الإشارات المتبقية
+    usageInfo.remainingToday = Math.max(0, usageInfo.dailyLimit - dailyUsage);
+    
+    return res.json(usageInfo);
+  } catch (error) {
+    console.error("خطأ في الحصول على معلومات استخدام الإشارات:", error);
+    return res.status(500).json({ error: "خطأ في معالجة الطلب" });
   }
 });
 
