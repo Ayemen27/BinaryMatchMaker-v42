@@ -14,7 +14,13 @@ export interface Signal {
   indicators: string[];
   platform?: string;
   timeframe?: string;
-  analysis?: any; // بيانات التحليل الإضافية
+  analysis?: {
+    reasoning?: string;
+    potentialProfit?: string;
+    riskRewardRatio?: string;
+    timestamp?: string;
+    [key: string]: any;
+  }; // بيانات التحليل الإضافية
   reason?: string; // سبب الإشارة
   createdAt?: Date;
   updatedAt?: Date;
