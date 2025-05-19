@@ -43,21 +43,9 @@ router.post("/generate", async (req: Request, res: Response) => {
       // TODO: تنفيذ التحقق الحقيقي من حدود الاشتراك المجاني
     }
     
-    // توليد الإشارة باستخدام الذكاء الاصطناعي
-    const signal = await openAIService.generateTradingSignal(platform, pair, timeframe);
-    
-    // حفظ الإشارة في قاعدة البيانات
-    const savedSignal = await storage.createSignal({
-      asset: signal.asset,
-      type: signal.type,
-      entryPrice: signal.entryPrice,
-      targetPrice: signal.targetPrice,
-      stopLoss: signal.stopLoss,
-      accuracy: signal.accuracy,
-      time: signal.time,
-      status: 'active',
-      indicators: signal.indicators,
-    });
+    // توليد الإشارة باستخدام الذكاء الاصطناعي ومعرف المستخدم لربطها به
+    const userId = req.user?.id;
+    const signal = await openAIService.generateTradingSignal(platform, pair, timeframe, userId);
 
     // إرجاع الإشارة المولدة
     return res.status(201).json(savedSignal);
