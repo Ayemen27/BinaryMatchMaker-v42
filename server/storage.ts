@@ -644,53 +644,65 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getUserFavoriteSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]> {
-    // استعلام الحصول على الإشارات المفضلة للمستخدم
-    const results = await db.execute(
-      sql`SELECT us.*, s.* 
-          FROM user_signals us
-          INNER JOIN signals s ON us.signal_id = s.id
-          WHERE us.user_id = ${userId} AND us.is_favorite = true
-          ORDER BY us.created_at DESC`
-    );
-    
-    // تحويل البيانات المستخرجة إلى النموذج المطلوب
-    return results.map(row => {
-      const userSignal: UserSignal = {
-        id: row.id,
-        userId: row.user_id,
-        signalId: row.signal_id,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-        isFavorite: row.is_favorite,
-        isTaken: row.is_taken,
-        result: row.result,
-        notes: row.notes
-      };
+    try {
+      // استخدام db.query بدلاً من db.execute
+      const query = `
+        SELECT us.*, s.* 
+        FROM user_signals us
+        INNER JOIN signals s ON us.signal_id = s.id
+        WHERE us.user_id = $1 AND us.is_favorite = true
+        ORDER BY us.created_at DESC
+      `;
       
-      const signal: Signal = {
-        id: row.signal_id || row.id,
-        type: row.type,
-        asset: row.asset,
-        entryPrice: row.entry_price,
-        targetPrice: row.target_price,
-        stopLoss: row.stop_loss,
-        timeframe: row.timeframe,
-        expiryTime: row.expiry_time ? new Date(row.expiry_time) : null,
-        status: row.status,
-        result: row.result,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-        createdBy: row.created_by,
-        confidence: row.confidence,
-        analysis: row.analysis,
-        isPublic: row.is_public
-      };
+      const results = await db.query(query, [userId]);
       
-      return {
-        ...userSignal,
-        signal
-      };
-    });
+      if (!results || results.length === 0) {
+        return [];
+      }
+      
+      // تحويل البيانات المستخرجة إلى النموذج المطلوب
+      return results.map(row => {
+        // استخراج حقول كل جدول
+        const userSignalFields = {
+          id: row.id,
+          userId: row.user_id,
+          signalId: row.signal_id,
+          isFavorite: row.is_favorite,
+          isTaken: row.is_taken,
+          result: row.result,
+          notes: row.notes,
+          createdAt: new Date(row.created_at),
+          updatedAt: new Date(row.updated_at)
+        };
+        
+        const signalFields = {
+          id: row.signal_id || row.id,
+          type: row.type,
+          asset: row.asset,
+          entryPrice: row.entry_price,
+          targetPrice: row.target_price,
+          stopLoss: row.stop_loss,
+          timeframe: row.timeframe,
+          expiryTime: row.expiry_time ? new Date(row.expiry_time) : null,
+          status: row.status,
+          result: row.result,
+          createdAt: new Date(row.created_at),
+          updatedAt: new Date(row.updated_at),
+          createdBy: row.created_by,
+          confidence: row.confidence,
+          analysis: row.analysis,
+          isPublic: row.is_public
+        };
+        
+        return {
+          ...userSignalFields,
+          signal: signalFields
+        };
+      });
+    } catch (error) {
+      console.error("خطأ في استرجاع الإشارات المفضلة للمستخدم:", error);
+      return [];
+    }
   }
   
   async addSignalToUser(userId: number, signalId: number): Promise<UserSignal> {
