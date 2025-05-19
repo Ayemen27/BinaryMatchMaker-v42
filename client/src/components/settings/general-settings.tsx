@@ -93,17 +93,22 @@ export function GeneralSettings() {
   // تحديث نموذج الإعدادات عند استرداد البيانات من الخادم
   useEffect(() => {
     if (userSettingsData) {
+      console.log("تم استلام إعدادات محدثة من الخادم:", userSettingsData);
+      
+      // تأكد من أن لدينا قيم سليمة لكل الحقول
+      const updatedSettings = {
+        theme: userSettingsData.theme !== null && userSettingsData.theme !== undefined ? userSettingsData.theme : 'dark',
+        defaultAsset: userSettingsData.defaultAsset !== null && userSettingsData.defaultAsset !== undefined ? userSettingsData.defaultAsset : 'BTC/USDT',
+        defaultTimeframe: userSettingsData.defaultTimeframe !== null && userSettingsData.defaultTimeframe !== undefined ? userSettingsData.defaultTimeframe : '1h',
+        defaultPlatform: userSettingsData.defaultPlatform !== null && userSettingsData.defaultPlatform !== undefined ? userSettingsData.defaultPlatform : '',
+        chartType: userSettingsData.chartType !== null && userSettingsData.chartType !== undefined ? userSettingsData.chartType : 'candlestick',
+        showTradingTips: userSettingsData.showTradingTips !== null && userSettingsData.showTradingTips !== undefined ? userSettingsData.showTradingTips : true,
+        autoRefreshData: userSettingsData.autoRefreshData !== null && userSettingsData.autoRefreshData !== undefined ? userSettingsData.autoRefreshData : true,
+        refreshInterval: userSettingsData.refreshInterval !== null && userSettingsData.refreshInterval !== undefined ? userSettingsData.refreshInterval : 60,
+      };
+      
       // تحديث نموذج إعدادات المستخدم العامة
-      settingsForm.reset({
-        theme: userSettingsData.theme || 'dark',
-        defaultAsset: userSettingsData.defaultAsset || 'BTC/USDT',
-        defaultTimeframe: userSettingsData.defaultTimeframe || '1h',
-        defaultPlatform: userSettingsData.defaultPlatform || '',
-        chartType: userSettingsData.chartType || 'candlestick',
-        showTradingTips: userSettingsData.showTradingTips ?? true,
-        autoRefreshData: userSettingsData.autoRefreshData ?? true,
-        refreshInterval: userSettingsData.refreshInterval || 60,
-      });
+      settingsForm.reset(updatedSettings);
     }
   }, [userSettingsData, settingsForm]);
 
@@ -136,9 +141,24 @@ export function GeneralSettings() {
 
   // تغيير وحفظ الإعدادات فوراً عند تغيير قيمة أي حقل
   const saveSettingOnChange = (field: keyof UserSettingsFormValues, value: any) => {
+    console.log(`تغيير إعداد ${field} إلى:`, value);
+    
+    // تحديث قيمة الحقل في النموذج
     settingsForm.setValue(field, value);
+    
+    // الحصول على جميع القيم الحالية في النموذج
     const currentValues = settingsForm.getValues();
-    const updatedValues = { ...currentValues, [field]: value };
+    
+    // إنشاء كائن الإعدادات المحدثة للإرسال للخادم
+    // نضمن إرسال جميع القيم، حتى تلك التي لم تتغير
+    const updatedValues = { 
+      ...currentValues, 
+      [field]: value 
+    };
+    
+    console.log("إرسال إعدادات للخادم:", updatedValues);
+    
+    // إرسال الإعدادات المحدثة للخادم
     onSubmit(updatedValues);
   };
 

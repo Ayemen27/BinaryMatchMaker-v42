@@ -158,14 +158,41 @@ router.patch("/", async (req: Request, res: Response) => {
     let userSettings = await storage.getUserSettings(userId);
     
     if (!userSettings) {
-      // إنشاء إعدادات جديدة للمستخدم
+      // إنشاء إعدادات جديدة للمستخدم مع تعيين قيم افتراضية للحقول غير المرسلة
+      const defaultSettings = {
+        theme: 'dark',
+        defaultAsset: 'BTC/USDT',
+        defaultTimeframe: '1h',
+        defaultPlatform: '',
+        chartType: 'candlestick',
+        showTradingTips: true,
+        autoRefreshData: true,
+        refreshInterval: 60,
+        // نضع الإعدادات المرسلة بعد القيم الافتراضية لإعطاء الأولوية للقيم المرسلة
+        ...settingsData
+      };
+      
       userSettings = await storage.createUserSettings({
         userId,
-        ...settingsData
+        ...defaultSettings
       });
     } else {
-      // تحديث الإعدادات الحالية
-      userSettings = await storage.updateUserSettings(userId, settingsData);
+      // الحفاظ على القيم الحالية وتحديث فقط القيم المرسلة
+      // هذا يضمن عدم فقدان أي إعدادات محفوظة سابقًا
+      const updatedSettings = {
+        // لا نستخدم spread operator فقط للقيم المرسلة
+        // بدلاً من ذلك، نحدد كل حقل بشكل صريح ونتحقق مما إذا كان موجودًا في البيانات المرسلة
+        theme: settingsData.theme !== undefined ? settingsData.theme : userSettings.theme,
+        defaultAsset: settingsData.defaultAsset !== undefined ? settingsData.defaultAsset : userSettings.defaultAsset,
+        defaultTimeframe: settingsData.defaultTimeframe !== undefined ? settingsData.defaultTimeframe : userSettings.defaultTimeframe,
+        defaultPlatform: settingsData.defaultPlatform !== undefined ? settingsData.defaultPlatform : userSettings.defaultPlatform,
+        chartType: settingsData.chartType !== undefined ? settingsData.chartType : userSettings.chartType,
+        showTradingTips: settingsData.showTradingTips !== undefined ? settingsData.showTradingTips : userSettings.showTradingTips,
+        autoRefreshData: settingsData.autoRefreshData !== undefined ? settingsData.autoRefreshData : userSettings.autoRefreshData,
+        refreshInterval: settingsData.refreshInterval !== undefined ? settingsData.refreshInterval : userSettings.refreshInterval,
+      };
+      
+      userSettings = await storage.updateUserSettings(userId, updatedSettings);
     }
 
     logger.info("UserSettings", "تم تحديث إعدادات المستخدم العامة", { userId });
