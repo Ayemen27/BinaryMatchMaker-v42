@@ -73,6 +73,7 @@ const passwordFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
+type ApiKeyFormValues = z.infer<typeof apiKeyFormSchema>;
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -86,7 +87,18 @@ export default function SettingsPage() {
     marketAlerts: false,
     accountAlerts: true,
   });
+  const [showApiKey, setShowApiKey] = useState(false);
   
+  // API Key form
+  const apiKeyForm = useForm<ApiKeyFormValues>({
+    resolver: zodResolver(apiKeyFormSchema),
+    defaultValues: {
+      openaiApiKey: '',
+      useCustomAiKey: false,
+      useAiForSignals: true,
+    },
+  });
+
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -193,6 +205,28 @@ export default function SettingsPage() {
     }
   });
   
+  // API Key mutation
+  const apiKeyMutation = useMutation({
+    mutationFn: async (data: ApiKeyFormValues) => {
+      const res = await apiRequest("PATCH", "/api/user/settings/api", data);
+      return await res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/settings"] });
+      toast({
+        title: t('apiKeyUpdated') || 'تم تحديث مفتاح API',
+        description: t('apiKeyUpdateSuccess') || 'تم تحديث إعدادات API بنجاح',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('updateFailed') || 'فشل التحديث',
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
   // Submit handlers
   const onProfileSubmit = (data: ProfileFormValues) => {
     profileMutation.mutate(data);
@@ -200,6 +234,10 @@ export default function SettingsPage() {
   
   const onPasswordSubmit = (data: PasswordFormValues) => {
     passwordMutation.mutate(data);
+  };
+  
+  const onApiKeySubmit = (data: ApiKeyFormValues) => {
+    apiKeyMutation.mutate(data);
   };
   
   const handleLanguageChange = (language: 'ar' | 'en') => {
@@ -602,6 +640,141 @@ export default function SettingsPage() {
                     </div>
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* API Keys Tab */}
+          <TabsContent value="apikeys">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('apiKeysSettings') || 'إعدادات مفاتيح API'}</CardTitle>
+                <CardDescription>{t('apiKeysSettingsDescription') || 'إدارة مفاتيح API الخاصة بك لتوليد الإشارات باستخدام الذكاء الاصطناعي'}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="bg-muted p-4 rounded-md border border-border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Info className="h-5 w-5 text-primary" />
+                    <h3 className="font-medium">{t('whatIsApiKey') || 'ما هو مفتاح API؟'}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {t('apiKeyExplanation') || 'مفتاح API هو رمز فريد يسمح لك باستخدام خدمات الذكاء الاصطناعي من OpenAI لتوليد إشارات تداول دقيقة. عند استخدام مفتاحك الخاص، يمكنك:'}
+                  </p>
+                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 mb-2">
+                    <li>{t('apiKeyBenefit1') || 'الحصول على إشارات غير محدودة دون قيود'}</li>
+                    <li>{t('apiKeyBenefit2') || 'تحسين دقة الإشارات وتخصيصها لاحتياجاتك'}</li>
+                    <li>{t('apiKeyBenefit3') || 'تشغيل التطبيق حتى عندما يكون هناك ضغط كبير على خوادم النظام'}</li>
+                  </ul>
+                </div>
+                
+                <Form {...apiKeyForm}>
+                  <form onSubmit={apiKeyForm.handleSubmit(onApiKeySubmit)} className="space-y-4">
+                    <FormField
+                      control={apiKeyForm.control}
+                      name="useAiForSignals"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              {t('useAiForSignals') || 'استخدام الذكاء الاصطناعي لتوليد الإشارات'}
+                            </FormLabel>
+                            <FormDescription>
+                              {t('useAiForSignalsDescription') || 'عند التعطيل، سيتم استخدام خوارزميات تقليدية لتوليد الإشارات بدلاً من الذكاء الاصطناعي'}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={apiKeyForm.control}
+                      name="useCustomAiKey"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              {t('useCustomAiKey') || 'استخدام مفتاح OpenAI خاص'}
+                            </FormLabel>
+                            <FormDescription>
+                              {t('useCustomAiKeyDescription') || 'استخدم مفتاح API الخاص بك للاتصال بـ OpenAI بدلاً من مفتاح النظام'}
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    {apiKeyForm.watch('useCustomAiKey') && (
+                      <FormField
+                        control={apiKeyForm.control}
+                        name="openaiApiKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('openaiApiKey') || 'مفتاح OpenAI API'}</FormLabel>
+                            <div className="relative">
+                              <FormControl>
+                                <Input 
+                                  type={showApiKey ? "text" : "password"} 
+                                  placeholder="sk-..." 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="absolute right-2 top-1/2 -translate-y-1/2"
+                                onClick={() => setShowApiKey(!showApiKey)}
+                              >
+                                {showApiKey ? t('hide') || 'إخفاء' : t('show') || 'إظهار'}
+                              </Button>
+                            </div>
+                            <FormDescription>
+                              {t('openaiApiKeyDescription') || 'أدخل مفتاح API الخاص بك من حساب OpenAI. نحن لا نخزن هذا المفتاح على خوادمنا.'}
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                    
+                    <div className="bg-muted p-4 rounded-md border border-border mt-4">
+                      <h3 className="font-medium mb-2">{t('howToGetApiKey') || 'كيفية الحصول على مفتاح API'}</h3>
+                      <ol className="text-sm text-muted-foreground list-decimal list-inside space-y-2">
+                        <li>{t('apiKeyStep1') || 'قم بزيارة موقع OpenAI على'} <a href="https://platform.openai.com/signup" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">platform.openai.com</a></li>
+                        <li>{t('apiKeyStep2') || 'سجل حساباً أو قم بتسجيل الدخول إلى حسابك الحالي'}</li>
+                        <li>{t('apiKeyStep3') || 'انتقل إلى صفحة "API Keys" في الإعدادات'}</li>
+                        <li>{t('apiKeyStep4') || 'اضغط على "Create new secret key" وقم بتسمية المفتاح'}</li>
+                        <li>{t('apiKeyStep5') || 'انسخ المفتاح المُنشأ والصقه هنا'}</li>
+                      </ol>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        <strong>{t('important') || 'هام'}:</strong> {t('apiKeyWarning') || 'تحتاج إلى إضافة طريقة دفع إلى حسابك في OpenAI لاستخدام المفتاح. سيتم تحصيل رسوم منك مباشرةً من قبل OpenAI حسب استخدامك.'}
+                      </p>
+                    </div>
+                    
+                    <Button 
+                      type="submit"
+                      disabled={apiKeyMutation.isPending}
+                      className="mt-4"
+                    >
+                      {apiKeyMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {t('saveApiSettings') || 'حفظ إعدادات API'}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           </TabsContent>
