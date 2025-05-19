@@ -79,6 +79,9 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 type PasswordFormValues = z.infer<typeof passwordFormSchema>;
 type ApiKeyFormValues = z.infer<typeof apiKeyFormSchema>;
 
+// تعريف أيقونة المصباح
+const LightbulbIcon = FileWarning;
+
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
