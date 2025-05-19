@@ -457,6 +457,10 @@ export default function SettingsPage() {
                   <User className="h-4 w-4" />
                   <span className="hidden xs:inline">{t('profile')}</span>
                 </TabsTrigger>
+                <TabsTrigger value="general" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="general">
+                  <Settings2 className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('general') || 'الإعدادات العامة'}</span>
+                </TabsTrigger>
                 <TabsTrigger value="security" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="security">
                   <Lock className="h-4 w-4" />
                   <span className="hidden xs:inline">{t('security')}</span>
