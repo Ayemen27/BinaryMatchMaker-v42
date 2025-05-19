@@ -512,10 +512,10 @@ export default function SignalGeneratorPage() {
                         </div>
                       </div>
                       
-                      {generatedSignal.reason && (
+                      {(generatedSignal.reason || (generatedSignal.analysis && generatedSignal.analysis.reasoning)) && (
                         <div>
                           <h4 className="text-sm text-muted-foreground mb-1">{t('signalReason') || 'سبب الإشارة'}</h4>
-                          <p className="text-sm">{generatedSignal.reason}</p>
+                          <p className="text-sm">{generatedSignal.reason || (generatedSignal.analysis && generatedSignal.analysis.reasoning)}</p>
                         </div>
                       )}
                     </div>

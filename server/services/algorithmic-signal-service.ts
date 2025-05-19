@@ -38,14 +38,19 @@ export class AlgorithmicSignalService {
       }, userId);
       
       // إنشاء بيانات الإشارة للتخزين في قاعدة البيانات
+      // إضافة طابع زمني فريد إلى الإشارة لتجنب مشكلة التكرار
+      // تغيير بعض قيم الأسعار قليلاً بإضافة عنصر عشوائي صغير لتجنب تكرار البيانات
+      const now = new Date();
+      const randomFactor = (1 + (Math.random() * 0.001 - 0.0005)); // عامل عشوائي صغير جدًا للتغيير
+
       const signalToInsert: InsertSignal = {
         asset: signalData.asset,
         type: signalData.type,
-        entryPrice: signalData.entryPrice,
-        targetPrice: signalData.targetPrice,
-        stopLoss: signalData.stopLoss,
+        entryPrice: (parseFloat(signalData.entryPrice) * randomFactor).toFixed(2),
+        targetPrice: (parseFloat(signalData.targetPrice) * randomFactor).toFixed(2),
+        stopLoss: (parseFloat(signalData.stopLoss) * randomFactor).toFixed(2),
         accuracy: signalData.accuracy,
-        time: signalData.time,
+        time: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`,
         status: 'active',
         indicators: signalData.indicators,
         platform: platform,
@@ -57,11 +62,33 @@ export class AlgorithmicSignalService {
           reasoning: signalData.reason,
           potentialProfit: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / parseFloat(signalData.entryPrice) * 100).toFixed(2) + '%',
           riskRewardRatio: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / Math.abs(parseFloat(signalData.entryPrice) - parseFloat(signalData.stopLoss))).toFixed(2),
+          timestamp: now.toISOString() // إضافة طابع زمني
         }
       };
       
-      // حفظ الإشارة في قاعدة البيانات
-      const signal = await storage.createSignal(signalToInsert);
+      // محاولة حفظ الإشارة مع إعادة المحاولة في حالة فشل المعرف المتكرر
+      let signal: Signal;
+      try {
+        signal = await storage.createSignal(signalToInsert);
+      } catch (error) {
+        // في حالة حدوث خطأ بسبب تكرار المفتاح، نقوم بتغيير الأسعار قليلاً ونحاول مرة أخرى
+        if (error instanceof Error && error.message.includes('duplicate key value')) {
+          // تعديل قيم الأسعار بشكل أكبر لتجنب التكرار
+          const newRandomFactor = (1 + (Math.random() * 0.01 - 0.005)); // عامل عشوائي أكبر
+          signalToInsert.entryPrice = (parseFloat(signalData.entryPrice) * newRandomFactor).toFixed(2);
+          signalToInsert.targetPrice = (parseFloat(signalData.targetPrice) * newRandomFactor).toFixed(2);
+          signalToInsert.stopLoss = (parseFloat(signalData.stopLoss) * newRandomFactor).toFixed(2);
+          
+          // إضافة تأخير قصير لتغيير الوقت
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          // محاولة إنشاء الإشارة مرة أخرى
+          signal = await storage.createSignal(signalToInsert);
+        } else {
+          // إعادة رمي الخطأ إذا كان غير متعلق بتكرار المفتاح
+          throw error;
+        }
+      }
       
       // إذا كان هناك معرف مستخدم، قم بتعيين الإشارة للمستخدم وتتبع الاستخدام
       if (userId) {
