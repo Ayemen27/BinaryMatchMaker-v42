@@ -47,7 +47,9 @@ export default function SignalGeneratorPage() {
   // When user settings load, set the initial AI usage preference
   useEffect(() => {
     if (userSettings) {
-      setUseAI(userSettings.useAiForSignals !== false);
+      // تحقق من وجود الإعداد وتفعيله أو تعطيله
+      const useAiSetting = userSettings.useAiForSignals as boolean | undefined;
+      setUseAI(useAiSetting !== false);
     }
   }, [userSettings]);
   
