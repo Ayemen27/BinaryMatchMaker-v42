@@ -279,9 +279,16 @@ export class DatabaseStorage implements IStorage {
           // تحويل اسم الحقل من camelCase إلى snake_case
           const fieldName = key.replace(/([A-Z])/g, '_$1').toLowerCase();
           
-          updateFields.push(`${fieldName} = $${paramIndex}`);
-          updateValues.push(value);
-          paramIndex++;
+          // معالجة خاصة للحقول البولينية
+          if (typeof value === 'boolean' || key === 'showTradingTips' || key === 'autoRefreshData') {
+            // استخدام تعبير SQL مباشر للقيم البولينية
+            updateFields.push(`${fieldName} = ${value === true ? 'TRUE' : 'FALSE'}`);
+          } else {
+            // معالجة الحقول العادية
+            updateFields.push(`${fieldName} = $${paramIndex}`);
+            updateValues.push(value);
+            paramIndex++;
+          }
         }
       }
       
@@ -418,15 +425,16 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getActiveSignals(): Promise<Signal[]> {
-    return db.select()
-      .from(signals)
-      .where(
-        and(
-          eq(signals.status, 'active'),
-          eq(signals.isPublic, true)
-        )
-      )
-      .orderBy(desc(signals.createdAt));
+    try {
+      const result = await db.query(
+        'SELECT * FROM signals WHERE status = $1 AND is_public = $2 ORDER BY created_at DESC',
+        ['active', true]
+      );
+      return result || [];
+    } catch (error) {
+      console.error('خطأ في استرجاع الإشارات النشطة:', error);
+      return [];
+    }
   }
   
   async getCompletedSignals(): Promise<Signal[]> {
