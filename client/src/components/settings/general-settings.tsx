@@ -63,19 +63,11 @@ export function GeneralSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  // نموذج إعدادات المستخدم العامة
+  // نموذج إعدادات المستخدم العامة - نبدأ بقيم فارغة وسنملأها من الخادم
   const settingsForm = useForm<UserSettingsFormValues>({
     resolver: zodResolver(userSettingsSchema),
-    defaultValues: {
-      theme: 'dark',
-      defaultAsset: 'BTC/USDT',
-      defaultTimeframe: '1h',
-      defaultPlatform: '',
-      chartType: 'candlestick',
-      showTradingTips: true,
-      autoRefreshData: true,
-      refreshInterval: 60,
-    },
+    // نترك القيم الافتراضية فارغة قدر الإمكان لمنع التضارب
+    defaultValues: {},
   });
 
   // استعلام لجلب إعدادات المستخدم من الخادم
@@ -84,30 +76,65 @@ export function GeneralSettings() {
     queryFn: async () => {
       const res = await fetch('/api/user/settings');
       if (!res.ok) {
+        // في حالة عدم وجود إعدادات للمستخدم (404)، نقوم بإنشاء إعدادات افتراضية
+        if (res.status === 404) {
+          // إرسال طلب لإنشاء إعدادات جديدة بالقيم الافتراضية
+          const createSettingsRes = await fetch('/api/user/settings', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(defaultSettings),
+          });
+          
+          if (createSettingsRes.ok) {
+            return createSettingsRes.json();
+          }
+        }
         throw new Error(await res.text());
       }
       return res.json();
     },
+    // استخدام staleTime لمنع استرجاع الإعدادات بشكل متكرر
+    staleTime: 60000, // 60 ثانية
+    // استخدام cacheTime لزيادة مدة تخزين الإعدادات محليًا
+    gcTime: 300000, // 5 دقائق
+    // إعادة محاولة الاستعلام في حالة الفشل
+    retry: 1,
   });
 
-  // تحديث نموذج الإعدادات عند استرداد البيانات من الخادم
+  // تعريف القيم الافتراضية للاستخدام في حالة عدم وجود قيمة من الخادم
+  const defaultSettings = {
+    theme: 'dark',
+    defaultAsset: 'BTC/USDT',
+    defaultTimeframe: '1h',
+    defaultPlatform: '',
+    chartType: 'candlestick',
+    showTradingTips: true,
+    autoRefreshData: true,
+    refreshInterval: 60,
+  };
+    
+  // تحديث نموذج الإعدادات عند استرداد البيانات من الخادم 
   useEffect(() => {
     if (userSettingsData) {
       console.log("تم استلام إعدادات محدثة من الخادم:", userSettingsData);
       
       // تأكد من أن لدينا قيم سليمة لكل الحقول
       const updatedSettings = {
-        theme: userSettingsData.theme !== null && userSettingsData.theme !== undefined ? userSettingsData.theme : 'dark',
-        defaultAsset: userSettingsData.defaultAsset !== null && userSettingsData.defaultAsset !== undefined ? userSettingsData.defaultAsset : 'BTC/USDT',
-        defaultTimeframe: userSettingsData.defaultTimeframe !== null && userSettingsData.defaultTimeframe !== undefined ? userSettingsData.defaultTimeframe : '1h',
-        defaultPlatform: userSettingsData.defaultPlatform !== null && userSettingsData.defaultPlatform !== undefined ? userSettingsData.defaultPlatform : '',
-        chartType: userSettingsData.chartType !== null && userSettingsData.chartType !== undefined ? userSettingsData.chartType : 'candlestick',
-        showTradingTips: userSettingsData.showTradingTips !== null && userSettingsData.showTradingTips !== undefined ? userSettingsData.showTradingTips : true,
-        autoRefreshData: userSettingsData.autoRefreshData !== null && userSettingsData.autoRefreshData !== undefined ? userSettingsData.autoRefreshData : true,
-        refreshInterval: userSettingsData.refreshInterval !== null && userSettingsData.refreshInterval !== undefined ? userSettingsData.refreshInterval : 60,
+        theme: userSettingsData.theme || defaultSettings.theme,
+        defaultAsset: userSettingsData.defaultAsset || defaultSettings.defaultAsset,
+        defaultTimeframe: userSettingsData.defaultTimeframe || defaultSettings.defaultTimeframe,
+        defaultPlatform: userSettingsData.defaultPlatform !== undefined ? userSettingsData.defaultPlatform : defaultSettings.defaultPlatform,
+        chartType: userSettingsData.chartType || defaultSettings.chartType,
+        showTradingTips: typeof userSettingsData.showTradingTips === 'boolean' ? userSettingsData.showTradingTips : defaultSettings.showTradingTips,
+        autoRefreshData: typeof userSettingsData.autoRefreshData === 'boolean' ? userSettingsData.autoRefreshData : defaultSettings.autoRefreshData,
+        refreshInterval: userSettingsData.refreshInterval !== undefined ? userSettingsData.refreshInterval : defaultSettings.refreshInterval,
       };
       
-      // تحديث نموذج إعدادات المستخدم العامة
+      console.log("تحديث النموذج بالإعدادات المستردة:", updatedSettings);
+      
+      // تحديث نموذج إعدادات المستخدم العامة بشكل كامل (reset)
       settingsForm.reset(updatedSettings);
     }
   }, [userSettingsData, settingsForm]);
@@ -146,20 +173,28 @@ export function GeneralSettings() {
     // تحديث قيمة الحقل في النموذج
     settingsForm.setValue(field, value);
     
-    // الحصول على جميع القيم الحالية في النموذج
-    const currentValues = settingsForm.getValues();
+    // تأكد من أن لدينا جميع القيم الحالية مع القيم الافتراضية للحقول التي ليس لها قيمة
+    // هذا مهم لضمان إرسال جميع الإعدادات في كل مرة
+    const formValues = settingsForm.getValues();
     
-    // إنشاء كائن الإعدادات المحدثة للإرسال للخادم
-    // نضمن إرسال جميع القيم، حتى تلك التي لم تتغير
-    const updatedValues = { 
-      ...currentValues, 
-      [field]: value 
+    // تحضير كائن الإعدادات الكامل مع القيم الافتراضية للحقول الفارغة
+    const completeSettings = {
+      theme: formValues.theme || defaultSettings.theme,
+      defaultAsset: formValues.defaultAsset || defaultSettings.defaultAsset,
+      defaultTimeframe: formValues.defaultTimeframe || defaultSettings.defaultTimeframe,
+      defaultPlatform: formValues.defaultPlatform !== undefined ? formValues.defaultPlatform : defaultSettings.defaultPlatform,
+      chartType: formValues.chartType || defaultSettings.chartType,
+      showTradingTips: typeof formValues.showTradingTips === 'boolean' ? formValues.showTradingTips : defaultSettings.showTradingTips,
+      autoRefreshData: typeof formValues.autoRefreshData === 'boolean' ? formValues.autoRefreshData : defaultSettings.autoRefreshData,
+      refreshInterval: formValues.refreshInterval !== undefined ? formValues.refreshInterval : defaultSettings.refreshInterval,
+      // تحديث الحقل المتغير
+      [field]: value
     };
     
-    console.log("إرسال إعدادات للخادم:", updatedValues);
+    console.log("إرسال إعدادات كاملة للخادم:", completeSettings);
     
-    // إرسال الإعدادات المحدثة للخادم
-    onSubmit(updatedValues);
+    // إرسال الإعدادات المحدثة الكاملة للخادم
+    onSubmit(completeSettings);
   };
 
   return (
