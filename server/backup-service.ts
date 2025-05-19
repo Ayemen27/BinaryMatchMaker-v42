@@ -30,12 +30,33 @@ export async function createBackup(): Promise<string | null> {
   try {
     console.log("[خدمة النسخ الاحتياطي] بدء إنشاء نسخة احتياطية من قاعدة البيانات...");
     
-    // استخراج متغيرات البيئة
-    const { PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE } = process.env;
+    // استخراج متغيرات البيئة لـ Supabase
+    const { DATABASE_URL } = process.env;
     
     // التحقق من وجود متغيرات البيئة اللازمة
-    if (!PGHOST || !PGPORT || !PGUSER || !PGPASSWORD || !PGDATABASE) {
-      console.error('[خدمة النسخ الاحتياطي] خطأ: متغيرات البيئة اللازمة لقاعدة البيانات غير محددة');
+    if (!DATABASE_URL) {
+      console.error('[خدمة النسخ الاحتياطي] خطأ: متغير البيئة DATABASE_URL غير محدد');
+      return null;
+    }
+    
+    // تعيين متغيرات البيئة من DATABASE_URL
+    try {
+      // تحليل DATABASE_URL
+      const dbUrlMatch = DATABASE_URL.match(/postgresql:\/\/([^:]+)(?::([^@]+))?@([^:]+):(\d+)\/(.+)/);
+      if (!dbUrlMatch) {
+        console.error('[خدمة النسخ الاحتياطي] خطأ: تنسيق DATABASE_URL غير صحيح');
+        return null;
+      }
+      
+      process.env.PGUSER = dbUrlMatch[1];
+      process.env.PGPASSWORD = dbUrlMatch[2];
+      process.env.PGHOST = dbUrlMatch[3];
+      process.env.PGPORT = dbUrlMatch[4];
+      process.env.PGDATABASE = dbUrlMatch[5];
+      
+      console.log('[خدمة النسخ الاحتياطي] تم تعيين متغيرات البيئة من DATABASE_URL');
+    } catch (err) {
+      console.error('[خدمة النسخ الاحتياطي] خطأ أثناء تحليل DATABASE_URL:', err);
       return null;
     }
     
