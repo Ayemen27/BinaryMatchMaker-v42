@@ -1,0 +1,107 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-05-19T20:32:13.946Z",
+    "database": "neondb",
+    "tablesCount": 9,
+    "createdAt": "2025-05-19T20:32:13.946Z"
+  },
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "username": "Binarjoinanalytic",
+        "password": "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f",
+        "email": null,
+        "full_name": null,
+        "subscription_level": "free",
+        "subscription_expiry": null,
+        "language": "ar",
+        "created_at": "2025-05-19T19:48:34.061Z",
+        "last_login": null,
+        "avatar": null,
+        "phone_number": null,
+        "is_active": true
+      },
+      {
+        "id": 2,
+        "username": "admin",
+        "password": "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f",
+        "email": null,
+        "full_name": null,
+        "subscription_level": "free",
+        "subscription_expiry": null,
+        "language": "ar",
+        "created_at": "2025-05-19T20:31:50.767Z",
+        "last_login": null,
+        "avatar": null,
+        "phone_number": null,
+        "is_active": true
+      }
+    ],
+    "user_settings": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "theme": "dark",
+        "default_asset": "BTC/USDT",
+        "default_timeframe": "1h",
+        "default_platform": null,
+        "chart_type": "candlestick",
+        "show_trading_tips": true,
+        "auto_refresh_data": true,
+        "refresh_interval": 60,
+        "use_ai_for_signals": true,
+        "use_custom_ai_key": false,
+        "openai_api_key": null,
+        "enable_otc_trading": false,
+        "allow_scheduled_signals": true,
+        "respect_timeframes": true,
+        "last_signal_time": null,
+        "preferred_platforms": null,
+        "preferred_pairs": null,
+        "preferred_timeframes": null,
+        "signal_history": null,
+        "created_at": "2025-05-19T20:01:16.563Z",
+        "updated_at": "2025-05-19T20:01:16.563Z"
+      }
+    ],
+    "user_notification_settings": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "email_notifications": true,
+        "push_notifications": true,
+        "signal_alerts": true,
+        "market_updates": true,
+        "account_alerts": true,
+        "promotional_emails": false,
+        "created_at": "2025-05-19T20:01:27.862Z",
+        "updated_at": "2025-05-19T20:01:27.862Z"
+      }
+    ],
+    "signals": [],
+    "user_signals": [],
+    "subscriptions": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "type": "free",
+        "start_date": "2025-05-19T20:01:37.100Z",
+        "end_date": null,
+        "is_active": true,
+        "daily_signal_limit": 5,
+        "transaction_id": null,
+        "payment_method": null,
+        "amount": null,
+        "currency": null,
+        "auto_renew": false,
+        "created_at": "2025-05-19T20:01:37.100Z",
+        "updated_at": "2025-05-19T20:01:37.100Z"
+      }
+    ],
+    "market_data": [],
+    "notifications": [],
+    "user_signal_usage": []
+  }
+}
