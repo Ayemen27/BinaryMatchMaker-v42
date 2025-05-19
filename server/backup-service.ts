@@ -74,8 +74,27 @@ export async function createBackup(): Promise<string | null> {
         data: {}
       };
       
+      // قائمة بالجداول الرئيسية المهمة التي يجب التأكد من استخراجها أولاً
+      const priorityTables = [
+        'users',
+        'user_settings', 
+        'user_notification_settings',
+        'signals',
+        'user_signals',
+        'subscriptions'
+      ];
+      
+      // إعادة ترتيب الجداول للبدء بالجداول ذات الأولوية
+      const orderedTables = [
+        ...priorityTables.filter(t => tables.includes(t)),
+        ...tables.filter(t => !priorityTables.includes(t) && t !== 'session')
+      ];
+      
+      console.log(`[خدمة النسخ الاحتياطي] جداول ذات أولوية: ${priorityTables.filter(t => tables.includes(t)).join(', ')}`);
+      console.log(`[خدمة النسخ الاحتياطي] إجمالي الجداول للنسخ الاحتياطي: ${orderedTables.length}`);
+      
       // استخراج البيانات من كل جدول
-      for (const tableName of tables) {
+      for (const tableName of orderedTables) {
         try {
           // تجاهل جداول الجلسات لأنها مؤقتة
           if (tableName === 'session') {
@@ -91,6 +110,9 @@ export async function createBackup(): Promise<string | null> {
           backupData.data[tableName] = dataResult.rows;
           
           console.log(`[خدمة النسخ الاحتياطي] تم استخراج ${dataResult.rows.length} سجل من جدول ${tableName}`);
+          
+          // تأخير صغير لمنع استهلاك الموارد بشكل كبير
+          await new Promise(resolve => setTimeout(resolve, 50));
         } catch (tableError) {
           console.error(`[خدمة النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName}:`, tableError);
         }
