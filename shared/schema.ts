@@ -61,6 +61,15 @@ export const userSettings = pgTable("user_settings", {
   useAiForSignals: boolean("use_ai_for_signals").default(true), // استخدام الذكاء الاصطناعي لتوليد الإشارات
   useCustomAiKey: boolean("use_custom_ai_key").default(false), // استخدام مفتاح OpenAI خاص
   openaiApiKey: text("openai_api_key"), // مفتاح API الخاص بـ OpenAI
+  // إعدادات توليد الإشارات الإضافية
+  enableOtcTrading: boolean("enable_otc_trading").default(false), // تفعيل التداول خارج السوق
+  allowScheduledSignals: boolean("allow_scheduled_signals").default(true), // السماح بجدولة الإشارات عندما يكون السوق مغلق
+  respectTimeframes: boolean("respect_timeframes").default(true), // احترام الإطار الزمني عند توليد إشارات جديدة
+  lastSignalTime: timestamp("last_signal_time"), // وقت آخر إشارة تم توليدها
+  preferredPlatforms: text("preferred_platforms").array(), // المنصات المفضلة
+  preferredPairs: text("preferred_pairs").array(), // الأزواج المفضلة
+  preferredTimeframes: text("preferred_timeframes").array(), // الأطر الزمنية المفضلة
+  signalHistory: json("signal_history"), // تاريخ الإشارات الأخيرة المولدة
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => {
