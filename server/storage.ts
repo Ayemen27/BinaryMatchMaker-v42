@@ -183,9 +183,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUserLastLogin(id: number): Promise<void> {
-    await db.update(users)
-      .set({ lastLogin: new Date() })
-      .where(eq(users.id, id));
+    try {
+      await db.query(
+        'UPDATE users SET last_login = $1 WHERE id = $2',
+        [new Date(), id]
+      );
+    } catch (error) {
+      console.error('خطأ في تحديث وقت آخر تسجيل دخول:', error);
+    }
   }
   
   // User settings methods
@@ -280,10 +285,9 @@ export class DatabaseStorage implements IStorage {
         }
       }
       
-      // إضافة حقل updated_at
-      updateFields.push(`updated_at = $${paramIndex}`);
-      updateValues.push(new Date());
-      paramIndex++;
+      // إضافة حقل updated_at مع التحويل الصريح إلى تاريخ SQL
+      updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+      // لا نضيف قيمة لـ updateValues لأننا نستخدم CURRENT_TIMESTAMP مباشرة في الاستعلام
       
       // إضافة شرط where
       updateValues.push(userId);
