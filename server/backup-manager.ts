@@ -39,7 +39,7 @@ export function createBackup(): void {
  * بدء نظام النسخ الاحتياطي التلقائي
  */
 export function startBackupSystem(): void {
-  startBackupSystemService(24); // تنفيذ النسخ الاحتياطي كل 24 ساعة افتراضياً
+  startBackupSystemService(5); // تنفيذ النسخ الاحتياطي كل 5 دقائق
 }
 
 /**
