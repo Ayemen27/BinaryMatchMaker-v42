@@ -42,14 +42,15 @@ router.post("/generate", async (req: Request, res: Response) => {
       });
     }
 
-    const { platform, pair, timeframe } = result.data;
+    const { platform, pair, timeframe, useAI } = result.data;
 
     // سجل بداية طلب توليد الإشارة
     logger.info("SignalGenerator", "طلب جديد لتوليد إشارة", { 
       userId: req.user?.id, 
       platform, 
       pair, 
-      timeframe 
+      timeframe,
+      useAI
     });
 
     // التحقق من حدود الاشتراك المجاني
@@ -71,9 +72,37 @@ router.post("/generate", async (req: Request, res: Response) => {
       }
     }
     
-    // توليد الإشارة باستخدام الذكاء الاصطناعي ومعرف المستخدم لربطها به
+    // توليد الإشارة باستخدام الذكاء الاصطناعي أو الخوارزميات التقليدية حسب اختيار المستخدم
     const userId = req.user?.id;
-    const signal = await openAIService.generateTradingSignal(platform, pair, timeframe, userId);
+    
+    // تحديث إعدادات المستخدم إذا كان مسجلاً دخوله
+    if (userId) {
+      try {
+        const userSettings = await storage.getUserSettings(userId);
+        
+        if (userSettings) {
+          // تحديث إعدادات استخدام الذكاء الاصطناعي بناءً على الاختيار الحالي
+          await storage.updateUserSettings(userId, {
+            useAiForSignals: useAI
+          });
+          
+          // تحديث السجلات
+          logger.info("SignalGenerator", "تم تحديث إعدادات الذكاء الاصطناعي للمستخدم", { 
+            userId, 
+            useAiForSignals: useAI 
+          });
+        }
+      } catch (settingsError) {
+        // تسجيل الخطأ ولكن الاستمرار في توليد الإشارة
+        logger.warn("SignalGenerator", "فشل تحديث إعدادات المستخدم", { 
+          userId,
+          error: settingsError instanceof Error ? settingsError.message : String(settingsError)
+        });
+      }
+    }
+    
+    // إرسال طلب توليد الإشارة مع تحديد طريقة التوليد
+    const signal = await openAIService.generateTradingSignal(platform, pair, timeframe, userId, !useAI);
 
     // تسجيل نجاح العملية
     logger.info("SignalGenerator", "تم توليد الإشارة بنجاح", { 
@@ -155,9 +184,12 @@ router.post("/analyze-trend", async (req: Request, res: Response) => {
       }
     }
 
-    // تحليل اتجاه السوق باستخدام الذكاء الاصطناعي
+    // استخراج خيار استخدام الذكاء الاصطناعي
+    const { useAI = true } = req.body;
+    
+    // تحليل اتجاه السوق باستخدام الذكاء الاصطناعي أو الخوارزميات التقليدية
     const userId = req.user?.id;
-    const analysis = await openAIService.analyzeMarketTrend(pair, userId);
+    const analysis = await openAIService.analyzeMarketTrend(pair, userId, !useAI);
     
     // تسجيل نجاح العملية
     logger.info("MarketAnalysis", "تم تحليل اتجاه السوق بنجاح", { 

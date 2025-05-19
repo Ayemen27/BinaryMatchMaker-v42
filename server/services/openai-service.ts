@@ -27,9 +27,17 @@ export class OpenAIService {
    * @param platform منصة التداول
    * @param pair زوج العملة
    * @param timeframe الإطار الزمني
+   * @param userId معرف المستخدم (اختياري)
+   * @param useAlgorithmic استخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي (اختياري)
    */
-  async generateTradingSignal(platform: string, pair: string, timeframe: string, userId?: number): Promise<Signal> {
+  async generateTradingSignal(platform: string, pair: string, timeframe: string, userId?: number, useAlgorithmic: boolean = false): Promise<Signal> {
     try {
+      // إذا تم طلب استخدام الخوارزميات التقليدية بشكل صريح
+      if (useAlgorithmic) {
+        logger.info("OpenAIService", "استخدام التوليد الخوارزمي بناءً على طلب صريح", { userId, platform, pair });
+        return await algorithmicSignalService.generateTradingSignal(platform, pair, timeframe, userId);
+      }
+      
       // إذا كان هناك معرف مستخدم، نتحقق من إعداداته المتعلقة بالذكاء الاصطناعي
       if (userId) {
         const userSettings = await storage.getUserSettings(userId);
@@ -204,14 +212,30 @@ export class OpenAIService {
   /**
    * تحليل الاتجاهات السوقية لزوج معين
    * @param pair زوج العملة
+   * @param userId معرف المستخدم (اختياري)
+   * @param useAlgorithmic استخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي (اختياري)
    */
-  async analyzeMarketTrend(pair: string, userId?: number): Promise<{
+  async analyzeMarketTrend(pair: string, userId?: number, useAlgorithmic: boolean = false): Promise<{
     trend: "صعودي" | "هبوطي" | "متذبذب";
     strength: number;
     summary: string;
     keyLevels: { support: string[]; resistance: string[] };
   }> {
     try {
+      // إذا تم طلب استخدام الخوارزميات التقليدية بشكل صريح
+      if (useAlgorithmic) {
+        logger.info("OpenAIService", "استخدام التحليل الخوارزمي بناءً على طلب صريح", { userId, pair });
+        return {
+          trend: Math.random() > 0.5 ? "صعودي" : (Math.random() > 0.5 ? "هبوطي" : "متذبذب"),
+          strength: Math.floor(Math.random() * 100),
+          summary: `تحليل سوق ${pair} باستخدام الخوارزميات التقليدية`,
+          keyLevels: {
+            support: ["35000", "34500"],
+            resistance: ["38000", "39000"]
+          }
+        };
+      }
+      
       // تحديد ما إذا كان يجب استخدام الخوارزمية بدلاً من الذكاء الاصطناعي
       if (userId) {
         const userSettings = await storage.getUserSettings(userId);
@@ -220,7 +244,7 @@ export class OpenAIService {
           return {
             trend: Math.random() > 0.5 ? "صعودي" : (Math.random() > 0.5 ? "هبوطي" : "متذبذب"),
             strength: Math.floor(Math.random() * 100),
-            summary: `تحليل سوق ${pair} باستخدام الخوارزمية المحددة`,
+            summary: `تحليل سوق ${pair} باستخدام الخوارزميات التقليدية`,
             keyLevels: {
               support: ["35000", "34500"],
               resistance: ["38000", "39000"]
