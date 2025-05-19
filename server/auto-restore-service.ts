@@ -50,30 +50,79 @@ export function findLatestBackupFile(): string | null {
       .map(file => {
         const filePath = path.join(backupDir, file);
         const stats = fs.statSync(filePath);
+        
+        // محاولة قراءة محتويات الملف لتحديد ما إذا كان يحتوي على بيانات فعلية
+        let hasRealData = false;
+        let userCount = 0;
+        let tableCount = 0;
+        
+        try {
+          const fileContent = fs.readFileSync(filePath, 'utf8');
+          const backupData = JSON.parse(fileContent);
+          
+          // فحص ما إذا كان الملف يحتوي على بيانات
+          if (backupData && backupData.data) {
+            tableCount = Object.keys(backupData.data).length;
+            
+            // فحص وجود بيانات المستخدمين
+            if (backupData.data.users && Array.isArray(backupData.data.users)) {
+              userCount = backupData.data.users.length;
+              hasRealData = userCount > 0;
+            }
+          }
+        } catch (err) {
+          // في حالة وجود خطأ في قراءة الملف، نفترض أنه لا يحتوي على بيانات صالحة
+          hasRealData = false;
+        }
+        
         return {
           name: file,
           path: filePath,
           time: stats.mtime,
-          size: stats.size
+          size: stats.size,
+          hasRealData,
+          userCount,
+          tableCount
         };
       })
+      .filter(file => file.hasRealData) // اختيار فقط الملفات التي تحتوي على بيانات فعلية
       .sort((a, b) => b.time.getTime() - a.time.getTime()); // ترتيب من الأحدث إلى الأقدم
     
     if (backupFiles.length === 0) {
-      console.log('[خدمة الاستعادة التلقائية] لم يتم العثور على ملفات نسخ احتياطية.');
+      console.log('[خدمة الاستعادة التلقائية] لم يتم العثور على ملفات نسخ احتياطية تحتوي على بيانات صالحة.');
       return null;
     }
     
-    // البحث عن أكبر ملف نسخة احتياطية (بالحجم)
-    const largestBackupFile = [...backupFiles].sort((a, b) => b.size - a.size)[0];
+    // البحث عن أفضل ملف نسخة احتياطية (الملف الذي يحتوي على أكبر عدد من المستخدمين والجداول)
+    const bestBackupFiles = [...backupFiles].sort((a, b) => {
+      // تفضيل الملفات التي تحتوي على عدد أكبر من المستخدمين
+      if (a.userCount !== b.userCount) {
+        return b.userCount - a.userCount;
+      }
+      
+      // ثم تفضيل الملفات التي تحتوي على عدد أكبر من الجداول
+      if (a.tableCount !== b.tableCount) {
+        return b.tableCount - a.tableCount;
+      }
+      
+      // ثم تفضيل الملفات الأكبر حجمًا
+      if (a.size !== b.size) {
+        return b.size - a.size;
+      }
+      
+      // ثم تفضيل الملفات الأحدث
+      return b.time.getTime() - a.time.getTime();
+    });
     
-    // إذا كان أكبر ملف أكبر بكثير من أحدث ملف، نستخدم أكبر ملف
-    if (largestBackupFile.size > backupFiles[0].size * 5) {
-      console.log(`[خدمة الاستعادة التلقائية] تم العثور على نسخة احتياطية أكبر حجمًا: ${largestBackupFile.name} (${largestBackupFile.size} بايت) بدلًا من أحدث نسخة: ${backupFiles[0].name} (${backupFiles[0].size} بايت)`);
-      return largestBackupFile.path;
+    const bestBackupFile = bestBackupFiles[0];
+    
+    // إذا كان أفضل ملف مختلفًا عن أحدث ملف
+    if (bestBackupFile.name !== backupFiles[0].name) {
+      console.log(`[خدمة الاستعادة التلقائية] تم اختيار أفضل نسخة احتياطية: ${bestBackupFile.name} (المستخدمين: ${bestBackupFile.userCount}, الجداول: ${bestBackupFile.tableCount}, الحجم: ${bestBackupFile.size} بايت) بدلًا من أحدث نسخة: ${backupFiles[0].name}`);
+      return bestBackupFile.path;
     }
     
-    console.log(`[خدمة الاستعادة التلقائية] تم العثور على أحدث نسخة احتياطية: ${backupFiles[0].name}`);
+    console.log(`[خدمة الاستعادة التلقائية] تم العثور على أحدث نسخة احتياطية: ${backupFiles[0].name} (المستخدمين: ${backupFiles[0].userCount}, الجداول: ${backupFiles[0].tableCount})`);
     return backupFiles[0].path;
   } catch (error) {
     console.error('[خدمة الاستعادة التلقائية] خطأ أثناء البحث عن ملف النسخة الاحتياطية:', error);
@@ -119,11 +168,36 @@ export async function restoreDataFromBackup(backupFilePath: string): Promise<boo
       throw new Error('بنية ملف النسخة الاحتياطية غير صالحة');
     }
     
-    // إدخال البيانات في الجداول
-    await insertBackupData(dataToInsert);
+    // تسجيل عدد الجداول والسجلات
+    const tableNames = Object.keys(dataToInsert);
+    const totalRecords = Object.values(dataToInsert).reduce((sum: number, records: any[]) => {
+      return sum + (Array.isArray(records) ? records.length : 0);
+    }, 0);
     
-    console.log('[خدمة الاستعادة التلقائية] تم استرجاع البيانات بنجاح');
-    return true;
+    console.log(`[خدمة الاستعادة التلقائية] النسخة الاحتياطية تحتوي على ${tableNames.length} جدول و ${totalRecords} سجل`);
+    
+    // التحقق من وجود جداول رئيسية مهمة
+    const criticalTables = ['users', 'user_settings', 'user_notification_settings'];
+    const missingTables = criticalTables.filter(table => !tableNames.includes(table));
+    
+    if (missingTables.length > 0) {
+      console.warn(`[خدمة الاستعادة التلقائية] تحذير: الجداول المهمة التالية غير موجودة في النسخة الاحتياطية: ${missingTables.join(', ')}`);
+    }
+    
+    // حساب عدد المستخدمين في النسخة الاحتياطية
+    const userCount = dataToInsert.users && Array.isArray(dataToInsert.users) ? dataToInsert.users.length : 0;
+    console.log(`[خدمة الاستعادة التلقائية] النسخة الاحتياطية تحتوي على ${userCount} مستخدم`);
+    
+    // إدخال البيانات في الجداول
+    const success = await insertBackupData(dataToInsert);
+    
+    if (success) {
+      console.log('[خدمة الاستعادة التلقائية] تم استرجاع البيانات بنجاح');
+      return true;
+    } else {
+      console.error('[خدمة الاستعادة التلقائية] فشل في استرجاع البيانات');
+      return false;
+    }
   } catch (error) {
     console.error('[خدمة الاستعادة التلقائية] خطأ أثناء استرجاع البيانات:', error);
     return false;
