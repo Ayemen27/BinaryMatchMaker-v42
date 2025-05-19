@@ -587,18 +587,54 @@ export class DatabaseStorage implements IStorage {
   // User signals methods
   async getUserSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]> {
     try {
-      // استخدام استعلام drizzle المباشر
-      const results = await db.select()
-        .from(userSignals)
-        .innerJoin(signals, eq(userSignals.signalId, signals.id))
-        .where(eq(userSignals.userId, userId))
-        .orderBy(desc(userSignals.createdAt));
+      // استخدام db.query بدلاً من استعلام drizzle المباشر
+      const query = `
+        SELECT us.*, s.* 
+        FROM user_signals us
+        INNER JOIN signals s ON us.signal_id = s.id
+        WHERE us.user_id = $1
+        ORDER BY us.created_at DESC
+      `;
+      
+      const results = await db.query(query, [userId]);
+      
+      if (!results || results.length === 0) {
+        return [];
+      }
       
       // تحويل النتائج إلى التنسيق المطلوب
-      return results.map(({ userSignals: us, signals: s }) => {
+      return results.map(row => {
+        // استخراج حقول كل جدول
+        const userSignalFields = {
+          id: row.id,
+          userId: row.user_id,
+          signalId: row.signal_id,
+          isFavorite: row.is_favorite,
+          notes: row.notes,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        };
+        
+        const signalFields = {
+          id: row.id,
+          userId: row.user_id,
+          asset: row.asset,
+          timeframe: row.timeframe,
+          direction: row.direction,
+          entryPrice: row.entry_price,
+          stopLoss: row.stop_loss,
+          takeProfit: row.take_profit,
+          status: row.status,
+          result: row.result,
+          isPublic: row.is_public,
+          analysis: row.analysis,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        };
+        
         return {
-          ...us,
-          signal: s
+          ...userSignalFields,
+          signal: signalFields
         };
       });
     } catch (error) {
