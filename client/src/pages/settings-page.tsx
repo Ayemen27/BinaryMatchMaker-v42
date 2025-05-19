@@ -79,6 +79,9 @@ export default function SettingsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // إضافة متغير لتتبع التبويب النشط
+  const [activeTab, setActiveTab] = useState<string>("profile");
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     email: true,
     push: true,
@@ -276,53 +279,72 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-4">
-          {/* Mobile View: Dropdown for Tabs */}
-          <div className="sm:hidden w-full mb-4">
-            <select 
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm" 
-              onChange={(e) => {
-                const selectElement = document.querySelector('[data-value="' + e.target.value + '"]') as HTMLElement;
-                if (selectElement) selectElement.click();
-              }}
-              defaultValue="profile"
-            >
-              <option value="profile">{t('profile')}</option>
-              <option value="security">{t('security')}</option>
-              <option value="notifications">{t('notifications')}</option>
-              <option value="subscription">{t('subscription')}</option>
-              <option value="language">{t('language')}</option>
-              <option value="apikeys">{t('apiKeys') || 'API مفاتيح'}</option>
-            </select>
+        <Tabs defaultValue="profile" className="space-y-4" onValueChange={(value) => setActiveTab(value)}>
+          {/* تصميم جديد متوافق مع جميع أحجام الشاشات */}
+          <div className="overflow-x-auto pb-2 mb-4">
+            <div className="min-w-max">
+              <TabsList className="flex border border-border p-1 rounded-lg bg-card">
+                <TabsTrigger value="profile" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="profile">
+                  <User className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('profile')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="security" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="security">
+                  <Lock className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('security')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="notifications">
+                  <Bell className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('notifications')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="subscription" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="subscription">
+                  <CreditCard className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('subscription')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="language" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="language">
+                  <Globe className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('language')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="apikeys" className="flex items-center gap-1 sm:gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="apikeys">
+                  <Key className="h-4 w-4" />
+                  <span className="hidden xs:inline">{t('apiKeys') || 'مفاتيح API'}</span>
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
           
-          {/* Desktop View: TabsList */}
-          <TabsList className="hidden sm:flex flex-wrap gap-1 mb-4 border border-border p-1 rounded-lg bg-card">
-            <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="profile">
-              <User className="h-4 w-4" />
-              {t('profile')}
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="security">
-              <Lock className="h-4 w-4" />
-              {t('security')}
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="notifications">
-              <Bell className="h-4 w-4" />
-              {t('notifications')}
-            </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="subscription">
-              <CreditCard className="h-4 w-4" />
-              {t('subscription')}
-            </TabsTrigger>
-            <TabsTrigger value="language" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="language">
-              <Globe className="h-4 w-4" />
-              {t('language')}
-            </TabsTrigger>
-            <TabsTrigger value="apikeys" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="apikeys">
-              <Key className="h-4 w-4" />
-              {t('apiKeys') || 'API مفاتيح'}
-            </TabsTrigger>
-          </TabsList>
+          {/* شريط عنوان القسم النشط - مع استخدام الأيقونات المناسبة للقسم النشط */}
+          <div className="bg-muted/30 p-3 rounded-lg border border-border mb-4">
+            <div className="flex items-center gap-2">
+              {activeTab === 'profile' ? <User className="h-5 w-5 text-primary" /> :
+               activeTab === 'security' ? <Lock className="h-5 w-5 text-primary" /> :
+               activeTab === 'notifications' ? <Bell className="h-5 w-5 text-primary" /> :
+               activeTab === 'subscription' ? <CreditCard className="h-5 w-5 text-primary" /> :
+               activeTab === 'language' ? <Globe className="h-5 w-5 text-primary" /> :
+               activeTab === 'apikeys' ? <Key className="h-5 w-5 text-primary" /> :
+               <Settings className="h-5 w-5 text-primary" />}
+              
+              <div>
+                <h2 className="text-lg font-semibold">
+                  {activeTab === 'profile' ? t('profile') :
+                   activeTab === 'security' ? t('security') :
+                   activeTab === 'notifications' ? t('notifications') :
+                   activeTab === 'subscription' ? t('subscription') :
+                   activeTab === 'language' ? t('language') :
+                   activeTab === 'apikeys' ? (t('apiKeys') || 'مفاتيح API') :
+                   t('settings')}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {activeTab === 'profile' ? (t('profileDescription') || 'تعديل معلومات الملف الشخصي') :
+                   activeTab === 'security' ? (t('securityDescription') || 'إعدادات الأمان وكلمة المرور') :
+                   activeTab === 'notifications' ? (t('notificationsDescription') || 'إدارة إعدادات الإشعارات') :
+                   activeTab === 'subscription' ? (t('subscriptionDescription') || 'إدارة اشتراكك وطرق الدفع') :
+                   activeTab === 'language' ? (t('languageDescription') || 'تغيير لغة التطبيق') :
+                   activeTab === 'apikeys' ? (t('apiKeysDescription') || 'إدارة مفاتيح API للذكاء الاصطناعي') :
+                   t('manageYourAccount')}
+                </p>
+              </div>
+            </div>
+          </div>
           
           {/* Profile Tab */}
           <TabsContent value="profile">
