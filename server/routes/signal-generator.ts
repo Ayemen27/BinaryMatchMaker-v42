@@ -48,7 +48,7 @@ router.post("/generate", async (req: Request, res: Response) => {
     const signal = await openAIService.generateTradingSignal(platform, pair, timeframe, userId);
 
     // إرجاع الإشارة المولدة
-    return res.status(201).json(savedSignal);
+    return res.status(201).json(signal);
   } catch (error) {
     console.error("خطأ في توليد الإشارة:", error);
     return res.status(500).json({ 
