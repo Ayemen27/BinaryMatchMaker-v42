@@ -37,6 +37,11 @@ export default function SignalGeneratorPage() {
   const [useAI, setUseAI] = useState<boolean>(true);
   const [generationMethod, setGenerationMethod] = useState<'ai' | 'algorithmic'>('ai');
   const [activeTab, setActiveTab] = useState<string>('standard');
+  const [isOtcEnabled, setIsOtcEnabled] = useState<boolean>(false); // خيار التداول خارج السوق
+  const [currentPrice, setCurrentPrice] = useState<string | null>(null); // السعر الحالي للزوج
+  const [lastSignalTime, setLastSignalTime] = useState<Date | null>(null); // وقت آخر إشارة تم توليدها
+  const [isMarketOpen, setIsMarketOpen] = useState<boolean>(true); // حالة السوق (مفتوح أو مغلق)
+  const [scheduledSignal, setScheduledSignal] = useState<boolean>(false); // طلب إشارة عندما يفتح السوق
   
   // Fetch user settings to get AI preference
   const { data: userSettings } = useQuery({
@@ -82,25 +87,114 @@ export default function SignalGeneratorPage() {
   const pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD', 'XRP/USD', 'BNB/USD', 'SOL/USD'];
   const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
   
+  // التحقق من إمكانية توليد إشارة بناءً على الإطار الزمني منذ آخر إشارة
+  const canGenerateSignal = () => {
+    if (!lastSignalTime || !timeframe) return true;
+    
+    const now = new Date();
+    const timeSinceLastSignal = now.getTime() - lastSignalTime.getTime();
+    
+    // تحويل الإطار الزمني إلى دقائق
+    let timeframeInMinutes = 0;
+    
+    switch (timeframe) {
+      case '1m':
+        timeframeInMinutes = 1;
+        break;
+      case '5m':
+        timeframeInMinutes = 5;
+        break;
+      case '15m':
+        timeframeInMinutes = 15;
+        break;
+      case '30m':
+        timeframeInMinutes = 30;
+        break;
+      case '1h':
+        timeframeInMinutes = 60;
+        break;
+      case '4h':
+        timeframeInMinutes = 240;
+        break;
+      case '1d':
+        timeframeInMinutes = 1440;
+        break;
+      default:
+        timeframeInMinutes = 0;
+    }
+    
+    // يمكن توليد إشارة جديدة فقط بعد انتهاء الإطار الزمني للإشارة الحالية
+    return timeSinceLastSignal >= timeframeInMinutes * 60 * 1000;
+  };
+
   const handleGenerateSignal = async () => {
-    // Validate form
+    // التحقق من صحة النموذج
     if (!platform || !pair || !timeframe) {
       toast({
-        title: t('formError'),
-        description: t('selectAllFields'),
+        title: t('formError') || 'خطأ في النموذج',
+        description: t('selectAllFields') || 'يرجى تحديد جميع الحقول المطلوبة',
         variant: 'destructive',
       });
       return;
     }
     
-    // Start loading
+    // التحقق من حالة السوق
+    if (!isMarketOpen && !isOtcEnabled) {
+      // إذا كان السوق مغلق ولم يتم تفعيل خيار OTC
+      toast({
+        title: t('marketClosed') || 'السوق مغلق',
+        description: t('marketClosedDesc') || 'السوق مغلق حالياً. يمكنك تفعيل خيار التداول خارج السوق (OTC) أو جدولة إشارة عند فتح السوق.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // التحقق من إمكانية توليد إشارة بناءً على الوقت المنقضي منذ آخر إشارة
+    if (!canGenerateSignal()) {
+      const timeframeText = timeframe === '1d' ? 'يوم' : 
+                          timeframe === '4h' ? '4 ساعات' : 
+                          timeframe === '1h' ? 'ساعة' : 
+                          timeframe === '30m' ? '30 دقيقة' : 
+                          timeframe === '15m' ? '15 دقيقة' : 
+                          timeframe === '5m' ? '5 دقائق' : 'دقيقة';
+                          
+      toast({
+        title: t('cannotGenerateYet') || 'لا يمكن توليد إشارة جديدة الآن',
+        description: t('waitTimeframeCompletion', { timeframe: timeframeText }) || 
+                   `يجب الانتظار حتى اكتمال الإطار الزمني الحالي (${timeframeText}) قبل توليد إشارة جديدة.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // بدء التحميل
     setIsGenerating(true);
     
-    // Update generation method for display in the UI
+    // تحديث طريقة التوليد للعرض في واجهة المستخدم
     setGenerationMethod(useAI ? 'ai' : 'algorithmic');
     
     try {
-      // Make API call to generate a signal
+      // إذا كان السوق مغلق وتم تفعيل جدولة الإشارات
+      if (!isMarketOpen && scheduledSignal) {
+        // تخزين طلب الإشارة للتنفيذ عند فتح السوق
+        localStorage.setItem('scheduledSignal', JSON.stringify({
+          platform,
+          pair,
+          timeframe,
+          useAI,
+          timestamp: new Date().toISOString()
+        }));
+        
+        toast({
+          title: t('signalScheduled') || 'تم جدولة الإشارة',
+          description: t('signalScheduledDesc') || 'سيتم توليد الإشارة تلقائياً عند فتح السوق.',
+        });
+        
+        setIsGenerating(false);
+        return;
+      }
+      
+      // استدعاء API لتوليد إشارة
       const response = await fetch('/api/signal-generator/generate', {
         method: 'POST',
         headers: {
@@ -110,29 +204,33 @@ export default function SignalGeneratorPage() {
           platform,
           pair,
           timeframe,
-          useAI  // Send the AI preference to the backend
+          useAI,  // إرسال تفضيل الذكاء الاصطناعي إلى الخادم
+          isOtcEnabled, // إرسال حالة تفعيل OTC
+          currentPrice // إرسال السعر الحالي إذا كان متاحاً
         }),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate signal');
+        throw new Error(errorData.message || 'فشل في توليد الإشارة');
       }
       
-      // Parse the generated signal from API
+      // تحليل الإشارة المولدة من API
       const newSignal: Signal = await response.json();
       
+      // تحديث الإشارة المولدة وحفظ وقت التوليد
       setGeneratedSignal(newSignal);
+      setLastSignalTime(new Date());
       
       toast({
-        title: t('signalGenerated'),
-        description: t('signalGeneratedDesc'),
+        title: t('signalGenerated') || 'تم توليد الإشارة',
+        description: t('signalGeneratedDesc') || 'تم توليد إشارة جديدة بنجاح.',
       });
     } catch (error) {
-      console.error('Error generating signal:', error);
+      console.error('خطأ في توليد الإشارة:', error);
       toast({
-        title: t('errorGeneratingSignal'),
-        description: error instanceof Error ? error.message : t('tryAgainLater'),
+        title: t('errorGeneratingSignal') || 'خطأ في توليد الإشارة',
+        description: error instanceof Error ? error.message : t('tryAgainLater') || 'يرجى المحاولة مرة أخرى لاحقاً',
         variant: 'destructive',
       });
     } finally {

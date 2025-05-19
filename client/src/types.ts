@@ -61,6 +61,15 @@ export interface UserSettings {
   useAiForSignals: boolean;
   useCustomAiKey: boolean;
   openaiApiKey?: string | null;
+  // إعدادات توليد الإشارات الإضافية
+  enableOtcTrading?: boolean; // تفعيل التداول خارج السوق
+  allowScheduledSignals?: boolean; // السماح بجدولة الإشارات عندما يكون السوق مغلق
+  respectTimeframes?: boolean; // احترام الإطار الزمني عند توليد إشارات جديدة
+  lastSignalTime?: Date | null; // وقت آخر إشارة تم توليدها
+  preferredPlatforms?: string[]; // المنصات المفضلة
+  preferredPairs?: string[]; // الأزواج المفضلة
+  preferredTimeframes?: string[]; // الأطر الزمنية المفضلة
+  signalHistory?: any; // تاريخ الإشارات الأخيرة المولدة
   createdAt: Date;
   updatedAt: Date;
 }
