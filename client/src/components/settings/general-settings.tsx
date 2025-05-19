@@ -62,47 +62,7 @@ interface UserSettings {
 export function GeneralSettings() {
   const { t } = useTranslation();
   const { toast } = useToast();
-
-  // نموذج إعدادات المستخدم العامة - نبدأ بقيم فارغة وسنملأها من الخادم
-  const settingsForm = useForm<UserSettingsFormValues>({
-    resolver: zodResolver(userSettingsSchema),
-    // نترك القيم الافتراضية فارغة قدر الإمكان لمنع التضارب
-    defaultValues: {},
-  });
-
-  // استعلام لجلب إعدادات المستخدم من الخادم
-  const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
-    queryKey: ['/api/user/settings'],
-    queryFn: async () => {
-      const res = await fetch('/api/user/settings');
-      if (!res.ok) {
-        // في حالة عدم وجود إعدادات للمستخدم (404)، نقوم بإنشاء إعدادات افتراضية
-        if (res.status === 404) {
-          // إرسال طلب لإنشاء إعدادات جديدة بالقيم الافتراضية
-          const createSettingsRes = await fetch('/api/user/settings', {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(defaultSettings),
-          });
-          
-          if (createSettingsRes.ok) {
-            return createSettingsRes.json();
-          }
-        }
-        throw new Error(await res.text());
-      }
-      return res.json();
-    },
-    // استخدام staleTime لمنع استرجاع الإعدادات بشكل متكرر
-    staleTime: 60000, // 60 ثانية
-    // استخدام cacheTime لزيادة مدة تخزين الإعدادات محليًا
-    gcTime: 300000, // 5 دقائق
-    // إعادة محاولة الاستعلام في حالة الفشل
-    retry: 1,
-  });
-
+  
   // تعريف القيم الافتراضية للاستخدام في حالة عدم وجود قيمة من الخادم
   const defaultSettings = {
     theme: 'dark',
@@ -114,6 +74,70 @@ export function GeneralSettings() {
     autoRefreshData: true,
     refreshInterval: 60,
   };
+  
+  // استرداد الإعدادات المخزنة محليًا (إن وجدت)
+  const getLocalSettings = (): UserSettingsFormValues => {
+    try {
+      const storedSettings = localStorage.getItem('user_settings');
+      if (storedSettings) {
+        const parsedSettings = JSON.parse(storedSettings);
+        console.log("تم استرداد الإعدادات من التخزين المحلي:", parsedSettings);
+        return parsedSettings;
+      }
+    } catch (error) {
+      console.error("خطأ في استرداد الإعدادات من التخزين المحلي:", error);
+    }
+    return defaultSettings;
+  };
+  
+  // حفظ الإعدادات في التخزين المحلي
+  const saveLocalSettings = (settings: UserSettingsFormValues) => {
+    try {
+      localStorage.setItem('user_settings', JSON.stringify(settings));
+      console.log("تم حفظ الإعدادات في التخزين المحلي:", settings);
+    } catch (error) {
+      console.error("خطأ في حفظ الإعدادات في التخزين المحلي:", error);
+    }
+  };
+
+  // نموذج إعدادات المستخدم العامة - نبدأ بالقيم المخزنة محليًا
+  const settingsForm = useForm<UserSettingsFormValues>({
+    resolver: zodResolver(userSettingsSchema),
+    defaultValues: getLocalSettings(),
+  });
+
+  // استعلام لجلب إعدادات المستخدم من الخادم
+  const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
+    queryKey: ['/api/user/settings'],
+    queryFn: async () => {
+      const res = await fetch('/api/user/settings');
+      if (!res.ok) {
+        // في حالة عدم وجود إعدادات للمستخدم (404)، نقوم بإنشاء إعدادات افتراضية
+        if (res.status === 404) {
+          // استخدام الإعدادات المحلية أو الافتراضية
+          const initialSettings = getLocalSettings();
+          
+          // إرسال طلب لإنشاء إعدادات جديدة
+          const createSettingsRes = await fetch('/api/user/settings', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(initialSettings),
+          });
+          
+          if (createSettingsRes.ok) {
+            return createSettingsRes.json();
+          }
+        }
+        throw new Error(await res.text());
+      }
+      return res.json();
+    },
+    staleTime: 60000, // 60 ثانية
+    gcTime: 300000, // 5 دقائق
+    retry: 1,
+  });
     
   // تحديث نموذج الإعدادات عند استرداد البيانات من الخادم 
   useEffect(() => {
@@ -134,7 +158,10 @@ export function GeneralSettings() {
       
       console.log("تحديث النموذج بالإعدادات المستردة:", updatedSettings);
       
-      // تحديث نموذج إعدادات المستخدم العامة بشكل كامل (reset)
+      // حفظ الإعدادات محليًا
+      saveLocalSettings(updatedSettings);
+      
+      // تحديث نموذج إعدادات المستخدم العامة بشكل كامل
       settingsForm.reset(updatedSettings);
     }
   }, [userSettingsData, settingsForm]);
