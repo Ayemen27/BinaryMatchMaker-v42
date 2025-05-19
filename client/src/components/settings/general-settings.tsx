@@ -169,17 +169,44 @@ export function GeneralSettings() {
   // إتاحة تعديلات الإعدادات
   const settingsMutation = useMutation({
     mutationFn: async (data: UserSettingsFormValues) => {
+      console.log("بدء إرسال الإعدادات إلى الخادم:", data);
       const res = await apiRequest("PATCH", "/api/user/settings", data);
-      return res.json();
+      const responseData = await res.json();
+      console.log("استجابة الخادم بعد تحديث الإعدادات:", responseData);
+      return responseData;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // إعادة طلب البيانات المحدثة من الخادم
       queryClient.invalidateQueries({ queryKey: ['/api/user/settings'] });
+      
+      // تطبيق التغييرات على النموذج مباشرة بدون انتظار استجابة الاستعلام
+      if (data) {
+        const updatedSettings = {
+          theme: data.theme || defaultSettings.theme,
+          defaultAsset: data.defaultAsset || defaultSettings.defaultAsset,
+          defaultTimeframe: data.defaultTimeframe || defaultSettings.defaultTimeframe,
+          defaultPlatform: data.defaultPlatform !== undefined ? data.defaultPlatform : defaultSettings.defaultPlatform,
+          chartType: data.chartType || defaultSettings.chartType,
+          showTradingTips: typeof data.showTradingTips === 'boolean' ? data.showTradingTips : defaultSettings.showTradingTips,
+          autoRefreshData: typeof data.autoRefreshData === 'boolean' ? data.autoRefreshData : defaultSettings.autoRefreshData,
+          refreshInterval: data.refreshInterval !== undefined ? data.refreshInterval : defaultSettings.refreshInterval,
+        };
+        
+        console.log("تطبيق الإعدادات المحدثة فوراً من استجابة الخادم:", updatedSettings);
+        settingsForm.reset(updatedSettings, { keepValues: true });
+        
+        // حفظ في التخزين المحلي
+        saveLocalSettings(updatedSettings);
+      }
+      
+      // عرض رسالة نجاح
       toast({
         title: t('settingsUpdated') || 'تم تحديث الإعدادات',
         description: t('settingsUpdateSuccess') || 'تم حفظ الإعدادات بنجاح',
       });
     },
     onError: (error: any) => {
+      console.error("خطأ في تحديث الإعدادات:", error);
       toast({
         title: t('updateFailed') || 'فشل التحديث',
         description: error.message,
