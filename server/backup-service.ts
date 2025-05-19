@@ -147,9 +147,9 @@ export async function createBackup(): Promise<string | null> {
 
 /**
  * بدء نظام النسخ الاحتياطي التلقائي
- * @param intervalHours الفاصل الزمني بين النسخ الاحتياطية بالساعات (افتراضيًا 24 ساعة)
+ * @param intervalMinutes الفاصل الزمني بين النسخ الاحتياطية بالدقائق (افتراضيًا 5 دقائق)
  */
-export function startBackupSystem(intervalHours: number = 24): void {
+export function startBackupSystem(intervalMinutes: number = 5): void {
   console.log("[خدمة النسخ الاحتياطي] تم بدء نظام النسخ الاحتياطي");
   
   // محاولة إنشاء نسخة احتياطية مباشرة عند بدء النظام (بدون انتظار إذا فشلت)
@@ -158,8 +158,8 @@ export function startBackupSystem(intervalHours: number = 24): void {
   });
   
   // جدولة النسخ الاحتياطي الدوري
-  if (intervalHours > 0) {
-    const intervalMs = intervalHours * 60 * 60 * 1000;
+  if (intervalMinutes > 0) {
+    const intervalMs = intervalMinutes * 60 * 1000;
     
     setInterval(async () => {
       try {
@@ -169,7 +169,7 @@ export function startBackupSystem(intervalHours: number = 24): void {
       }
     }, intervalMs);
     
-    console.log(`[خدمة النسخ الاحتياطي] تم ضبط النسخ الاحتياطي الدوري كل ${intervalHours} ساعة`);
+    console.log(`[خدمة النسخ الاحتياطي] تم ضبط النسخ الاحتياطي الدوري كل ${intervalMinutes} دقيقة`);
   }
 }
 
