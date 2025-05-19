@@ -399,7 +399,39 @@ export async function initializeDatabase(): Promise<boolean> {
     } else {
       console.log(`[نظام النسخ الاحتياطي] بعض جداول قاعدة البيانات غير موجودة. بدء عملية الاسترجاع...`);
       
-      // محاولة إنشاء الجداول باستخدام Drizzle
+      // محاولة استرجاع البيانات من نسخة احتياطية
+      console.log(`[نظام النسخ الاحتياطي] البحث عن نسخة احتياطية لاسترجاع البيانات...`);
+      
+      try {
+        // البحث عن نسخ احتياطية
+        const files = fs.readdirSync(backupDir)
+          .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
+          .map(file => ({
+            name: file,
+            path: path.join(backupDir, file),
+            time: fs.statSync(path.join(backupDir, file)).mtime.getTime()
+          }))
+          .sort((a, b) => b.time - a.time); // ترتيب من الأحدث إلى الأقدم
+
+        if (files.length > 0) {
+          // وجدنا نسخة احتياطية، سنحاول استرجاعها
+          console.log(`[نظام النسخ الاحتياطي] تم العثور على نسخة احتياطية: ${files[0].name}`);
+          const restored = await restoreFromBackup(files[0].path);
+          
+          if (restored) {
+            console.log(`[نظام النسخ الاحتياطي] تم استرجاع قاعدة البيانات بنجاح من النسخة الاحتياطية!`);
+            return true;
+          } else {
+            console.log(`[نظام النسخ الاحتياطي] فشل في استرجاع النسخة الاحتياطية. محاولة إنشاء قاعدة بيانات جديدة...`);
+          }
+        } else {
+          console.log(`[نظام النسخ الاحتياطي] لم يتم العثور على نسخ احتياطية.`);
+        }
+      } catch (err) {
+        console.error(`[نظام النسخ الاحتياطي] خطأ أثناء البحث عن نسخ احتياطية: ${err}`);
+      }
+      
+      // إذا فشلت عملية الاسترجاع أو لم نجد نسخ احتياطية، ننشئ قاعدة بيانات جديدة
       console.log(`[نظام النسخ الاحتياطي] إنشاء جداول قاعدة البيانات باستخدام Drizzle...`);
       return await runMigrations();
     }
