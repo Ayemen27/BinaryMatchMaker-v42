@@ -96,13 +96,25 @@ export class DatabaseStorage implements IStorage {
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      // استخدام طريقة الاستعلام المخصصة في كائن db
+      const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في البحث عن المستخدم بواسطة المعرف:', error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
+    try {
+      // استخدام طريقة الاستعلام المخصصة في كائن db
+      const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في البحث عن المستخدم بواسطة اسم المستخدم:', error);
+      return undefined;
+    }
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
