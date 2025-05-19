@@ -32,7 +32,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Check, Globe, Lock, User, Bell, CreditCard, Settings, Loader2 } from 'lucide-react';
+import { Check, Globe, Lock, User, Bell, CreditCard, Settings, Loader2, Key, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { NotificationSettings } from '@/types';
@@ -46,6 +46,14 @@ const profileFormSchema = z.object({
     message: "Please enter a valid email address.",
   }),
   fullName: z.string().optional(),
+});
+
+const apiKeyFormSchema = z.object({
+  openaiApiKey: z.string().min(1, {
+    message: "مفتاح API مطلوب",
+  }),
+  useCustomAiKey: z.boolean().default(false),
+  useAiForSignals: z.boolean().default(true),
 });
 
 const passwordFormSchema = z.object({
@@ -245,6 +253,10 @@ export default function SettingsPage() {
             <TabsTrigger value="language" className="flex items-center">
               <Globe className="h-4 w-4 mr-2" />
               {t('language')}
+            </TabsTrigger>
+            <TabsTrigger value="apikeys" className="flex items-center">
+              <Key className="h-4 w-4 mr-2" />
+              {t('apiKeys') || 'API مفاتيح'}
             </TabsTrigger>
           </TabsList>
           
