@@ -12,6 +12,7 @@ const generateSignalSchema = z.object({
   platform: z.string().min(1, "المنصة مطلوبة"),
   pair: z.string().min(1, "زوج التداول مطلوب"),
   timeframe: z.string().min(1, "الإطار الزمني مطلوب"),
+  useAI: z.boolean().optional().default(true), // خيار استخدام الذكاء الاصطناعي
 });
 
 type GenerateSignalRequest = z.infer<typeof generateSignalSchema>;
