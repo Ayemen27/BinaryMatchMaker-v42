@@ -140,8 +140,43 @@ async function insertBackupData(data: any): Promise<void> {
     throw new Error('بيانات النسخة الاحتياطية غير صالحة');
   }
   
-  // معالجة البيانات لكل جدول
-  for (const tableName in data) {
+  // تحديد ترتيب الجداول لضمان إدخال البيانات بترتيب صحيح يحترم القيود الخارجية
+  const tableInsertionOrder = [
+    // الجداول الأساسية (بدون مفاتيح خارجية) أولاً
+    'users',             // المستخدمين
+    'signals',           // الإشارات
+    'market_data',       // بيانات السوق
+    
+    // الجداول التي تعتمد على جداول أساسية
+    'user_settings',            // إعدادات المستخدم
+    'user_notification_settings', // إعدادات إشعارات المستخدم
+    'subscriptions',            // الاشتراكات
+    
+    // الجداول المرتبطة بعلاقات متعددة
+    'user_signals',      // إشارات المستخدم
+    'user_signal_usage', // استخدام الإشارات
+    'notifications',     // الإشعارات
+    
+    // أي جداول أخرى
+  ];
+  
+  // إنشاء قائمة بجميع الجداول الموجودة في البيانات
+  const allTablesInData = Object.keys(data);
+  
+  // إضافة أي جداول ليست في القائمة المحددة
+  for (const table of allTablesInData) {
+    if (!tableInsertionOrder.includes(table)) {
+      tableInsertionOrder.push(table);
+    }
+  }
+  
+  // معالجة البيانات حسب الترتيب المحدد
+  for (const tableName of tableInsertionOrder) {
+    // تخطي الجداول غير الموجودة في بيانات النسخة الاحتياطية
+    if (!data[tableName]) {
+      continue;
+    }
+    
     const tableData = data[tableName];
     
     // التحقق من أن الجدول موجود قبل محاولة إدخال البيانات
