@@ -384,6 +384,11 @@ const resources = {
       historicalSignalsCount: 'عدد الإشارات السابقة',
       noSignalsSelected: 'لم يتم اختيار أي إشارات',
       tryDifferentFilters: 'جرب معايير تصفية مختلفة',
+      activeFilters: 'التصفيات النشطة',
+      noActiveFilters: 'لا توجد تصفيات نشطة',
+      loadingSignals: 'جاري تحميل الإشارات...',
+      successResult: 'ناجحة',
+      failureResult: 'فاشلة',
       
       // Auth
       login: 'تسجيل الدخول',
