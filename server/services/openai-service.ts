@@ -2,13 +2,14 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 import { Signal, InsertSignal } from "@shared/schema";
 import { storage } from "../storage";
+import { logger } from "./logger";
 
 // تحميل متغيرات البيئة من ملف .env
 dotenv.config();
 
 // التحقق من وجود مفتاح API
 if (!process.env.OPENAI_API_KEY) {
-  console.error("مفتاح API الخاص بـ OpenAI غير متوفر. يرجى التحقق من ملف .env");
+  logger.error("OpenAIService", new Error("مفتاح API الخاص بـ OpenAI غير متوفر. يرجى التحقق من ملف .env"));
 }
 
 // إنشاء مثيل من OpenAI
@@ -55,78 +56,119 @@ export class OpenAIService {
       ملاحظة: ضمن دقة إشارة مرتفعة (أكثر من 90%) وقدم أسعار دخول وهدف ووقف خسارة واقعية ومنطقية للزوج المحدد.
       `;
 
-      // استدعاء واجهة برمجة ChatGPT
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o", // استخدام أحدث نموذج
-        messages: [
-          {
-            role: "system",
-            content: "أنت محلل مالي خبير متخصص في توليد إشارات تداول دقيقة للخيارات الثنائية."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.5, // درجة إبداعية متوسطة
-        response_format: { type: "json_object" }, // تنسيق الرد كـ JSON
-      });
+      logger.info("OpenAIService", "توليد إشارة جديدة", { platform, pair, timeframe, userId });
 
-      // تحويل النص إلى كائن JSON
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error("لم يتم توليد محتوى من الذكاء الاصطناعي");
-      }
-
-      const signalData = JSON.parse(content);
-      
-      // إنشاء بيانات الإشارة للتخزين في قاعدة البيانات
-      const signalToInsert: InsertSignal = {
-        asset: signalData.asset,
-        type: signalData.type,
-        entryPrice: signalData.entryPrice,
-        targetPrice: signalData.targetPrice,
-        stopLoss: signalData.stopLoss,
-        accuracy: signalData.accuracy,
-        time: signalData.time,
-        status: 'active',
-        indicators: signalData.indicators,
-        platform: platform,
-        timeframe: timeframe,
-        reason: signalData.reason,
-        createdBy: userId || null,
-        isPublic: true,
-        analysis: {
-          reasoning: signalData.reason,
-          potentialProfit: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / parseFloat(signalData.entryPrice) * 100).toFixed(2) + '%',
-          riskRewardRatio: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / Math.abs(parseFloat(signalData.entryPrice) - parseFloat(signalData.stopLoss))).toFixed(2),
-        }
-      };
-      
-      // حفظ الإشارة في قاعدة البيانات
-      const signal = await storage.createSignal(signalToInsert);
-      
-      // إذا كان هناك معرف مستخدم، قم بتعيين الإشارة للمستخدم وتتبع الاستخدام
-      if (userId) {
-        // تتبع استخدام المستخدم للإشارات
-        await storage.trackSignalUsage(userId, 'generated');
-        
-        // ربط الإشارة بالمستخدم
-        await storage.addSignalToUser(userId, signal.id);
-        
-        // إنشاء إشعار للمستخدم
-        await storage.createNotification({
-          userId,
-          type: 'signal',
-          title: 'تم إنشاء إشارة جديدة',
-          message: `تم إنشاء إشارة ${signalData.type === 'buy' ? 'شراء' : 'بيع'} جديدة لـ ${pair} على الإطار الزمني ${timeframe}`,
-          relatedId: signal.id
+      try {
+        // استدعاء واجهة برمجة ChatGPT
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o", // استخدام أحدث نموذج
+          messages: [
+            {
+              role: "system",
+              content: "أنت محلل مالي خبير متخصص في توليد إشارات تداول دقيقة للخيارات الثنائية."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.5, // درجة إبداعية متوسطة
+          response_format: { type: "json_object" }, // تنسيق الرد كـ JSON
         });
-      }
 
-      return signal;
+        // تحويل النص إلى كائن JSON
+        const content = response.choices[0].message.content;
+        if (!content) {
+          throw new Error("لم يتم توليد محتوى من الذكاء الاصطناعي");
+        }
+
+        const signalData = JSON.parse(content);
+        
+        // تسجيل نجاح عملية توليد الإشارة
+        logger.signalActivity("generate", { platform, pair, timeframe, success: true }, userId);
+        
+        // إنشاء بيانات الإشارة للتخزين في قاعدة البيانات
+        const signalToInsert: InsertSignal = {
+          asset: signalData.asset,
+          type: signalData.type,
+          entryPrice: signalData.entryPrice,
+          targetPrice: signalData.targetPrice,
+          stopLoss: signalData.stopLoss,
+          accuracy: signalData.accuracy,
+          time: signalData.time,
+          status: 'active',
+          indicators: signalData.indicators,
+          platform: platform,
+          timeframe: timeframe,
+          reason: signalData.reason,
+          createdBy: userId || null,
+          isPublic: true,
+          analysis: {
+            reasoning: signalData.reason,
+            potentialProfit: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / parseFloat(signalData.entryPrice) * 100).toFixed(2) + '%',
+            riskRewardRatio: ((parseFloat(signalData.targetPrice) - parseFloat(signalData.entryPrice)) / Math.abs(parseFloat(signalData.entryPrice) - parseFloat(signalData.stopLoss))).toFixed(2),
+          }
+        };
+        
+        // حفظ الإشارة في قاعدة البيانات
+        const signal = await storage.createSignal(signalToInsert);
+        
+        // إذا كان هناك معرف مستخدم، قم بتعيين الإشارة للمستخدم وتتبع الاستخدام
+        if (userId) {
+          // تتبع استخدام المستخدم للإشارات
+          await storage.trackSignalUsage(userId, 'generated');
+          
+          // ربط الإشارة بالمستخدم
+          await storage.addSignalToUser(userId, signal.id);
+          
+          // إنشاء إشعار للمستخدم
+          await storage.createNotification({
+            userId,
+            type: 'signal',
+            title: 'تم إنشاء إشارة جديدة',
+            message: `تم إنشاء إشارة ${signalData.type === 'buy' ? 'شراء' : 'بيع'} جديدة لـ ${pair} على الإطار الزمني ${timeframe}`,
+            relatedId: signal.id
+          });
+        }
+
+        return signal;
+      } catch (openAIError) {
+        // في حالة حدوث خطأ في الاتصال بـ OpenAI، نقوم بتسجيل الخطأ بالتفصيل
+        logger.error("OpenAIService", openAIError instanceof Error ? openAIError : new Error(String(openAIError)), {
+          platform,
+          pair,
+          timeframe,
+          userId,
+          service: "openai"
+        });
+        
+        logger.signalActivity("error", {
+          platform,
+          pair,
+          timeframe,
+          error: openAIError instanceof Error ? openAIError.message : String(openAIError),
+          service: "openai"
+        }, userId);
+        
+        // في حالة تجاوز الحصة أو مشاكل مفتاح API، نلقي خطأ محدد
+        const errorObj = openAIError as any; // تحويل نوع الخطأ لاستخراج الخصائص بشكل آمن
+        if (errorObj?.code === 'insufficient_quota' || errorObj?.code === 'invalid_api_key') {
+          throw new Error("مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.");
+        }
+        
+        // إعادة إلقاء الخطأ الأصلي إذا كان خطأً آخر
+        throw new Error("فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.");
+      }
     } catch (error) {
-      console.error("حدث خطأ أثناء توليد إشارة التداول:", error);
+      // تسجيل أي خطأ آخر خارج عملية OpenAI
+      logger.error("OpenAIService", error instanceof Error ? error : new Error(String(error)), {
+        function: "generateTradingSignal",
+        platform,
+        pair,
+        timeframe,
+        userId
+      });
+      
       throw new Error("فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.");
     }
   }
