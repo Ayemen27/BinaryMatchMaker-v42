@@ -47,16 +47,30 @@ export function findLatestBackupFile(): string | null {
     // البحث عن ملفات النسخ الاحتياطية (ملفات JSON)
     const backupFiles = fs.readdirSync(backupDir)
       .filter(file => file.startsWith('backup-') && file.endsWith('.json'))
-      .map(file => ({
-        name: file,
-        path: path.join(backupDir, file),
-        time: fs.statSync(path.join(backupDir, file)).mtime
-      }))
+      .map(file => {
+        const filePath = path.join(backupDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          name: file,
+          path: filePath,
+          time: stats.mtime,
+          size: stats.size
+        };
+      })
       .sort((a, b) => b.time.getTime() - a.time.getTime()); // ترتيب من الأحدث إلى الأقدم
     
     if (backupFiles.length === 0) {
       console.log('[خدمة الاستعادة التلقائية] لم يتم العثور على ملفات نسخ احتياطية.');
       return null;
+    }
+    
+    // البحث عن أكبر ملف نسخة احتياطية (بالحجم)
+    const largestBackupFile = [...backupFiles].sort((a, b) => b.size - a.size)[0];
+    
+    // إذا كان أكبر ملف أكبر بكثير من أحدث ملف، نستخدم أكبر ملف
+    if (largestBackupFile.size > backupFiles[0].size * 5) {
+      console.log(`[خدمة الاستعادة التلقائية] تم العثور على نسخة احتياطية أكبر حجمًا: ${largestBackupFile.name} (${largestBackupFile.size} بايت) بدلًا من أحدث نسخة: ${backupFiles[0].name} (${backupFiles[0].size} بايت)`);
+      return largestBackupFile.path;
     }
     
     console.log(`[خدمة الاستعادة التلقائية] تم العثور على أحدث نسخة احتياطية: ${backupFiles[0].name}`);
@@ -78,10 +92,35 @@ export async function restoreDataFromBackup(backupFilePath: string): Promise<boo
     
     // قراءة ملف النسخة الاحتياطية
     const backupData = fs.readFileSync(backupFilePath, 'utf8');
-    const data = JSON.parse(backupData);
+    const parsedData = JSON.parse(backupData);
+    
+    // التعامل مع هيكل البيانات المختلف
+    // هيكل ملف النسخة الاحتياطية قد يكون:
+    // 1. كائن مباشر يحتوي على كل الجداول - { table1: [...], table2: [...] }
+    // 2. كائن metadata بهيكل داخلي - { metadata: {...}, data: { table1: [...], table2: [...] } }
+    
+    // تحديد ما إذا كان الملف يحتوي على بنية "data" أو مباشرة جداول البيانات
+    let dataToInsert: any = parsedData;
+    
+    if (parsedData.data && typeof parsedData.data === 'object') {
+      console.log('[خدمة الاستعادة التلقائية] تم اكتشاف هيكل بيانات مع "data"');
+      dataToInsert = parsedData.data;
+    } else if (parsedData.metadata && typeof parsedData.metadata === 'object') {
+      // تحديد ما إذا كانت البيانات في الجذر مع metadata أو في كائن data
+      if (parsedData.tables) {
+        // البيانات في الجذر مع metadata
+        const { metadata, tables, ...restData } = parsedData;
+        dataToInsert = restData;
+      }
+    }
+    
+    // فحص صحة بنية البيانات
+    if (typeof dataToInsert !== 'object' || dataToInsert === null) {
+      throw new Error('بنية ملف النسخة الاحتياطية غير صالحة');
+    }
     
     // إدخال البيانات في الجداول
-    await insertBackupData(data);
+    await insertBackupData(dataToInsert);
     
     console.log('[خدمة الاستعادة التلقائية] تم استرجاع البيانات بنجاح');
     return true;
