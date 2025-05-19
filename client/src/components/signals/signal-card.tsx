@@ -27,15 +27,23 @@ export function SignalCard({ signal }: SignalCardProps) {
     buy: {
       icon: TrendingUp,
       colorClass: "bg-success/20 text-success border-success",
-      gradientClass: "from-success/5 to-success/0",
-      badgeClass: "bg-success/15 text-success hover:bg-success/20",
+      gradientClass: "from-success/10 to-success/0",
+      badgeClass: "bg-success/20 text-success hover:bg-success/30",
+      // Signal color theme for buy
+      borderClass: "border-success/30 dark:border-success/50",
+      headerClass: "bg-success/5 dark:bg-success/10",
+      highlightClass: "text-success font-semibold",
       accuracyBarClass: "bg-success"
     },
     sell: {
       icon: TrendingDown,
       colorClass: "bg-destructive/20 text-destructive border-destructive",
-      gradientClass: "from-destructive/5 to-destructive/0",
-      badgeClass: "bg-destructive/15 text-destructive hover:bg-destructive/20",
+      gradientClass: "from-destructive/10 to-destructive/0",
+      badgeClass: "bg-destructive/20 text-destructive hover:bg-destructive/30",
+      // Signal color theme for sell
+      borderClass: "border-destructive/30 dark:border-destructive/50",
+      headerClass: "bg-destructive/5 dark:bg-destructive/10",
+      highlightClass: "text-destructive font-semibold",
       accuracyBarClass: "bg-destructive"
     }
   };
@@ -83,7 +91,9 @@ export function SignalCard({ signal }: SignalCardProps) {
     <div className={cn(
       "rounded-lg overflow-hidden transition-all hover:shadow-md border",
       isActive 
-        ? "border-border dark:border-border/50" 
+        ? signal.type === 'buy'
+          ? "border-success/20 dark:border-success/30" 
+          : "border-destructive/20 dark:border-destructive/30"
         : "border-border/10 dark:border-border/5 opacity-85",
       "bg-card dark:bg-card/95"
     )}>
@@ -91,8 +101,8 @@ export function SignalCard({ signal }: SignalCardProps) {
       <div className={cn(
         "p-4",
         signal.type === 'buy' 
-          ? "bg-gradient-to-br from-success/5 to-transparent dark:from-success/10 dark:to-transparent" 
-          : "bg-gradient-to-br from-destructive/5 to-transparent dark:from-destructive/10 dark:to-transparent"
+          ? "bg-gradient-to-br from-success/10 to-transparent dark:from-success/15 dark:to-transparent" 
+          : "bg-gradient-to-br from-destructive/10 to-transparent dark:from-destructive/15 dark:to-transparent"
       )}>
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-2">
@@ -108,13 +118,13 @@ export function SignalCard({ signal }: SignalCardProps) {
             <Badge 
               variant="outline" 
               className={cn(
-                "flex items-center px-2 py-1 gap-1 transition-colors shadow-sm", 
+                "flex items-center px-2.5 py-1 gap-1.5 transition-colors shadow-sm", 
                 signal.type === 'buy'
-                  ? "bg-success/10 dark:bg-success/20 text-success border-success/20 dark:border-success/30"
-                  : "bg-destructive/10 dark:bg-destructive/20 text-destructive border-destructive/20 dark:border-destructive/30"
+                  ? "bg-success/15 dark:bg-success/25 text-success border-success/30 dark:border-success/40 font-medium"
+                  : "bg-destructive/15 dark:bg-destructive/25 text-destructive border-destructive/30 dark:border-destructive/40 font-medium"
               )}
             >
-              <TypeIcon className="h-3 w-3" />
+              <TypeIcon className="h-3.5 w-3.5" />
               {signal.type === 'buy' ? t('buy') : t('sell')}
             </Badge>
           </div>
@@ -134,21 +144,24 @@ export function SignalCard({ signal }: SignalCardProps) {
               <Target className="h-3 w-3" />
               {t('targetPrice')}
             </p>
-            <p className="font-semibold text-foreground">{signal.targetPrice}</p>
+            <p className={cn(
+              "font-semibold", 
+              signal.type === 'buy' ? "text-success/90 dark:text-success/80" : "text-destructive/90 dark:text-destructive/80"
+            )}>{signal.targetPrice}</p>
           </div>
           <div>
             <p className="text-muted-foreground text-xs flex items-center gap-1 mb-1">
               <AlertTriangle className="h-3 w-3" />
               {t('stopLoss')}
             </p>
-            <p className="font-semibold text-foreground">{signal.stopLoss}</p>
+            <p className="font-semibold text-destructive/90 dark:text-destructive/80">{signal.stopLoss}</p>
           </div>
           <div>
             <p className="text-muted-foreground text-xs flex items-center gap-1 mb-1">
               <BarChart3 className="h-3 w-3" />
               {t('potentialProfit')}
             </p>
-            <p className="font-semibold text-success dark:text-success/90">+{profitPercentage}%</p>
+            <p className="font-semibold text-success/90 dark:text-success/80">+{profitPercentage}%</p>
           </div>
         </div>
         
@@ -156,15 +169,18 @@ export function SignalCard({ signal }: SignalCardProps) {
         <div className="mb-4">
           <div className="flex justify-between text-xs mb-1">
             <span className="text-muted-foreground">{t('signalAccuracy')}</span>
-            <span className="font-medium text-foreground">{signal.accuracy}%</span>
+            <span className={cn(
+              "font-medium",
+              signal.type === 'buy' ? "text-success dark:text-success/90" : "text-destructive dark:text-destructive/90"
+            )}>{signal.accuracy}%</span>
           </div>
-          <div className="w-full bg-muted/50 dark:bg-muted/30 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-muted/50 dark:bg-muted/30 rounded-full h-2 overflow-hidden">
             <div 
               className={cn(
-                "h-1.5 rounded-full", 
+                "h-2 rounded-full shadow-inner", 
                 signal.type === 'buy' 
-                  ? "bg-success dark:bg-success/90" 
-                  : "bg-destructive dark:bg-destructive/90"
+                  ? "bg-success/80 dark:bg-success/90" 
+                  : "bg-destructive/80 dark:bg-destructive/90"
               )} 
               style={{ width: `${signal.accuracy}%` }}
             ></div>
