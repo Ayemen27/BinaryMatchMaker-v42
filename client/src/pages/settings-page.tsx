@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/layout/layout';
 import { useAuth } from '@/hooks/use-auth';
+import { GeneralSettings } from '@/components/settings/general-settings';
 import {
   Card,
   CardContent,
