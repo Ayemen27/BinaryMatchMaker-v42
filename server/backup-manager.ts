@@ -353,23 +353,36 @@ export async function restoreFromBackup(backupFilePath?: string): Promise<boolea
         
         // ثم نقوم بإدراج البيانات
         for (const row of tableData) {
-          // تحويل الكائن إلى سلسلة JSON محفوظة
-          const jsonStr = JSON.stringify(row).replace(/'/g, "''");
-          
-          // إنشاء أمر إدراج
-          const insertQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "INSERT INTO ${tableName} SELECT * FROM json_populate_record(null::${tableName}, '${jsonStr}');"`;
-          
-          await new Promise<void>((resolve) => {
-            exec(insertQuery, (error) => {
-              if (error) {
-                console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إدراج بيانات في جدول ${tableName}: ${error.message}`);
-                // نستمر مع السجل التالي
-                resolve();
-                return;
-              }
-              resolve();
+          try {
+            // بناء أمر إدراج أكثر موثوقية باستخدام قيم مفصولة
+            const columns = Object.keys(row).filter(k => row[k] !== null);
+            const values = columns.map(col => {
+              const val = row[col];
+              if (val === null || val === undefined) return 'NULL';
+              if (typeof val === 'number') return val;
+              if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+              if (Array.isArray(val)) return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+              if (typeof val === 'object') return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+              return `'${String(val).replace(/'/g, "''")}'`;
             });
-          });
+            
+            // إنشاء أمر إدراج SQL مباشر (أكثر موثوقية من json_populate_record)
+            const insertQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "INSERT INTO ${tableName}(${columns.join(',')}) VALUES(${values.join(',')});"`;
+            
+            await new Promise<void>((resolve) => {
+              exec(insertQuery, (error) => {
+                if (error) {
+                  console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إدراج بيانات في جدول ${tableName}: ${error.message}`);
+                  // نستمر مع السجل التالي
+                  resolve();
+                  return;
+                }
+                resolve();
+              });
+            });
+          } catch (err) {
+            console.error(`[نظام النسخ الاحتياطي] خطأ في معالجة بيانات لإدراجها في ${tableName}:`, err);
+          }
         }
         
         console.log(`[نظام النسخ الاحتياطي] تم استرجاع جدول ${tableName} بنجاح`);
