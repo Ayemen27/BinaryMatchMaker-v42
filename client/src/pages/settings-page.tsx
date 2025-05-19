@@ -263,78 +263,122 @@ export default function SettingsPage() {
       </Helmet>
       
       <div className="p-4 md:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 bg-gradient-to-r from-primary/10 to-primary/5 p-4 md:p-6 rounded-lg shadow-sm">
           <div>
             <h1 className="text-2xl font-bold">{t('settings')}</h1>
             <p className="text-muted-foreground">{t('manageYourAccount')}</p>
           </div>
+          <div className="mt-4 md:mt-0">
+            <div className="inline-flex items-center gap-2 bg-card py-1 px-2 rounded-full text-xs text-muted-foreground border">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              {user?.username}
+            </div>
+          </div>
         </div>
 
         <Tabs defaultValue="profile" className="space-y-4">
-          <TabsList className="w-full sm:w-auto border-b-0 bg-card">
-            <TabsTrigger value="profile" className="flex items-center">
-              <User className="h-4 w-4 mr-2" />
+          {/* Mobile View: Dropdown for Tabs */}
+          <div className="sm:hidden w-full mb-4">
+            <select 
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm" 
+              onChange={(e) => {
+                const selectElement = document.querySelector('[data-value="' + e.target.value + '"]') as HTMLElement;
+                if (selectElement) selectElement.click();
+              }}
+              defaultValue="profile"
+            >
+              <option value="profile">{t('profile')}</option>
+              <option value="security">{t('security')}</option>
+              <option value="notifications">{t('notifications')}</option>
+              <option value="subscription">{t('subscription')}</option>
+              <option value="language">{t('language')}</option>
+              <option value="apikeys">{t('apiKeys') || 'API مفاتيح'}</option>
+            </select>
+          </div>
+          
+          {/* Desktop View: TabsList */}
+          <TabsList className="hidden sm:flex flex-wrap gap-1 mb-4 border border-border p-1 rounded-lg bg-card">
+            <TabsTrigger value="profile" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="profile">
+              <User className="h-4 w-4" />
               {t('profile')}
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center">
-              <Lock className="h-4 w-4 mr-2" />
+            <TabsTrigger value="security" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="security">
+              <Lock className="h-4 w-4" />
               {t('security')}
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center">
-              <Bell className="h-4 w-4 mr-2" />
+            <TabsTrigger value="notifications" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="notifications">
+              <Bell className="h-4 w-4" />
               {t('notifications')}
             </TabsTrigger>
-            <TabsTrigger value="subscription" className="flex items-center">
-              <CreditCard className="h-4 w-4 mr-2" />
+            <TabsTrigger value="subscription" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="subscription">
+              <CreditCard className="h-4 w-4" />
               {t('subscription')}
             </TabsTrigger>
-            <TabsTrigger value="language" className="flex items-center">
-              <Globe className="h-4 w-4 mr-2" />
+            <TabsTrigger value="language" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="language">
+              <Globe className="h-4 w-4" />
               {t('language')}
             </TabsTrigger>
-            <TabsTrigger value="apikeys" className="flex items-center">
-              <Key className="h-4 w-4 mr-2" />
+            <TabsTrigger value="apikeys" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md" data-value="apikeys">
+              <Key className="h-4 w-4" />
               {t('apiKeys') || 'API مفاتيح'}
             </TabsTrigger>
           </TabsList>
           
           {/* Profile Tab */}
           <TabsContent value="profile">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('profileSettings')}</CardTitle>
-                <CardDescription>{t('profileSettingsDescription')}</CardDescription>
+            <Card className="border border-border shadow-sm">
+              <CardHeader className="bg-muted/30 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary/10 p-2 rounded-full">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>{t('profileSettings')}</CardTitle>
+                    <CardDescription>{t('profileSettingsDescription')}</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
+                <div className="bg-primary/5 p-4 rounded-lg mb-6 flex items-center gap-3">
+                  <div className="bg-primary/20 p-2 rounded-full">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t('profileInfoMessage') || 'هذه المعلومات ستظهر في حسابك الشخصي وستكون مرئية للإدارة فقط.'}</p>
+                </div>
+                
                 <Form {...profileForm}>
                   <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
-                    <FormField
-                      control={profileForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('username')}</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={profileForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('email')}</FormLabel>
-                          <FormControl>
-                            <Input type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField
+                        control={profileForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('username')}</FormLabel>
+                            <FormControl>
+                              <Input {...field} className="border-border focus-visible:ring-primary" />
+                            </FormControl>
+                            <FormDescription className="text-xs">{t('usernameDescription') || 'اسم المستخدم الخاص بك للدخول إلى النظام'}</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={profileForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('email')}</FormLabel>
+                            <FormControl>
+                              <Input type="email" {...field} className="border-border focus-visible:ring-primary" />
+                            </FormControl>
+                            <FormDescription className="text-xs">{t('emailDescription') || 'البريد الإلكتروني المستخدم للإشعارات والتواصل'}</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                     
                     <FormField
                       control={profileForm.control}
@@ -343,22 +387,29 @@ export default function SettingsPage() {
                         <FormItem>
                           <FormLabel>{t('fullName')}</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} className="border-border focus-visible:ring-primary" />
                           </FormControl>
+                          <FormDescription className="text-xs">{t('fullNameDescription') || 'الاسم الكامل الذي سيظهر في حسابك'}</FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     
-                    <Button 
-                      type="submit"
-                      disabled={profileMutation.isPending}
-                    >
-                      {profileMutation.isPending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      {t('saveChanges')}
-                    </Button>
+                    <div className="pt-4 border-t border-border mt-6">
+                      <Button 
+                        type="submit"
+                        disabled={profileMutation.isPending}
+                        className="relative overflow-hidden group"
+                      >
+                        {profileMutation.isPending ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="mr-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+                        )}
+                        {t('saveChanges')}
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                      </Button>
+                    </div>
                   </form>
                 </Form>
               </CardContent>
@@ -367,78 +418,124 @@ export default function SettingsPage() {
           
           {/* Security Tab */}
           <TabsContent value="security">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('securitySettings')}</CardTitle>
-                <CardDescription>{t('securitySettingsDescription')}</CardDescription>
+            <Card className="border border-border shadow-sm">
+              <CardHeader className="bg-muted/30 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary/10 p-2 rounded-full">
+                    <Lock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>{t('securitySettings')}</CardTitle>
+                    <CardDescription>{t('securitySettingsDescription')}</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <Form {...passwordForm}>
-                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-                    <FormField
-                      control={passwordForm.control}
-                      name="currentPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('currentPassword')}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={passwordForm.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('newPassword')}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={passwordForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('confirmPassword')}</FormLabel>
-                          <FormControl>
-                            <Input type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit"
-                      disabled={passwordMutation.isPending}
-                    >
-                      {passwordMutation.isPending && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      {t('changePassword')}
-                    </Button>
-                  </form>
-                </Form>
+              <CardContent className="space-y-6 p-6">
+                <div className="bg-yellow-500/10 p-4 rounded-lg mb-6 flex items-center gap-3">
+                  <div className="bg-yellow-500/20 p-2 rounded-full">
+                    <Info className="h-4 w-4 text-yellow-500" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t('passwordWarning') || 'تأكد من استخدام كلمة مرور قوية وفريدة لحماية حسابك.'}</p>
+                </div>
                 
-                <Separator className="my-6" />
+                <div className="bg-card border border-border rounded-lg p-5">
+                  <h3 className="text-lg font-medium mb-4">{t('changePassword') || 'تغيير كلمة المرور'}</h3>
+                  <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={passwordForm.control}
+                          name="currentPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('currentPassword')}</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} className="border-border focus-visible:ring-primary" />
+                              </FormControl>
+                              <FormDescription className="text-xs">{t('currentPasswordDescription') || 'أدخل كلمة المرور الحالية للتحقق'}</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                        <FormField
+                          control={passwordForm.control}
+                          name="newPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('newPassword')}</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} className="border-border focus-visible:ring-primary" />
+                              </FormControl>
+                              <FormDescription className="text-xs">{t('passwordRequirements') || 'يجب أن تكون كلمة المرور 6 أحرف على الأقل'}</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={passwordForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('confirmPassword')}</FormLabel>
+                              <FormControl>
+                                <Input type="password" {...field} className="border-border focus-visible:ring-primary" />
+                              </FormControl>
+                              <FormDescription className="text-xs">{t('confirmPasswordDescription') || 'أعد إدخال كلمة المرور الجديدة للتأكيد'}</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <div className="pt-4 mt-2">
+                        <Button 
+                          type="submit"
+                          disabled={passwordMutation.isPending}
+                          className="relative overflow-hidden group"
+                        >
+                          {passwordMutation.isPending ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Lock className="mr-2 h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+                          )}
+                          {t('changePassword')}
+                          <span className="absolute bottom-0 left-0 w-full h-0.5 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </div>
                 
-                <div>
-                  <h3 className="text-lg font-medium mb-4">{t('twoFactorAuth')}</h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{t('twoFactorAuthTitle')}</p>
-                      <p className="text-sm text-muted-foreground">{t('twoFactorAuthDescription')}</p>
+                <div className="bg-card border border-border rounded-lg p-5 mt-6">
+                  <h3 className="text-lg font-medium mb-4">{t('additionalSecurity') || 'إعدادات الأمان الإضافية'}</h3>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-border pb-4">
+                      <div>
+                        <p className="font-medium">{t('twoFactorAuthTitle') || 'المصادقة الثنائية'}</p>
+                        <p className="text-sm text-muted-foreground">{t('twoFactorAuthDescription') || 'تمكين المصادقة ثنائية العوامل لحماية إضافية للحساب'}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch id="two-factor" className="data-[state=checked]:bg-green-500" />
+                        <span className="text-xs text-muted-foreground">
+                          {t('inactive') || 'غير مفعل'}
+                        </span>
+                      </div>
                     </div>
-                    <Switch id="two-factor" />
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{t('loginHistory') || 'سجل تسجيلات الدخول'}</p>
+                        <p className="text-sm text-muted-foreground">{t('loginHistoryDescription') || 'مراجعة نشاط تسجيل الدخول الأخير لحسابك'}</p>
+                      </div>
+                      <Button variant="outline" size="sm" className="border-primary/20 hover:border-primary/50">
+                        {t('viewHistory') || 'عرض السجل'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -601,44 +698,113 @@ export default function SettingsPage() {
           
           {/* Language Tab */}
           <TabsContent value="language">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('languageSettings')}</CardTitle>
-                <CardDescription>{t('languageSettingsDescription')}</CardDescription>
+            <Card className="border border-border shadow-sm">
+              <CardHeader className="bg-muted/30 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary/10 p-2 rounded-full">
+                    <Globe className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>{t('languageSettings')}</CardTitle>
+                    <CardDescription>{t('languageSettingsDescription')}</CardDescription>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
+                <div className="bg-primary/5 p-4 rounded-lg mb-6 flex items-center gap-3">
+                  <div className="bg-primary/20 p-2 rounded-full">
+                    <Info className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t('languageInfoMessage') || 'اختيار اللغة سيؤثر على واجهة المستخدم والإشعارات والرسائل.'}</p>
+                </div>
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button
-                    variant={i18n.language === 'ar' ? 'default' : 'outline'}
-                    className="h-auto p-4 justify-start"
+                  <div 
+                    className={`relative p-1 border rounded-lg cursor-pointer transition-all overflow-hidden ${i18n.language === 'ar' ? 'border-primary shadow-sm shadow-primary/20' : 'border-border hover:border-primary/40'}`}
                     onClick={() => handleLanguageChange('ar')}
                   >
-                    <div className="flex items-center">
-                      <div className="mr-3 h-10 w-10 rounded-full flex items-center justify-center bg-primary/10">
-                        <span className="text-lg">ع</span>
+                    {i18n.language === 'ar' && (
+                      <div className="absolute right-0 top-0 h-6 px-3 text-xs bg-primary text-white rounded-bl-md rounded-tr-md flex items-center justify-center">
+                        {t('active') || 'نشط'}
                       </div>
-                      <div className="text-left">
-                        <div className="font-medium">العربية</div>
-                        <div className="text-sm text-muted-foreground">Arabic</div>
+                    )}
+                    
+                    <div className={`flex items-center gap-4 p-4 rounded-md ${i18n.language === 'ar' ? 'bg-primary/5' : ''}`}>
+                      <div className="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-primary/80 to-primary/30 flex items-center justify-center">
+                        <span className="text-white text-2xl font-bold">ع</span>
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-xl font-medium mb-1">العربية</h3>
+                        <p className="text-sm text-muted-foreground">Arabic</p>
+                        {i18n.language === 'ar' && (
+                          <div className="mt-2 inline-flex items-center text-primary text-sm">
+                            <Check className="h-4 w-4 mr-1" />
+                            {t('currentLanguage') || 'اللغة الحالية'}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </Button>
+                  </div>
                   
-                  <Button
-                    variant={i18n.language === 'en' ? 'default' : 'outline'}
-                    className="h-auto p-4 justify-start"
+                  <div 
+                    className={`relative p-1 border rounded-lg cursor-pointer transition-all overflow-hidden ${i18n.language === 'en' ? 'border-primary shadow-sm shadow-primary/20' : 'border-border hover:border-primary/40'}`}
                     onClick={() => handleLanguageChange('en')}
                   >
-                    <div className="flex items-center">
-                      <div className="mr-3 h-10 w-10 rounded-full flex items-center justify-center bg-primary/10">
-                        <span className="text-lg">E</span>
+                    {i18n.language === 'en' && (
+                      <div className="absolute right-0 top-0 h-6 px-3 text-xs bg-primary text-white rounded-bl-md rounded-tr-md flex items-center justify-center">
+                        {t('active') || 'نشط'}
                       </div>
-                      <div className="text-left">
-                        <div className="font-medium">English</div>
-                        <div className="text-sm text-muted-foreground">English</div>
+                    )}
+                    
+                    <div className={`flex items-center gap-4 p-4 rounded-md ${i18n.language === 'en' ? 'bg-primary/5' : ''}`}>
+                      <div className="flex-shrink-0 w-16 h-16 rounded-full bg-gradient-to-br from-primary/80 to-primary/30 flex items-center justify-center">
+                        <span className="text-white text-2xl font-bold">En</span>
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="text-xl font-medium mb-1">English</h3>
+                        <p className="text-sm text-muted-foreground">الإنجليزية</p>
+                        {i18n.language === 'en' && (
+                          <div className="mt-2 inline-flex items-center text-primary text-sm">
+                            <Check className="h-4 w-4 mr-1" />
+                            {t('currentLanguage') || 'اللغة الحالية'}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </Button>
+                  </div>
+                </div>
+                
+                <div className="mt-8 p-5 border border-border rounded-lg">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Settings className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="text-lg font-medium">{t('advancedSettings') || 'إعدادات إضافية'}</h3>
+                  </div>
+                  
+                  <div className="space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-border">
+                      <div>
+                        <p className="font-medium">{t('dateTimeFormat') || 'تنسيق التاريخ والوقت'}</p>
+                        <p className="text-xs text-muted-foreground">{t('dateTimeFormatDescription') || 'تنسيق عرض التاريخ والوقت'}</p>
+                      </div>
+                      <select className="w-full sm:w-auto border border-border rounded-md h-9 px-3 focus:outline-none focus:ring-1 focus:ring-primary bg-background text-sm">
+                        <option value="auto">{t('systemDefault') || 'افتراضي النظام'}</option>
+                        <option value="ar">التنسيق العربي</option>
+                        <option value="en">English Format</option>
+                      </select>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <p className="font-medium">{t('numberFormat') || 'تنسيق الأرقام'}</p>
+                        <p className="text-xs text-muted-foreground">{t('numberFormatDescription') || 'نوع الأرقام المستخدمة'}</p>
+                      </div>
+                      <select className="w-full sm:w-auto border border-border rounded-md h-9 px-3 focus:outline-none focus:ring-1 focus:ring-primary bg-background text-sm">
+                        <option value="auto">{t('followLanguage') || 'حسب اللغة'}</option>
+                        <option value="arabic">١٢٣٤٥ (عربية)</option>
+                        <option value="latin">12345 (لاتينية)</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
