@@ -14,6 +14,7 @@ import NewSettingsPage from "@/pages/new-settings-page"; // استخدام صف�
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
+import { ThemeSync } from "./hooks/use-theme-sync";
 
 function Router() {
   return (
@@ -36,6 +37,7 @@ function App() {
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
         <AuthProvider>
           <TooltipProvider>
+            <ThemeSync />
             <Toaster />
             <Router />
           </TooltipProvider>
