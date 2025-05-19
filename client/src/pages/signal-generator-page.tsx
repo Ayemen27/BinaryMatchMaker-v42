@@ -44,27 +44,26 @@ export default function SignalGeneratorPage() {
     setIsGenerating(true);
     
     try {
-      // In a real implementation, this would make an API call to the backend
-      // to generate a signal using AI based on the selected parameters
+      // Make API call to generate an AI-powered signal
+      const response = await fetch('/api/signal-generator/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          platform,
+          pair,
+          timeframe
+        }),
+      });
       
-      // Simulate a delay (remove in production)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate signal');
+      }
       
-      // Dummy signal data (in production, this would come from the API)
-      const newSignal: Signal = {
-        id: Date.now(),
-        asset: pair,
-        type: Math.random() > 0.5 ? 'buy' : 'sell',
-        entryPrice: `$${(Math.random() * 1000).toFixed(2)}`,
-        targetPrice: `$${(Math.random() * 1500).toFixed(2)}`,
-        stopLoss: `$${(Math.random() * 800).toFixed(2)}`,
-        accuracy: 90 + Math.floor(Math.random() * 8), // 90-98% accuracy
-        time: new Date().toISOString(),
-        status: 'active',
-        indicators: ['RSI', 'MACD', 'Bollinger Bands'],
-        createdAt: new Date(),
-        result: null
-      };
+      // Parse the generated signal from API
+      const newSignal: Signal = await response.json();
       
       setGeneratedSignal(newSignal);
       
@@ -73,9 +72,10 @@ export default function SignalGeneratorPage() {
         description: t('signalGeneratedDesc'),
       });
     } catch (error) {
+      console.error('Error generating signal:', error);
       toast({
         title: t('errorGeneratingSignal'),
-        description: t('tryAgainLater'),
+        description: error instanceof Error ? error.message : t('tryAgainLater'),
         variant: 'destructive',
       });
     } finally {
