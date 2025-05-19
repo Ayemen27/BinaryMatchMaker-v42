@@ -1,0 +1,297 @@
+سوبابيز
+
+
+حر
+
+صانع التطابقات الثنائية
+
+
+يتصل
+
+تمكين التفرع
+
+
+
+أيمن27
+
+
+صانع التطابقات الثنائية
+نانو
+الجداول
+0
+الوظائف
+0
+النسخ المقلدة
+0
+
+حالة المشروع
+مرحباً بكم في مشروعكم الجديد
+لقد تم نشر مشروعك على مثيل خاص به، مع واجهة برمجة التطبيقات الخاصة به والتي تم إعدادها وجاهزة للاستخدام.
+
+ابدأ ببناء قاعدة البيانات الخاصة بك
+ابدأ ببناء تطبيقك بإنشاء الجداول وإدراج البيانات. يُسهّل مُحرر الجداول لدينا استخدام Postgres كجدول بيانات، ولكن لدينا أيضًا مُحرر SQL إذا كنت بحاجة إلى المزيد.
+
+محرر الجدول
+محرر SQL
+حول قاعدة البيانات
+1
+إنشاء جدول المهام (
+
+2
+معرف bigint تم إنشاؤه افتراضيًا ،
+
+3
+نص المهمة​
+
+4
+الحالة الحالة الافتراضية 'لم يتم البدء' ،
+
+5
+يشير معرف المستخدم uuid إلى auth.users وليس null ،
+
+6
+طابع زمني inserted_at مع المنطقة الزمنية ،
+
+7
+طابع زمني updated_at مع المنطقة الزمنية ،
+
+8
+);
+
+بطاقة تعريف
+
+مهمة
+
+حالة
+
+1
+
+إنشاء مشروع
+
+مكتمل
+
+2
+
+قراءة الوثائق
+
+مكتمل
+
+3
+
+بناء التطبيق
+
+في تَقَدم
+
+4
+
+ربط Supabase
+
+في تَقَدم
+
+5
+
+نشر المشروع
+
+لم يتم البدء
+
+6
+
+احصل على المستخدمين
+
+لم يتم البدء
+
+7
+
+الترقية إلى Pro
+
+لم يتم البدء
+
+استكشف منتجاتنا الأخرى
+يوفر Supabase جميع ميزات الواجهة الخلفية التي تحتاجها لبناء منتج. يمكنك استخدامه بالكامل، أو فقط الميزات التي تحتاجها.
+
+المصادقة
+نظام إدارة مستخدم كامل يعمل بدون أي أدوات إضافية.
+
+استكشاف المصادقة
+حول المصادقة
+تخزين
+قم بتخزين وتنظيم وتقديم أي نوع من الملفات مهما كان حجمها من دلاء متعددة.
+
+استكشاف التخزين
+حول التخزين
+وظائف الحافة
+اكتب كودًا مخصصًا دون الحاجة إلى نشر أو توسيع نطاق الخوادم، مع أوقات نشر سريعة وزمن انتقال منخفض.
+
+استكشاف الوظائف
+حول الوظائف
+في الوقت الحالى
+استمع إلى قاعدة بيانات PostgreSQL الخاصة بك في الوقت الفعلي عبر websockets.
+
+استكشف الوقت الحقيقي
+حول الوقت الحقيقي
+الاتصال بمشروعك الجديد
+تفاعل مع قاعدة البيانات الخاصة بك من خلال مكتبات عميل Supabase باستخدام مفاتيح API الخاصة بك.
+
+يمكنك العثور على مزيد من المعلومات حول مفاتيح مشروعك في إعدادات واجهة برمجة التطبيقات الخاصة بمشروعك.
+
+عرض إعدادات API
+حول واجهات برمجة التطبيقات
+واجهة برمجة تطبيقات المشروع
+واجهة برمجة التطبيقات (API) الخاصة بك مؤمنة عبر بوابة API تتطلب مفتاح API لكل طلب.
+يمكنك استخدام المعلمات أدناه لاستخدام مكتبات عملاء Supabase.
+
+رابط المشروع
+https://iqeulzwbiovlsuytoxvk.supabase.co
+
+ينسخ
+نقطة نهاية RESTful للاستعلام عن قاعدة البيانات وإدارتها.
+مفتاح API
+
+anon
+public
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZXVsendiaW92bHN1eXRveHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2ODkxMzcsImV4cCI6MjA2MzI2NTEzN30.9Z8QjE9FNYAZYoRmi6iSCmxfIA0-yKSqOoOeXlhebjY
+
+ينسخ
+هذا المفتاح آمن للاستخدام في المتصفح إذا فعّلتَ أمان مستوى الصف (RLS) لجداولك وسياساتك المُعدّة. يمكنك أيضًا استخدام مفتاح الخدمة، الموجود هنا، لتجاوز أمان مستوى الصف.
+
+جافا سكريبت
+دارت
+استيراد { createClient } من '@supabase/supabase-js'   
+
+ثابت supabaseUrl = 'https://iqeulzwbiovlsuytoxvk.supabase.co' 
+const supabaseKey = process . env . SUPABASE_KEY
+ثابت supabase = createClient ( supabaseUrl ، supabaseKey ) 
+مكتبات العملاء
+JavaScript logo
+جافا سكريبت
+
+المستندات
+
+جيثب
+Flutter logo
+رفرفة
+
+المستندات
+
+جيثب
+Python logo
+بايثون
+
+المستندات
+
+جيثب
+C# logo
+سي شارب
+مجتمع
+
+المستندات
+
+جيثب
+Swift logo
+سويفت
+
+المستندات
+
+جيثب
+Kotlin logo
+كوتلين
+مجتمع
+
+المستندات
+
+جيثب
+Example projects
+App Frameworks
+Mobile Frameworks
+NestJS logo
+NestJS example
+NestJS example using Supabase Auth
+
+nextjs logo
+Next.js Realtime chat app
+Next.js Slack clone app using Supabase realtime subscriptions
+
+nextjs logo
+Next.js Subscription and Auth
+The all-in-one starter kit for high-performance SaaS applications.
+
+nextjs logo
+Next.js todo list app
+Next.js todo list example
+
+React logo
+React realtime chat app
+Example app of real-time chat using supabase realtime api
+
+Svelte logo
+Svelte kanban board
+A Trello clone using Supabase as the storage system.
+
+Svelte logo
+Svelte todo list app
+Sveltejs todo with TailwindCSS and Snowpack
+
+BinaryMatchMaker | BinaryMatchMaker | Supabase
+الاتصال بمشروعك
+احصل على سلاسل الاتصال ومتغيرات البيئة لتطبيقك
+
+
+سلسلة الاتصال
+
+أطر عمل التطبيقات
+
+أطر عمل الهاتف المحمول
+
+ORMs
+يكتب
+
+عنوان URI
+مصدر
+
+قاعدة البيانات الأساسية
+اتصال مباشر
+مثالي للتطبيقات ذات الاتصالات المستمرة وطويلة الأمد، مثل تلك التي تعمل على الآلات الافتراضية أو الحاويات طويلة الأمد.
+
+postgresql://postgres:[YOUR-PASSWORD]@db.iqeulzwbiovlsuytoxvk.supabase.co:5432/postgres
+
+
+عرض المعلمات
+مناسب للاتصالات طويلة الأمد والمستمرة
+كل عميل لديه اتصال مخصص مع Postgres
+غير متوافق مع IPv4
+استخدم Session Pooler إذا كنت على شبكة IPv4 أو قم بشراء الوظيفة الإضافية IPv4
+إضافة IPv4
+إعدادات المجمع
+
+بعض المنصات تدعم IPv4 فقط:
+مجمع المعاملات
+مجمع مشترك
+مثالي للتطبيقات عديمة الجنسية مثل الوظائف الخالية من الخوادم حيث يكون كل تفاعل مع Postgres قصيرًا ومعزولًا.
+
+postgresql://postgres.iqeulzwbiovlsuytoxvk:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:6543/postgres
+
+لا يدعم عبارات PREPARE
+
+
+عرض المعلمات
+مناسب لعدد كبير من العملاء المتصلين
+مجموعة اتصال مُجهزة مسبقًا لـ Postgres
+متوافق مع IPv4
+يتم استخدام بروتوكول IPv4 في اتصالات مجمع المعاملات مجانًا.
+مجمع الجلسات
+مجمع مشترك
+يوصى به فقط كبديل للاتصال المباشر، عند الاتصال عبر شبكة IPv4.
+
+postgresql://postgres.iqeulzwbiovlsuytoxvk:[YOUR-PASSWORD]@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
+
+
+عرض المعلمات
+متوافق مع IPv4
+يتم استخدام بروتوكول IPv4 مجانًا في اتصالات مجمع الجلسات
+استخدم فقط على شبكة IPv4
+استخدم الاتصال المباشر إذا كنت تتصل عبر شبكة IPv6
+إعادة تعيين كلمة مرور قاعدة البيانات الخاصة بك
+
+يمكنك إعادة تعيين كلمة مرور قاعدة البيانات الخاصة بك في إعدادات قاعدة البيانات الخاصة بمشروعك
+
+يغلق
