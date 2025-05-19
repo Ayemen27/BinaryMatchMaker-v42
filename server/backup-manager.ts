@@ -348,22 +348,230 @@ export async function restoreFromBackup(backupFilePath?: string): Promise<boolea
 }
 
 /**
- * دالة لتشغيل أوامر الهجرة الخاصة بـ Drizzle
+ * دالة لتشغيل أوامر الهجرة الخاصة بـ Drizzle مع محاولات إعادة في حالة الفشل
+ * @param retryCount عدد محاولات الإعادة المتبقية
  * @returns وعد يحل إلى قيمة boolean
  */
-export function runMigrations(): Promise<boolean> {
-  console.log(`[نظام النسخ الاحتياطي] تشغيل أوامر الهجرة الخاصة بـ Drizzle...`);
+export function runMigrations(retryCount = 3): Promise<boolean> {
+  console.log(`[نظام النسخ الاحتياطي] تشغيل أوامر الهجرة الخاصة بـ Drizzle... (محاولات متبقية: ${retryCount})`);
+  
+  // استخدام خيار -w للانتظار حتى اكتمال العملية
+  const command = 'NODE_OPTIONS="--max-old-space-size=512" npm run db:push';
   
   return new Promise((resolve) => {
-    exec('npm run db:push', (error, stdout) => {
-      if (error) {
-        console.error(`[نظام النسخ الاحتياطي] خطأ أثناء تنفيذ أوامر الهجرة: ${error.message}`);
-        resolve(false);
+    exec(command, { timeout: 60000 }, (error, stdout, stderr) => {
+      if (error || stderr.includes('error')) {
+        console.error(`[نظام النسخ الاحتياطي] خطأ أثناء تنفيذ أوامر الهجرة: ${error?.message || stderr}`);
+        
+        // إذا كان هناك محاولات إضافية متاحة، حاول مرة أخرى بعد تأخير قصير
+        if (retryCount > 0) {
+          console.log(`[نظام النسخ الاحتياطي] إعادة المحاولة بعد 2 ثانية...`);
+          setTimeout(() => {
+            runMigrations(retryCount - 1).then(resolve);
+          }, 2000);
+          return;
+        }
+        
+        // إذا استنفدنا جميع المحاولات، حاول تنفيذ مقاربة أخرى (قم بإنشاء الجداول مباشرة)
+        console.log(`[نظام النسخ الاحتياطي] استنفدنا جميع محاولات أوامر الهجرة. محاولة إنشاء الجداول مباشرة...`);
+        createTablesDirectly().then(resolve);
         return;
       }
       
       console.log(`[نظام النسخ الاحتياطي] تم تنفيذ أوامر الهجرة بنجاح!`);
-      console.log(stdout);
+      if (stdout) {
+        console.log(`[نظام النسخ الاحتياطي] نتائج تنفيذ أوامر الهجرة:`);
+        console.log(stdout);
+      }
+      resolve(true);
+    });
+  });
+}
+
+/**
+ * دالة احتياطية لإنشاء الجداول مباشرة في حالة فشل أوامر الهجرة
+ * @returns وعد يحل إلى قيمة boolean
+ */
+function createTablesDirectly(): Promise<boolean> {
+  const {
+    PGHOST,
+    PGPORT,
+    PGUSER,
+    PGPASSWORD,
+    PGDATABASE
+  } = process.env;
+
+  if (!PGDATABASE) {
+    console.error('[نظام النسخ الاحتياطي] خطأ: لم يتم العثور على متغيرات البيئة اللازمة لقاعدة البيانات!');
+    return Promise.resolve(false);
+  }
+
+  console.log('[نظام النسخ الاحتياطي] محاولة إنشاء الجداول مباشرة من خلال SQL...');
+
+  // قائمة بجمل SQL لإنشاء الجداول الأساسية
+  // ملاحظة: هذه هي النسخة المبسطة فقط للجداول الأساسية
+  const createTablesSQL = `
+    -- إنشاء التعدادات
+    DO $$ BEGIN
+      CREATE TYPE subscription_type AS ENUM ('free', 'basic', 'pro', 'vip');
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE signal_type AS ENUM ('buy', 'sell');
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE signal_status AS ENUM ('active', 'completed');
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE signal_result AS ENUM ('success', 'failure');
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+
+    DO $$ BEGIN
+      CREATE TYPE notification_type AS ENUM ('signal', 'market', 'account', 'system');
+    EXCEPTION
+      WHEN duplicate_object THEN null;
+    END $$;
+
+    -- إنشاء الجداول الرئيسية
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL,
+      email TEXT,
+      name TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      last_login TIMESTAMP,
+      language TEXT DEFAULT 'ar',
+      avatar TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS user_settings (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      theme TEXT DEFAULT 'dark',
+      chart_type TEXT DEFAULT 'candles',
+      timeframe TEXT DEFAULT '1h',
+      show_indicators BOOLEAN DEFAULT true,
+      default_currency TEXT DEFAULT 'USD',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS user_notification_settings (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      email_notifications BOOLEAN DEFAULT true,
+      push_notifications BOOLEAN DEFAULT true,
+      trade_alerts BOOLEAN DEFAULT true,
+      market_updates BOOLEAN DEFAULT true,
+      account_notifications BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      type subscription_type DEFAULT 'free',
+      starts_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      expires_at TIMESTAMP,
+      auto_renew BOOLEAN DEFAULT false,
+      max_signals INTEGER DEFAULT 5,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS signals (
+      id SERIAL PRIMARY KEY,
+      asset TEXT NOT NULL,
+      type signal_type NOT NULL,
+      price TEXT NOT NULL,
+      target_price TEXT NOT NULL,
+      stop_loss TEXT,
+      confidence_level INTEGER DEFAULT 70,
+      timeframe TEXT DEFAULT '1h',
+      status signal_status DEFAULT 'active',
+      result signal_result,
+      expiration_time TIMESTAMP,
+      source TEXT DEFAULT 'AI',
+      analysis TEXT,
+      chart_data TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS user_signals (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      signal_id INTEGER NOT NULL REFERENCES signals(id) ON DELETE CASCADE,
+      is_favorite BOOLEAN DEFAULT false,
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, signal_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_signal_usage (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      date DATE DEFAULT CURRENT_DATE,
+      generated INTEGER DEFAULT 0,
+      viewed INTEGER DEFAULT 0,
+      analyzed INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(user_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      type notification_type DEFAULT 'system',
+      read BOOLEAN DEFAULT false,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS market_data (
+      id SERIAL PRIMARY KEY,
+      asset TEXT NOT NULL,
+      price TEXT NOT NULL,
+      change_24h TEXT,
+      high_24h TEXT,
+      low_24h TEXT,
+      volume_24h TEXT,
+      market_cap TEXT,
+      data_source TEXT,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  return new Promise((resolve) => {
+    const createTablesCommand = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "${createTablesSQL.replace(/"/g, '\\"')}"`;
+    
+    exec(createTablesCommand, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إنشاء الجداول مباشرة: ${error.message}`);
+        console.error(stderr);
+        resolve(false);
+        return;
+      }
+      
+      console.log(`[نظام النسخ الاحتياطي] تم إنشاء الجداول الرئيسية بنجاح!`);
+      if (stdout) {
+        console.log(`[نظام النسخ الاحتياطي] نتائج إنشاء الجداول:`);
+        console.log(stdout);
+      }
       resolve(true);
     });
   });
