@@ -56,7 +56,8 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    console.error('خطأ في الخادم:', err);
+    // لا نعيد رمي الخطأ - هذا يسبب انهيار الخادم
   });
 
   // importantly only setup vite in development and after
