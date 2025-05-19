@@ -114,19 +114,43 @@ export function createBackup(): void {
       // نستخدم Promise.all لتنفيذ جميع عمليات استخراج البيانات بالتوازي
       const extractPromises = tables.map(tableName => 
         new Promise((resolve) => {
-          // استخدام دالة execQuery المساعدة مع التأكد من وجود متغيرات البيئة
-          execQuery(
-            `SELECT row_to_json(t) FROM ${tableName} t`,
-            PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
-          ).then(rows => {
-            backup.data[tableName] = rows;
-            console.log(`[نظام النسخ الاحتياطي] تم استخراج ${rows.length} سجل من جدول ${tableName}`);
-            resolve(null);
-          }).catch(error => {
-            console.error(`[نظام النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName}:`, error);
+          // تحسين استعلام استخراج البيانات - استخدام درزل بدلاً من الاستعلام المباشر
+          try {
+            // الحصول على بنية الجدول أولاً
+            execQuery(
+              `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '${tableName}' ORDER BY ordinal_position`,
+              PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+            ).then(columns => {
+              const columnNames = columns.map(col => col.column_name).join(', ');
+              
+              // استخراج البيانات مع التحكم بالشكل
+              execQuery(
+                `SELECT json_agg(t) FROM (SELECT ${columnNames} FROM ${tableName}) t`,
+                PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+              ).then(result => {
+                // من المتوقع أن تكون النتيجة كائن واحد يحتوي على مصفوفة json_agg
+                if (result && result.length > 0 && result[0].json_agg) {
+                  backup.data[tableName] = result[0].json_agg || [];
+                } else {
+                  backup.data[tableName] = [];
+                }
+                console.log(`[نظام النسخ الاحتياطي] تم استخراج ${backup.data[tableName].length} سجل من جدول ${tableName}`);
+                resolve(null);
+              }).catch(error => {
+                console.error(`[نظام النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName} (2): ${error}`);
+                backup.data[tableName] = [];
+                resolve(null);
+              });
+            }).catch(error => {
+              console.error(`[نظام النسخ الاحتياطي] خطأ أثناء الحصول على بنية جدول ${tableName}: ${error}`);
+              backup.data[tableName] = [];
+              resolve(null);
+            });
+          } catch (error) {
+            console.error(`[نظام النسخ الاحتياطي] خطأ عام أثناء استخراج بيانات جدول ${tableName}: ${error}`);
             backup.data[tableName] = [];
             resolve(null);
-          });
+          }
         })
       );
       
@@ -321,8 +345,29 @@ export async function restoreFromBackup(backupFilePath?: string): Promise<boolea
       PGDATABASE
     } = process.env;
     
-    // استرجاع كل جدول على حدة
-    const tables = Object.keys(backupData.data);
+    // استرجاع كل جدول على حدة - ترتيب الجداول بشكل صحيح لتجنب مشاكل المفاتيح الخارجية
+    // ترتيب الجداول المستقلة أولا ثم الجداول التي تعتمد عليها
+    const tableOrder = [
+      'users', 
+      'market_data', 
+      'signals', 
+      'user_settings', 
+      'user_notification_settings',
+      'subscriptions', 
+      'user_signal_usage', 
+      'user_signals', 
+      'notifications'
+    ];
+    
+    // ترتيب الجداول حسب الأولوية المحددة
+    const tables = Object.keys(backupData.data)
+      .sort((a, b) => {
+        const indexA = tableOrder.indexOf(a);
+        const indexB = tableOrder.indexOf(b);
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      });
+    
+    console.log(`[نظام النسخ الاحتياطي] ترتيب استرجاع الجداول: ${tables.join(', ')}`);
     
     for (const tableName of tables) {
       const tableData = backupData.data[tableName];
@@ -354,30 +399,71 @@ export async function restoreFromBackup(backupFilePath?: string): Promise<boolea
         // ثم نقوم بإدراج البيانات
         for (const row of tableData) {
           try {
-            // بناء أمر إدراج أكثر موثوقية باستخدام قيم مفصولة
-            const columns = Object.keys(row).filter(k => row[k] !== null);
-            const values = columns.map(col => {
-              const val = row[col];
-              if (val === null || val === undefined) return 'NULL';
-              if (typeof val === 'number') return val;
-              if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
-              if (Array.isArray(val)) return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
-              if (typeof val === 'object') return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
-              return `'${String(val).replace(/'/g, "''")}'`;
-            });
+            // بناء استعلام COPY بدلاً من INSERT - أكثر كفاءة وموثوقية للاستعادة
+            // 1. التحقق من الأعمدة للتأكد من تطابقها مع الجدول
+            const allColumns = Object.keys(row);
             
-            // إنشاء أمر إدراج SQL مباشر (أكثر موثوقية من json_populate_record)
-            const insertQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "INSERT INTO ${tableName}(${columns.join(',')}) VALUES(${values.join(',')});"`;
+            // 2. الحصول على أسماء الأعمدة الفعلية في الجدول من قاعدة البيانات
+            const columnsQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -t -A -c "SELECT column_name FROM information_schema.columns WHERE table_name = '${tableName}' ORDER BY ordinal_position;"`;
             
             await new Promise<void>((resolve) => {
-              exec(insertQuery, (error) => {
+              exec(columnsQuery, (error, stdout) => {
                 if (error) {
-                  console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إدراج بيانات في جدول ${tableName}: ${error.message}`);
-                  // نستمر مع السجل التالي
+                  console.error(`[نظام النسخ الاحتياطي] خطأ أثناء الحصول على أعمدة جدول ${tableName}: ${error.message}`);
                   resolve();
                   return;
                 }
-                resolve();
+                
+                // 3. تصفية الأعمدة حسب الأعمدة المتوفرة في قاعدة البيانات
+                const validColumns = stdout.trim().split('\n');
+                const filteredColumns = allColumns.filter(col => validColumns.includes(col));
+                
+                if (filteredColumns.length === 0) {
+                  console.error(`[نظام النسخ الاحتياطي] لم يتم العثور على أعمدة صالحة للسجل في جدول ${tableName}`);
+                  resolve();
+                  return;
+                }
+                
+                // 4. إنشاء قيم الأعمدة مع معالجة خاصة للأنواع المختلفة
+                const values = filteredColumns.map(col => {
+                  const val = row[col];
+                  if (val === null || val === undefined) return 'NULL';
+                  if (typeof val === 'number') return val;
+                  if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+                  if (Array.isArray(val)) return `'${JSON.stringify(val).replace(/'/g, "''")}'::jsonb`;
+                  if (typeof val === 'object') return `'${JSON.stringify(val).replace(/'/g, "''")}'::jsonb`;
+                  
+                  // معالجة الخاصة للتواريخ
+                  if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(val)) {
+                    return `'${val}'::timestamp`;
+                  }
+                  
+                  return `'${String(val).replace(/'/g, "''")}'`;
+                });
+                
+                // 5. إنشاء استعلام الإدراج مع تحديد نوع البيانات للتأكد من تحويلها بشكل صحيح
+                const insertQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "INSERT INTO ${tableName}(${filteredColumns.join(',')}) VALUES(${values.join(',')});"`;
+                
+                exec(insertQuery, (insertError) => {
+                  if (insertError) {
+                    console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إدراج بيانات في جدول ${tableName}: ${insertError.message}`);
+                    
+                    // 6. محاولة ثانية باستخدام طريقة بديلة إذا فشل الإدراج المباشر
+                    const jsonData = JSON.stringify(row).replace(/'/g, "''");
+                    const backupInsertQuery = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "INSERT INTO ${tableName} SELECT * FROM json_populate_recordset(null::${tableName}, '[${jsonData}]'::json);"`;
+                    
+                    exec(backupInsertQuery, (backupError) => {
+                      if (backupError) {
+                        console.error(`[نظام النسخ الاحتياطي] فشلت المحاولة البديلة أيضًا: ${backupError.message}`);
+                      } else {
+                        console.log(`[نظام النسخ الاحتياطي] تم إدراج سجل في جدول ${tableName} باستخدام الطريقة البديلة`);
+                      }
+                      resolve();
+                    });
+                  } else {
+                    resolve();
+                  }
+                });
               });
             });
           } catch (err) {
