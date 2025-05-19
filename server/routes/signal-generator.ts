@@ -3,6 +3,7 @@ import { openAIService } from "../services/openai-service";
 import { storage } from "../storage";
 import { z } from "zod";
 import { logger } from "../services/logger";
+import { getAIErrorMessage, SupportedLanguages } from "../i18n/translations";
 
 // إنشاء موجه الطرق
 const router = express.Router();
@@ -121,40 +122,41 @@ router.post("/generate", async (req: Request, res: Response) => {
       requestBody: req.body 
     });
     
-    // معالجة رسائل الخطأ المختلفة من OpenAI بطريقة أكثر تفصيلاً
-    if (errorMessage.includes("تم تجاوز الحد المسموح")) {
-      return res.status(429).json({ 
-        error: "تجاوز الحد المسموح", 
-        message: "تم تجاوز الحد المسموح لاستخدام الذكاء الاصطناعي. يرجى تجربة استخدام الخوارزميات التقليدية.",
-        solution: "يمكنك تعطيل خيار الذكاء الاصطناعي والاستمرار باستخدام الخوارزميات التقليدية" 
-      });
-    } else if (errorMessage.includes("المفتاح غير صالح") || errorMessage.includes("مفتاح الذكاء الاصطناعي")) {
-      return res.status(403).json({ 
-        error: "مشكلة في مفتاح API", 
-        message: "المفتاح المستخدم للذكاء الاصطناعي غير صالح أو منتهي الصلاحية.",
-        solution: "يرجى التواصل مع الدعم الفني أو تعطيل خيار الذكاء الاصطناعي مؤقتاً"
-      });
+    // الحصول على لغة المستخدم المفضلة
+    let userLanguage: SupportedLanguages = 'ar';
+    
+    // محاولة الحصول على لغة المستخدم من الإعدادات
+    if (req.user?.id) {
+      try {
+        const userSettings = await storage.getUserSettings(req.user.id);
+        if (userSettings?.language) {
+          // التحقق من أن اللغة مدعومة
+          userLanguage = (userSettings.language === 'en' ? 'en' : 'ar') as SupportedLanguages;
+        }
+      } catch (error) {
+        logger.warn("SignalGenerator", "فشل في الحصول على لغة المستخدم", { userId: req.user.id });
+      }
+    }
+    
+    // تحديد نوع الخطأ
+    let errorType = 'generic_error';
+    
+    if (errorMessage.includes("تم تجاوز الحد المسموح") || errorMessage.includes("quota")) {
+      errorType = 'quota_exceeded';
+      return res.status(429).json(getAIErrorMessage(errorType, userLanguage));
+    } else if (errorMessage.includes("المفتاح غير صالح") || errorMessage.includes("key")) {
+      errorType = 'invalid_api_key';
+      return res.status(403).json(getAIErrorMessage(errorType, userLanguage));
     } else if (errorMessage.includes("تجاوز الحد الأقصى") || errorMessage.includes("rate limit")) {
-      return res.status(429).json({ 
-        error: "تجاوز معدل الاستخدام", 
-        message: "تم تجاوز الحد الأقصى لعدد طلبات الذكاء الاصطناعي المسموح بها.",
-        solution: "يرجى المحاولة لاحقاً أو استخدام الخوارزميات التقليدية بتعطيل خيار الذكاء الاصطناعي" 
-      });
-    } else if (errorMessage.includes("غير متاحة حاليًا") || errorMessage.includes("خدمة الذكاء الاصطناعي")) {
-      return res.status(503).json({ 
-        error: "خدمة غير متاحة", 
-        message: "خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة لاحقاً.",
-        solution: "يمكنك تعطيل خيار الذكاء الاصطناعي مؤقتاً واستخدام الخوارزميات التقليدية بدلاً من ذلك" 
-      });
+      errorType = 'rate_limit';
+      return res.status(429).json(getAIErrorMessage(errorType, userLanguage));
+    } else if (errorMessage.includes("غير متاحة") || errorMessage.includes("service")) {
+      errorType = 'service_unavailable';
+      return res.status(503).json(getAIErrorMessage(errorType, userLanguage));
     }
     
     // أخطاء أخرى
-    return res.status(500).json({ 
-      error: "حدث خطأ أثناء توليد الإشارة", 
-      message: "تعذر إكمال العملية. يرجى المحاولة مرة أخرى لاحقاً.",
-      details: errorMessage,
-      solution: "يمكنك تجربة تعطيل خيار الذكاء الاصطناعي واستخدام الخوارزميات التقليدية بدلاً من ذلك"
-    });
+    return res.status(500).json(getAIErrorMessage(errorType, userLanguage));
   }
 });
 
