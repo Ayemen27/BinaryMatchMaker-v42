@@ -170,9 +170,12 @@ export async function restoreDataFromBackup(backupFilePath: string): Promise<boo
     
     // تسجيل عدد الجداول والسجلات
     const tableNames = Object.keys(dataToInsert);
-    const totalRecords = Object.values(dataToInsert).reduce((sum: number, records: any[]) => {
-      return sum + (Array.isArray(records) ? records.length : 0);
-    }, 0);
+    let totalRecords = 0;
+    for (const tableName of tableNames) {
+      if (Array.isArray(dataToInsert[tableName])) {
+        totalRecords += dataToInsert[tableName].length;
+      }
+    }
     
     console.log(`[خدمة الاستعادة التلقائية] النسخة الاحتياطية تحتوي على ${tableNames.length} جدول و ${totalRecords} سجل`);
     
@@ -207,87 +210,126 @@ export async function restoreDataFromBackup(backupFilePath: string): Promise<boo
 /**
  * إدخال البيانات من النسخة الاحتياطية إلى الجداول
  * @param data بيانات النسخة الاحتياطية
+ * @returns وعد يحل إلى قيمة منطقية تشير إلى نجاح العملية
  */
-async function insertBackupData(data: any): Promise<void> {
-  // التحقق من وجود بيانات للإدخال
-  if (!data || typeof data !== 'object') {
-    throw new Error('بيانات النسخة الاحتياطية غير صالحة');
-  }
-  
-  // تحديد ترتيب الجداول لضمان إدخال البيانات بترتيب صحيح يحترم القيود الخارجية
-  const tableInsertionOrder = [
-    // الجداول الأساسية (بدون مفاتيح خارجية) أولاً
-    'users',             // المستخدمين
-    'signals',           // الإشارات
-    'market_data',       // بيانات السوق
-    
-    // الجداول التي تعتمد على جداول أساسية
-    'user_settings',            // إعدادات المستخدم
-    'user_notification_settings', // إعدادات إشعارات المستخدم
-    'subscriptions',            // الاشتراكات
-    
-    // الجداول المرتبطة بعلاقات متعددة
-    'user_signals',      // إشارات المستخدم
-    'user_signal_usage', // استخدام الإشارات
-    'notifications',     // الإشعارات
-    
-    // أي جداول أخرى
-  ];
-  
-  // إنشاء قائمة بجميع الجداول الموجودة في البيانات
-  const allTablesInData = Object.keys(data);
-  
-  // إضافة أي جداول ليست في القائمة المحددة
-  for (const table of allTablesInData) {
-    if (!tableInsertionOrder.includes(table)) {
-      tableInsertionOrder.push(table);
-    }
-  }
-  
-  // معالجة البيانات حسب الترتيب المحدد
-  for (const tableName of tableInsertionOrder) {
-    // تخطي الجداول غير الموجودة في بيانات النسخة الاحتياطية
-    if (!data[tableName]) {
-      continue;
-    }
-    
-    const tableData = data[tableName];
-    
-    // التحقق من أن الجدول موجود قبل محاولة إدخال البيانات
-    const tableExists = await checkTableExists(tableName);
-    if (!tableExists) {
-      console.warn(`[خدمة الاستعادة التلقائية] تم تخطي جدول ${tableName} لأنه غير موجود`);
-      continue;
-    }
-    
+async function insertBackupData(data: any): Promise<boolean> {
+  try {
     // التحقق من وجود بيانات للإدخال
-    if (!Array.isArray(tableData) || tableData.length === 0) {
-      console.log(`[خدمة الاستعادة التلقائية] لا توجد بيانات لإدخالها في جدول ${tableName}`);
-      continue;
+    if (!data || typeof data !== 'object') {
+      throw new Error('بيانات النسخة الاحتياطية غير صالحة');
     }
     
-    console.log(`[خدمة الاستعادة التلقائية] إدخال ${tableData.length} سجل في جدول ${tableName}`);
+    // تحديد ترتيب الجداول لضمان إدخال البيانات بترتيب صحيح يحترم القيود الخارجية
+    const tableInsertionOrder = [
+      // الجداول الأساسية (بدون مفاتيح خارجية) أولاً
+      'users',             // المستخدمين
+      'signals',           // الإشارات
+      'market_data',       // بيانات السوق
+      
+      // الجداول التي تعتمد على جداول أساسية
+      'user_settings',            // إعدادات المستخدم
+      'user_notification_settings', // إعدادات إشعارات المستخدم
+      'subscriptions',            // الاشتراكات
+      
+      // الجداول المرتبطة بعلاقات متعددة
+      'user_signals',      // إشارات المستخدم
+      'user_signal_usage', // استخدام الإشارات
+      'notifications',     // الإشعارات
+      
+      // أي جداول أخرى
+    ];
     
-    // إنشاء استعلام الإدخال
-    for (const record of tableData) {
-      try {
-        // استخراج أسماء الأعمدة والقيم
-        const columns = Object.keys(record);
-        const values = Object.values(record);
-        
-        // بناء استعلام الإدخال
-        const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-        const query = {
-          text: `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING;`,
-          values: values,
-        };
-        
-        // تنفيذ الاستعلام
-        await pool.query(query);
-      } catch (error) {
-        console.error(`[خدمة الاستعادة التلقائية] خطأ أثناء إدخال سجل في جدول ${tableName}:`, error);
+    // إنشاء قائمة بجميع الجداول الموجودة في البيانات
+    const allTablesInData = Object.keys(data);
+    
+    // إضافة أي جداول ليست في القائمة المحددة
+    for (const table of allTablesInData) {
+      if (!tableInsertionOrder.includes(table)) {
+        tableInsertionOrder.push(table);
       }
     }
+    
+    // عرض معلومات عن ترتيب الإدخال
+    console.log(`[خدمة الاستعادة التلقائية] ترتيب إدخال الجداول: ${tableInsertionOrder.join(', ')}`);
+    
+    // حساب إجمالي عدد السجلات التي سيتم إدخالها
+    let totalRecordsToInsert = 0;
+    let insertedRecordsCount = 0;
+    for (const tableName of tableInsertionOrder) {
+      if (data[tableName] && Array.isArray(data[tableName])) {
+        totalRecordsToInsert += data[tableName].length;
+      }
+    }
+    
+    console.log(`[خدمة الاستعادة التلقائية] إجمالي عدد السجلات للإدخال: ${totalRecordsToInsert}`);
+    
+    // معالجة البيانات حسب الترتيب المحدد
+    for (const tableName of tableInsertionOrder) {
+      // تخطي الجداول غير الموجودة في بيانات النسخة الاحتياطية
+      if (!data[tableName]) {
+        console.log(`[خدمة الاستعادة التلقائية] الجدول ${tableName} غير موجود في النسخة الاحتياطية`);
+        continue;
+      }
+      
+      const tableData = data[tableName];
+      
+      // التحقق من أن الجدول موجود قبل محاولة إدخال البيانات
+      const tableExists = await checkTableExists(tableName);
+      if (!tableExists) {
+        console.warn(`[خدمة الاستعادة التلقائية] تم تخطي جدول ${tableName} لأنه غير موجود في قاعدة البيانات`);
+        continue;
+      }
+      
+      // التحقق من وجود بيانات للإدخال
+      if (!Array.isArray(tableData) || tableData.length === 0) {
+        console.log(`[خدمة الاستعادة التلقائية] لا توجد بيانات لإدخالها في جدول ${tableName}`);
+        continue;
+      }
+      
+      console.log(`[خدمة الاستعادة التلقائية] إدخال ${tableData.length} سجل في جدول ${tableName}`);
+      
+      // إنشاء استعلام الإدخال لكل سجل
+      let successfulInserts = 0;
+      
+      for (const record of tableData) {
+        try {
+          // استخراج أسماء الأعمدة والقيم
+          const columns = Object.keys(record);
+          const values = Object.values(record);
+          
+          // بناء استعلام الإدخال
+          const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+          const query = {
+            text: `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders}) ON CONFLICT DO NOTHING;`,
+            values: values,
+          };
+          
+          // تنفيذ الاستعلام
+          const result = await pool.query(query);
+          
+          // إذا تم الإدخال بنجاح (تم إدخال سجل جديد)
+          if (result.rowCount != null && result.rowCount > 0) {
+            successfulInserts++;
+            insertedRecordsCount++;
+          }
+          
+          // إضافة تأخير صغير لتجنب الإرهاق الزائد لقاعدة البيانات
+          if (tableData.length > 10) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+          }
+        } catch (error) {
+          console.error(`[خدمة الاستعادة التلقائية] خطأ أثناء إدخال سجل في جدول ${tableName}:`, error);
+        }
+      }
+      
+      console.log(`[خدمة الاستعادة التلقائية] تم إدخال ${successfulInserts} سجل بنجاح في جدول ${tableName} من أصل ${tableData.length}`);
+    }
+    
+    console.log(`[خدمة الاستعادة التلقائية] اكتملت عملية الاسترجاع: تم إدخال ${insertedRecordsCount} سجل من أصل ${totalRecordsToInsert}`);
+    return true;
+  } catch (error) {
+    console.error('[خدمة الاستعادة التلقائية] خطأ أثناء إدخال البيانات:', error);
+    return false;
   }
 }
 
