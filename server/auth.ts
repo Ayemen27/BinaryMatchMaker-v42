@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import MemoryStore from "memorystore";
 
 declare global {
   namespace Express {
@@ -32,11 +33,20 @@ export function setupAuth(app: Express) {
   // استخدام متغير البيئة SESSION_SECRET أو إنشاء قيمة افتراضية
   const sessionSecret = process.env.SESSION_SECRET || 'binary-signals-app-secret-key';
   
+  // استخدام MemoryStore بدلاً من مخزن قاعدة البيانات
+  const MemoryStoreSession = MemoryStore(session);
+  
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: storage.sessionStore,
+    store: new MemoryStoreSession({
+      checkPeriod: 86400000 // التنظيف التلقائي كل 24 ساعة
+    }),
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 ساعة
+    }
   };
 
   app.set("trust proxy", 1);
