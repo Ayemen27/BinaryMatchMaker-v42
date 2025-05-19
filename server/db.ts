@@ -1,16 +1,15 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
 import * as schema from "@shared/schema";
 import { initializeDatabase, startBackupSystem } from './backup-manager';
 
-neonConfig.webSocketConstructor = ws;
-
+// التحقق من وجود متغير البيئة DATABASE_URL
 if (!process.env.DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL must be set. تحتاج إلى تعيين رابط قاعدة بيانات Supabase.",
   );
 }
+
+console.log('[نظام قاعدة البيانات] محاولة الاتصال بقاعدة بيانات Supabase...');
 
 // تهيئة قاعدة البيانات واسترجاعها إذا لزم الأمر
 const initDB = async () => {
@@ -20,9 +19,28 @@ const initDB = async () => {
   startBackupSystem();
 };
 
-// المستودع لاتصال قاعدة البيانات
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+// إنشاء مجمع اتصالات لقاعدة بيانات Supabase
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// استيراد المكتبة بنهج آخر
+import * as drizzleOrm from 'drizzle-orm';
+import { PgDialect } from 'drizzle-orm/pg-core';
+
+// إنشاء كائن للاتصال بقاعدة البيانات
+const dialect = new PgDialect({});
+const session = {
+  execute: async (query, params) => {
+    const result = await pool.query(query, params);
+    return result.rows;
+  },
+  dialect
+};
+
+// إنشاء كائن drizzle
+export const db = drizzleOrm.drizzle(session, { schema });
 
 // تنفيذ التهيئة بشكل غير متزامن
 initDB().catch(err => {
