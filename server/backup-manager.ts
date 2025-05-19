@@ -80,104 +80,125 @@ export function createBackup(): void {
       PGDATABASE
     } = process.env;
     
-    // قائمة بالجداول الرئيسية التي نريد نسخها
-    const tables = [
-      'users',
-      'user_settings',
-      'user_notification_settings',
-      'subscriptions',
-      'signals',
-      'user_signals',
-      'user_signal_usage',
-      'notifications',
-      'market_data'
-    ];
+    // الحصول على قائمة جميع الجداول في قاعدة البيانات - هذا يضمن نسخ جميع الجداول
+    execQuery(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE'`,
+      PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+    ).then(tablesResult => {
+      // استخراج أسماء الجداول من النتيجة
+      const tables = tablesResult.map(row => row.table_name);
     
-    // إعداد كائن لتخزين بيانات كل الجداول
-    const backup: any = {
-      metadata: {
-        version: '1.0',
-        timestamp: new Date().toISOString(),
-        database: PGDATABASE,
-        tables: tables
-      },
-      data: {}
-    };
-    
-    // نستخدم Promise.all لتنفيذ جميع عمليات استخراج البيانات بالتوازي
-    const extractPromises = tables.map(tableName => 
-      new Promise((resolve) => {
-        const query = `PGPASSWORD="${PGPASSWORD}" psql -h ${PGHOST} -p ${PGPORT} -U ${PGUSER} -d ${PGDATABASE} -c "SELECT row_to_json(t) FROM ${tableName} t" -t`;
-        
-        exec(query, (error, stdout) => {
-          if (error) {
-            console.error(`[نظام النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName}: ${error.message}`);
-            // حتى لو فشل استخراج جدول، نستمر مع باقي الجداول
-            backup.data[tableName] = [];
-            resolve(null);
-            return;
-          }
-          
-          // معالجة البيانات المستخرجة
-          try {
-            // تحويل كل سطر JSON إلى كائن
-            const rows = stdout.trim().split('\n')
-              .filter(line => line.trim() !== '')
-              .map(line => {
-                try {
-                  return JSON.parse(line.trim());
-                } catch (e) {
-                  console.error(`[نظام النسخ الاحتياطي] خطأ في تحليل بيانات من ${tableName}:`, e);
-                  return null;
-                }
-              })
-              .filter(row => row !== null);
-            
+      if (tables.length === 0) {
+        console.log(`[نظام النسخ الاحتياطي] لم يتم العثور على أي جداول في قاعدة البيانات!`);
+        return;
+      }
+      
+      console.log(`[نظام النسخ الاحتياطي] تم العثور على ${tables.length} جدول سيتم نسخها احتياطيًا: ${tables.join(', ')}`);
+      
+      // إعداد كائن لتخزين بيانات كل الجداول
+      const backup: any = {
+        metadata: {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          database: PGDATABASE,
+          tables: tables
+        },
+        data: {}
+      };
+      
+      // نستخدم Promise.all لتنفيذ جميع عمليات استخراج البيانات بالتوازي
+      const extractPromises = tables.map(tableName => 
+        new Promise((resolve) => {
+          // استخدام دالة execQuery المساعدة
+          execQuery(
+            `SELECT row_to_json(t) FROM ${tableName} t`,
+            PGHOST, PGPORT, PGUSER, PGPASSWORD, PGDATABASE
+          ).then(rows => {
             backup.data[tableName] = rows;
             console.log(`[نظام النسخ الاحتياطي] تم استخراج ${rows.length} سجل من جدول ${tableName}`);
-          } catch (e) {
-            console.error(`[نظام النسخ الاحتياطي] خطأ أثناء معالجة بيانات جدول ${tableName}:`, e);
+            resolve(null);
+          }).catch(error => {
+            console.error(`[نظام النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName}:`, error);
             backup.data[tableName] = [];
-          }
+            resolve(null);
+          });
+        })
+      );
+      
+      // ننتظر انتهاء جميع عمليات الاستخراج ثم نكتب الملف
+      Promise.all(extractPromises).then(() => {
+        try {
+          // حفظ البيانات في ملف JSON
+          fs.writeFileSync(backupFile, JSON.stringify(backup, null, 2));
+          console.log(`[نظام النسخ الاحتياطي] تم إنشاء نسخة احتياطية شاملة: ${backupFile}`);
           
-          resolve(null);
-        });
-      })
-    );
-    
-    // ننتظر انتهاء جميع عمليات الاستخراج ثم نكتب الملف
-    Promise.all(extractPromises).then(() => {
-      try {
-        // حفظ البيانات في ملف JSON
-        fs.writeFileSync(backupFile, JSON.stringify(backup, null, 2));
-        console.log(`[نظام النسخ الاحتياطي] تم إنشاء نسخة احتياطية شاملة: ${backupFile}`);
-        
-        // أيضًا إنشاء سكريبت SQL بسيط للبنية باستخدام Drizzle
-        exec('npm run db:push -- --dry-run', (error, stdout) => {
-          if (!error && stdout) {
-            try {
-              fs.writeFileSync(schemaFile, 
-                `-- Schema generated on ${timestamp}\n-- Using drizzle-kit\n\n` + stdout
-              );
-              console.log(`[نظام النسخ الاحتياطي] تم تحديث ملف البنية بنجاح`);
-            } catch (err) {
-              console.error(`[نظام النسخ الاحتياطي] خطأ أثناء كتابة ملف البنية: ${err}`);
+          // أيضًا إنشاء سكريبت SQL بسيط للبنية باستخدام Drizzle
+          exec('npm run db:push -- --dry-run', (error, stdout) => {
+            if (!error && stdout) {
+              try {
+                fs.writeFileSync(schemaFile, 
+                  `-- Schema generated on ${timestamp}\n-- Using drizzle-kit\n\n` + stdout
+                );
+                console.log(`[نظام النسخ الاحتياطي] تم تحديث ملف البنية بنجاح`);
+              } catch (err) {
+                console.error(`[نظام النسخ الاحتياطي] خطأ أثناء كتابة ملف البنية: ${err}`);
+              }
             }
-          }
-        });
-        
-        // تنظيف النسخ الاحتياطية القديمة
-        cleanupOldBackups();
-      } catch (err) {
-        console.error(`[نظام النسخ الاحتياطي] خطأ أثناء كتابة ملف النسخة الاحتياطية: ${err}`);
-      }
-    }).catch(err => {
-      console.error(`[نظام النسخ الاحتياطي] خطأ غير متوقع أثناء إنشاء النسخة الاحتياطية: ${err}`);
+          });
+          
+          // تنظيف النسخ الاحتياطية القديمة
+          cleanupOldBackups();
+        } catch (err) {
+          console.error(`[نظام النسخ الاحتياطي] خطأ أثناء كتابة ملف النسخة الاحتياطية: ${err}`);
+        }
+      }).catch(err => {
+        console.error(`[نظام النسخ الاحتياطي] خطأ غير متوقع أثناء إنشاء النسخة الاحتياطية: ${err}`);
+      });
+    }).catch(error => {
+      console.error(`[نظام النسخ الاحتياطي] خطأ أثناء الحصول على قائمة الجداول:`, error);
     });
-    
   } catch(err) {
     console.error(`[نظام النسخ الاحتياطي] خطأ أثناء إنشاء النسخة الاحتياطية: ${err}`);
   }
+}
+
+/**
+ * دالة مساعدة لتنفيذ استعلامات SQL وإرجاع النتائج كمصفوفة من الكائنات
+ */
+function execQuery(query: string, host: string, port: string, user: string, password: string, database: string): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const command = `PGPASSWORD="${password}" psql -h ${host} -p ${port} -U ${user} -d ${database} -c "\\copy (${query}) to stdout csv" | jq -c .`;
+    
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      
+      if (stderr && !stderr.includes('NOTICE')) {
+        console.warn(`[نظام النسخ الاحتياطي] تحذير من تنفيذ الاستعلام:`, stderr);
+      }
+      
+      try {
+        // تحويل كل سطر JSON إلى كائن
+        const rows = stdout.trim().split('\n')
+          .filter(line => line.trim() !== '')
+          .map(line => {
+            try {
+              return JSON.parse(line.trim());
+            } catch (e) {
+              console.error(`[نظام النسخ الاحتياطي] خطأ في تحليل JSON:`, e);
+              return null;
+            }
+          })
+          .filter(row => row !== null);
+        
+        resolve(rows);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  });
 }
 
 /**
