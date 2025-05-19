@@ -706,124 +706,135 @@ export class DatabaseStorage implements IStorage {
   }
   
   async addSignalToUser(userId: number, signalId: number): Promise<UserSignal> {
-    // Check if relation already exists
-    const [existing] = await db
-      .select()
-      .from(userSignals)
-      .where(
-        and(
-          eq(userSignals.userId, userId),
-          eq(userSignals.signalId, signalId)
-        )
-      );
-    
-    if (existing) {
-      return existing;
+    try {
+      // التحقق من وجود العلاقة مسبقًا
+      const checkQuery = `
+        SELECT * FROM user_signals
+        WHERE user_id = $1 AND signal_id = $2
+      `;
+      
+      const existing = await db.query(checkQuery, [userId, signalId]);
+      
+      if (existing && existing.length > 0) {
+        return existing[0];
+      }
+      
+      // إنشاء علاقة جديدة
+      const insertQuery = `
+        INSERT INTO user_signals (user_id, signal_id, created_at, updated_at)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+      `;
+      
+      const result = await db.query(insertQuery, [userId, signalId, new Date(), new Date()]);
+      
+      if (!result || result.length === 0) {
+        throw new Error('فشل في إضافة الإشارة للمستخدم');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error("خطأ في إضافة الإشارة للمستخدم:", error);
+      throw error;
     }
-    
-    const [userSignal] = await db
-      .insert(userSignals)
-      .values({
-        userId,
-        signalId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    
-    return userSignal;
   }
   
   async markSignalAsFavorite(userId: number, signalId: number, isFavorite: boolean): Promise<UserSignal> {
-    // Check if relation exists first
-    const [existing] = await db
-      .select()
-      .from(userSignals)
-      .where(
-        and(
-          eq(userSignals.userId, userId),
-          eq(userSignals.signalId, signalId)
-        )
-      );
-    
-    if (!existing) {
-      // Create relation first
-      const [userSignal] = await db
-        .insert(userSignals)
-        .values({
-          userId,
-          signalId,
-          isFavorite,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
+    try {
+      // التحقق من وجود العلاقة
+      const checkQuery = `
+        SELECT * FROM user_signals
+        WHERE user_id = $1 AND signal_id = $2
+      `;
       
-      return userSignal;
+      const existingResults = await db.query(checkQuery, [userId, signalId]);
+      const existing = existingResults && existingResults.length > 0 ? existingResults[0] : null;
+      
+      if (!existing) {
+        // إنشاء علاقة جديدة
+        const insertQuery = `
+          INSERT INTO user_signals (user_id, signal_id, is_favorite, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
+        `;
+        
+        const result = await db.query(insertQuery, [userId, signalId, isFavorite, new Date(), new Date()]);
+        
+        if (!result || result.length === 0) {
+          throw new Error('فشل في تعيين الإشارة كمفضلة');
+        }
+        
+        return result[0];
+      }
+      
+      // تحديث علاقة موجودة
+      const updateQuery = `
+        UPDATE user_signals
+        SET is_favorite = $1, updated_at = $2
+        WHERE user_id = $3 AND signal_id = $4
+        RETURNING *
+      `;
+      
+      const result = await db.query(updateQuery, [isFavorite, new Date(), userId, signalId]);
+      
+      if (!result || result.length === 0) {
+        throw new Error('فشل في تحديث حالة الإشارة المفضلة');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error("خطأ في تعيين الإشارة كمفضلة:", error);
+      throw error;
     }
-    
-    // Update existing relation
-    const [updatedUserSignal] = await db
-      .update(userSignals)
-      .set({
-        isFavorite,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(userSignals.userId, userId),
-          eq(userSignals.signalId, signalId)
-        )
-      )
-      .returning();
-    
-    return updatedUserSignal;
   }
   
   async updateUserSignalNotes(userId: number, signalId: number, notes: string): Promise<UserSignal> {
-    // Check if relation exists first
-    const [existing] = await db
-      .select()
-      .from(userSignals)
-      .where(
-        and(
-          eq(userSignals.userId, userId),
-          eq(userSignals.signalId, signalId)
-        )
-      );
-    
-    if (!existing) {
-      // Create relation first
-      const [userSignal] = await db
-        .insert(userSignals)
-        .values({
-          userId,
-          signalId,
-          notes,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .returning();
+    try {
+      // التحقق من وجود العلاقة
+      const checkQuery = `
+        SELECT * FROM user_signals
+        WHERE user_id = $1 AND signal_id = $2
+      `;
       
-      return userSignal;
+      const existingResults = await db.query(checkQuery, [userId, signalId]);
+      const existing = existingResults && existingResults.length > 0 ? existingResults[0] : null;
+      
+      if (!existing) {
+        // إنشاء علاقة جديدة
+        const insertQuery = `
+          INSERT INTO user_signals (user_id, signal_id, notes, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
+        `;
+        
+        const result = await db.query(insertQuery, [userId, signalId, notes, new Date(), new Date()]);
+        
+        if (!result || result.length === 0) {
+          throw new Error('فشل في إنشاء علاقة الإشارة بالمستخدم مع الملاحظات');
+        }
+        
+        return result[0];
+      }
+      
+      // تحديث علاقة موجودة
+      const updateQuery = `
+        UPDATE user_signals
+        SET notes = $1, updated_at = $2
+        WHERE user_id = $3 AND signal_id = $4
+        RETURNING *
+      `;
+      
+      const result = await db.query(updateQuery, [notes, new Date(), userId, signalId]);
+      
+      if (!result || result.length === 0) {
+        throw new Error('فشل في تحديث ملاحظات الإشارة');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error("خطأ في تحديث ملاحظات الإشارة:", error);
+      throw error;
     }
-    
-    // Update existing relation
-    const [updatedUserSignal] = await db
-      .update(userSignals)
-      .set({
-        notes,
-        updatedAt: new Date(),
-      })
-      .where(
-        and(
-          eq(userSignals.userId, userId),
-          eq(userSignals.signalId, signalId)
-        )
-      )
-      .returning();
-    
-    return updatedUserSignal;
   }
   
   // Signal usage methods
