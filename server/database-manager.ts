@@ -1,6 +1,8 @@
 import { exec } from 'child_process';
-import { promises as fs, existsSync, statSync, readdirSync, mkdirSync, unlinkSync } from 'fs';
+import { promises as fsPromises } from 'fs';
+import * as fs from 'fs';
 import path from 'path';
+import { promisify } from 'util';
 
 // تكوين النظام
 const BACKUP_INTERVAL = 5 * 60 * 1000; // 5 دقائق بالميلي ثانية
@@ -8,8 +10,8 @@ const MAX_BACKUPS = 10; // الحد الأقصى لعدد النسخ الاحت�
 const backupDir = path.join(process.cwd(), 'backups');
 
 // إنشاء مجلد النسخ الاحتياطية إذا لم يكن موجودًا
-if (!existsSync(backupDir)) {
-  mkdirSync(backupDir, { recursive: true });
+if (!fs.existsSync(backupDir)) {
+  fs.mkdirSync(backupDir, { recursive: true });
 }
 
 // الحصول على بيانات الاتصال بقاعدة البيانات
@@ -121,14 +123,24 @@ export async function createBackup(): Promise<string | null> {
         
         // في حالة فشل pg_dumpall، استخدم آلية بديلة للاحتفاظ بملف نصي للبنية
         try {
-          fs.writeFileSync(backupFile, 
+          const backupContent = 
             `-- النسخة الاحتياطية أنشئت في ${new Date().toISOString()}
--- DATABASE_URL: ${process.env.DATABASE_URL}
 -- ملاحظة: تم إنشاء هذا الملف كبديل بسبب تعذر النسخ الاحتياطي الكامل
--- لاستعادة قاعدة البيانات، استخدم أمر db:push لإعادة بناء البنية من الكود المصدري`
-          );
-          console.log(`[مدير قاعدة البيانات] [${new Date().toISOString()}] تم إنشاء ملف النسخة الاحتياطية البديل`);
-          resolve(backupFile);
+-- لاستعادة قاعدة البيانات، استخدم أمر db:push لإعادة بناء البنية من الكود المصدري`;
+          
+          // استخدام طريقة أخرى لكتابة الملف
+          const { promisify } = require('util');
+          const writeFile = promisify(require('fs').writeFile);
+          
+          writeFile(backupFile, backupContent)
+            .then(() => {
+              console.log(`[مدير قاعدة البيانات] [${new Date().toISOString()}] تم إنشاء ملف النسخة الاحتياطية البديل`);
+              resolve(backupFile);
+            })
+            .catch(fsError => {
+              console.error(`[مدير قاعدة البيانات] [${new Date().toISOString()}] فشل في إنشاء ملف بديل: ${fsError.message}`);
+              resolve(null);
+            });
         } catch(fsError) {
           console.error(`[مدير قاعدة البيانات] [${new Date().toISOString()}] فشل في إنشاء ملف بديل: ${fsError.message}`);
           resolve(null);
