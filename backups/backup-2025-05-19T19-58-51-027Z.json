@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-05-19T19:58:51.374Z",
+    "database": "neondb",
+    "tablesCount": 9,
+    "createdAt": "2025-05-19T19:58:51.374Z"
+  },
+  "data": {
+    "users": [
+      {
+        "id": 1,
+        "username": "Binarjoinanalytic",
+        "password": "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f",
+        "email": null,
+        "full_name": null,
+        "subscription_level": "free",
+        "subscription_expiry": null,
+        "language": "ar",
+        "created_at": "2025-05-19T19:48:34.061Z",
+        "last_login": null,
+        "avatar": null,
+        "phone_number": null,
+        "is_active": true
+      }
+    ],
+    "user_settings": [],
+    "user_notification_settings": [],
+    "signals": [],
+    "user_signals": [],
+    "subscriptions": [],
+    "market_data": [],
+    "notifications": [],
+    "user_signal_usage": []
+  }
+}
