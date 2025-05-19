@@ -105,6 +105,14 @@ router.post("/generate", async (req: Request, res: Response) => {
     // إرسال طلب توليد الإشارة مع تحديد طريقة التوليد
     const signal = await openAIService.generateTradingSignal(platform, pair, timeframe, userId, !useAI);
 
+    // تتبع استخدام الإشارة في سجل المستخدم
+    if (userId) {
+      await storage.trackSignalUsage(userId, 'generated');
+      
+      // إضافة الإشارة إلى قائمة إشارات المستخدم
+      await storage.addSignalToUser(userId, signal.id);
+    }
+
     // تسجيل نجاح العملية
     logger.info("SignalGenerator", "تم توليد الإشارة بنجاح", { 
       userId, 

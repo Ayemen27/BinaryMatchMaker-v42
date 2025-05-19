@@ -387,19 +387,15 @@ export class DatabaseStorage implements IStorage {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const [usage] = await db
-      .select({
-        count: count(),
-      })
-      .from(userSignalUsage)
-      .where(
-        and(
-          eq(userSignalUsage.userId, userId),
-          gte(userSignalUsage.date, today)
-        )
-      );
+    // البحث عن سجل استخدام إشارات المستخدم لليوم الحالي
+    const usageToday = await this.getSignalUsage(userId, today);
     
-    return Number(usage?.count || 0);
+    if (!usageToday) {
+      return 0; // لا يوجد استخدام مسجل اليوم
+    }
+    
+    // إجمالي الإشارات المولدة والتحليلات المطلوبة
+    return (usageToday.signalsGenerated || 0) + (usageToday.analysisRequested || 0);
   }
   
   // User signals methods
