@@ -2,7 +2,7 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
-import { initializeDatabase, startAutoBackup } from './database-manager';
+import { initializeDatabase, startBackupSystem } from './backup-manager';
 
 neonConfig.webSocketConstructor = ws;
 
@@ -17,7 +17,7 @@ const initDB = async () => {
   console.log('[نظام قاعدة البيانات] بدء التحقق من قاعدة البيانات وتهيئتها...');
   await initializeDatabase();
   // بدء نظام النسخ الاحتياطي التلقائي
-  startAutoBackup();
+  startBackupSystem();
 };
 
 // المستودع لاتصال قاعدة البيانات
