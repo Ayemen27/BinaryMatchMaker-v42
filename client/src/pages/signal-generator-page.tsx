@@ -382,6 +382,86 @@ export default function SignalGeneratorPage() {
                           className="data-[state=checked]:bg-primary"
                         />
                       </motion.div>
+                      
+                      {/* OTC Trading Toggle */}
+                      <motion.div 
+                        whileHover={{ scale: 1.01 }}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500/5 to-blue-500/10 rounded-lg mb-4 border border-blue-500/20"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full ${isOtcEnabled ? 'bg-blue-500/20' : 'bg-muted/80'}`}>
+                            {isOtcEnabled ? (
+                              <Clock className="h-5 w-5 text-blue-500" />
+                            ) : (
+                              <Clock className="h-5 w-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">
+                              {isOtcEnabled ? 
+                                (t('otcTradingEnabled') || 'تداول خارج السوق مفعّل') : 
+                                (t('otcTradingDisabled') || 'تداول خارج السوق معطّل')
+                              }
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {isOtcEnabled ? 
+                                (t('otcTradingEnabledDesc') || 'يمكنك توليد إشارات خارج أوقات التداول الرسمية') : 
+                                (t('otcTradingDisabledDesc') || 'سيتم توليد إشارات فقط خلال أوقات التداول الرسمية')
+                              }
+                            </p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={isOtcEnabled}
+                          onCheckedChange={setIsOtcEnabled}
+                          aria-label={t('toggleOtcTrading') || 'تبديل التداول خارج السوق'}
+                          className="data-[state=checked]:bg-blue-500"
+                        />
+                      </motion.div>
+                      
+                      {/* Market Status Indicator */}
+                      {!isMarketOpen && (
+                        <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-lg mb-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Clock className="h-5 w-5 text-orange-500" />
+                            <h3 className="font-medium text-orange-500">
+                              {t('marketClosed') || 'السوق مغلق حالياً'}
+                            </h3>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {t('marketClosedDesc') || 'الأسواق المالية مغلقة حالياً. يمكنك تفعيل خيار التداول خارج السوق (OTC) أو جدولة إشارة عند فتح السوق.'}
+                          </p>
+                          
+                          <div className="flex items-center gap-2 mt-3">
+                            <Switch
+                              checked={scheduledSignal}
+                              onCheckedChange={setScheduledSignal}
+                              aria-label={t('toggleScheduledSignal') || 'تبديل جدولة الإشارات'}
+                              className="data-[state=checked]:bg-orange-500"
+                            />
+                            <Label htmlFor="scheduledSignal" className="text-sm cursor-pointer">
+                              {t('scheduleSignalWhenMarketOpens') || 'جدولة توليد الإشارة عند فتح السوق'}
+                            </Label>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Current Price Indicator */}
+                      {currentPrice && pair && (
+                        <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg mb-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <BarChart2 className="h-5 w-5 text-primary" />
+                              <h3 className="font-medium">
+                                {t('currentPrice') || 'السعر الحالي'}: {pair}
+                              </h3>
+                            </div>
+                            <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
+                              {currentPrice}
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Generate Button */}
                       <motion.div whileTap={{ scale: 0.98 }}>
