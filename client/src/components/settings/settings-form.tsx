@@ -111,18 +111,22 @@ export function SettingsForm() {
   
   // تغيير قيمة فردية على الفور
   function handleSettingChange(name: keyof SettingsFormValues, value: any) {
-    // تحديث قيمة الحقل في النموذج
+    // تحديث قيمة الحقل في النموذج فوراً
     form.setValue(name, value);
     
     // حفظ القيمة في المتغير المحلي حتى لا تضيع عند تغيير التبويب
     const formValues = form.getValues();
     console.log(`تغيير إعداد ${name} إلى:`, value);
     
-    // منع الإرسال المتكرر للقيم (throttle)
-    setTimeout(() => {
-      // إرسال القيمة الجديدة إلى الخادم
-      updateSettings({ [name]: value });
-    }, 300);
+    // تطبيق تغيير الثيم فوراً إذا كان الإعداد هو الثيم
+    if (name === 'theme' && window && document) {
+      // تطبيق الثيم مباشرة على HTML
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(value);
+    }
+    
+    // إرسال القيمة الجديدة إلى الخادم
+    updateSettings({ [name]: value });
   }
   
   return (
