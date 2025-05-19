@@ -29,8 +29,11 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // استخدام متغير البيئة SESSION_SECRET أو إنشاء قيمة افتراضية
+  const sessionSecret = process.env.SESSION_SECRET || 'binary-signals-app-secret-key';
+  
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET!,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
