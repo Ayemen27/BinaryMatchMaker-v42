@@ -74,7 +74,7 @@ export function setupAuth(app: Express) {
       // إنشاء المستخدم
       const user = await storage.createUser({
         ...req.body,
-        language: req.body.language || 'ar', // استخدام اللغة العربية افتراضياً
+        language: req.body.language || 'en', // استخدام اللغة الإنجليزية افتراضياً
         subscriptionLevel: 'free', // بدء المستخدم بالمستوى المجاني
         isActive: true,
         password: await hashPassword(req.body.password),
@@ -104,12 +104,12 @@ export function setupAuth(app: Express) {
         promotionalEmails: false
       });
 
-      // إنشاء اشتراك للمستخدم
+      // إنشاء اشتراك للمستخدم بحد 3 إشارات يومياً للمستخدم المجاني
       await storage.createUserSubscription({
         userId: user.id,
         type: 'free',
         isActive: true,
-        dailySignalLimit: 5,
+        dailySignalLimit: 3, // تحديد عدد الإشارات المسموح بها يومياً للمستخدم المجاني بـ 3
         startDate: new Date()
       });
 
