@@ -4,10 +4,14 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { Signal, insertSignalSchema } from "@shared/schema";
 import { z } from "zod";
+import signalGeneratorRoutes from "./routes/signal-generator";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
   setupAuth(app);
+  
+  // Signal generator routes with AI
+  app.use('/api/signal-generator', signalGeneratorRoutes);
 
   // API routes
   // Get all signals

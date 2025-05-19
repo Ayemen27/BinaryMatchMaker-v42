@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,14 +11,68 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { BarChart, LineChart, ArrowDownUp, TrendingUp, CandlestickChart } from 'lucide-react';
+import { BarChart, LineChart, ArrowDownUp, TrendingUp, CandlestickChart, Loader } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet';
 
 export default function MarketAnalysisPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [asset, setAsset] = useState('BTC/USDT');
   const [timeframe, setTimeframe] = useState('1d');
   const [chartType, setChartType] = useState('candlestick');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [marketAnalysis, setMarketAnalysis] = useState<{
+    trend: "صعودي" | "هبوطي" | "متذبذب";
+    strength: number;
+    summary: string;
+    keyLevels: { support: string[]; resistance: string[] };
+  } | null>(null);
+  
+  // Function to analyze market trends using AI
+  const analyzeMarketTrend = async () => {
+    if (isAnalyzing) return;
+    
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/signal-generator/analyze-trend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ pair: asset }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to analyze market trend');
+      }
+      
+      const analysis = await response.json();
+      setMarketAnalysis(analysis);
+      
+      toast({
+        title: t('analysisComplete'),
+        description: t('marketAnalysisUpdated'),
+      });
+    } catch (error) {
+      console.error('Error analyzing market trend:', error);
+      toast({
+        title: t('analysisError'),
+        description: error instanceof Error ? error.message : t('tryAgainLater'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+  
+  // Analyze market on asset or timeframe change
+  useEffect(() => {
+    if (asset) {
+      analyzeMarketTrend();
+    }
+  }, [asset]);
   
   return (
     <Layout>
@@ -280,38 +334,97 @@ export default function MarketAnalysisPage() {
               </CardContent>
             </Card>
             
-            {/* Signal Prediction */}
+            {/* Market Analysis */}
             <Card>
               <CardHeader className="border-b border-border p-4 bg-card">
-                <CardTitle>{t('signalPrediction')}</CardTitle>
+                <CardTitle className="flex justify-between items-center">
+                  <span>{t('aiMarketAnalysis')}</span>
+                  {isAnalyzing && <Loader className="h-4 w-4 animate-spin" />}
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-success/20 text-success mb-4">
-                    <ArrowDownUp className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-lg font-medium text-success mb-1">{t('buySignal')}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">{t('entryPoint')}: $37,540.00</p>
-                  
-                  <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                    <div className="bg-muted p-2 rounded">
-                      <p className="text-muted-foreground">{t('targetPrice')}</p>
-                      <p className="font-medium">$38,750.00</p>
+                {marketAnalysis ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className={`inline-flex items-center justify-center h-12 w-12 rounded-full 
+                        ${marketAnalysis.trend === "صعودي" ? "bg-success/20 text-success" : 
+                          marketAnalysis.trend === "هبوطي" ? "bg-destructive/20 text-destructive" : 
+                          "bg-amber-500/20 text-amber-500"}`}>
+                        <ArrowDownUp className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium">
+                          {marketAnalysis.trend === "صعودي" ? t('bullishTrend') : 
+                           marketAnalysis.trend === "هبوطي" ? t('bearishTrend') : 
+                           t('sidewaysTrend')}
+                        </h3>
+                        <div className="flex items-center mt-1">
+                          <div className="w-24 bg-muted rounded-full h-1.5 mr-2">
+                            <div className={`h-1.5 rounded-full 
+                              ${marketAnalysis.trend === "صعودي" ? "bg-success" : 
+                                marketAnalysis.trend === "هبوطي" ? "bg-destructive" : 
+                                "bg-amber-500"}`} 
+                              style={{ width: `${marketAnalysis.strength}%` }}>
+                            </div>
+                          </div>
+                          <span className="text-xs font-medium">{marketAnalysis.strength}%</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="bg-muted p-2 rounded">
-                      <p className="text-muted-foreground">{t('stopLoss')}</p>
-                      <p className="font-medium">$36,950.00</p>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {marketAnalysis.summary}
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-muted p-3 rounded">
+                        <p className="text-xs font-semibold text-muted-foreground">{t('supportLevels')}</p>
+                        <div className="space-y-1 mt-2">
+                          {marketAnalysis.keyLevels.support.map((level, idx) => (
+                            <p key={idx} className="font-medium">${level}</p>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="bg-muted p-3 rounded">
+                        <p className="text-xs font-semibold text-muted-foreground">{t('resistanceLevels')}</p>
+                        <div className="space-y-1 mt-2">
+                          {marketAnalysis.keyLevels.resistance.map((level, idx) => (
+                            <p key={idx} className="font-medium">${level}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 text-center">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={analyzeMarketTrend}
+                        disabled={isAnalyzing}
+                      >
+                        {isAnalyzing ? (
+                          <>
+                            <Loader className="mr-2 h-3 w-3 animate-spin" />
+                            {t('analyzing')}
+                          </>
+                        ) : (
+                          t('refreshAnalysis')
+                        )}
+                      </Button>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center justify-center mb-2">
-                    <div className="w-full max-w-[200px] bg-muted rounded-full h-2 mr-2">
-                      <div className="bg-success h-2 rounded-full" style={{ width: '92%' }}></div>
-                    </div>
-                    <span className="text-sm font-medium">92%</span>
+                ) : isAnalyzing ? (
+                  <div className="py-8 text-center">
+                    <Loader className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+                    <p>{t('analyzingMarket')}</p>
                   </div>
-                  <p className="text-xs text-muted-foreground">{t('signalAccuracy')}</p>
-                </div>
+                ) : (
+                  <div className="py-8 text-center">
+                    <Button onClick={analyzeMarketTrend}>
+                      {t('analyzeMarket')}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
