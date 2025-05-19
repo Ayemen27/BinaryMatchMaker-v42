@@ -26,7 +26,7 @@ export function StatsCards({
       iconColor: 'text-primary'
     },
     {
-      title: t('signalAccuracy'),
+      title: t('accuracyRate'),
       value: `${accuracy}%`,
       icon: BarChart3,
       iconBg: 'bg-success/20',
