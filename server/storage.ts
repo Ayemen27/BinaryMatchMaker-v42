@@ -190,80 +190,144 @@ export class DatabaseStorage implements IStorage {
   
   // User settings methods
   async getUserSettings(userId: number): Promise<UserSettings | undefined> {
-    const [settings] = await db
-      .select()
-      .from(userSettings)
-      .where(eq(userSettings.userId, userId));
-    return settings;
+    try {
+      const result = await db.query(
+        'SELECT * FROM user_settings WHERE user_id = $1',
+        [userId]
+      );
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في الحصول على إعدادات المستخدم:', error);
+      return undefined;
+    }
   }
   
   async createUserSettings(settings: InsertUserSettings): Promise<UserSettings> {
-    const [createdSettings] = await db
-      .insert(userSettings)
-      .values({
-        ...settings,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .returning();
-    return createdSettings;
+    try {
+      const result = await db.query(
+        'INSERT INTO user_settings (user_id, theme, language, show_notifications, trading_preferences, chart_interval, analysis_depth, signal_notifications, preferred_assets, trading_session, risk_level, refresh_interval, dashboard_layout, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
+        [
+          settings.userId,
+          settings.theme,
+          settings.language,
+          settings.showNotifications,
+          settings.tradingPreferences,
+          settings.chartInterval,
+          settings.analysisDepth,
+          settings.signalNotifications,
+          settings.preferredAssets,
+          settings.tradingSession,
+          settings.riskLevel,
+          settings.refreshInterval,
+          settings.dashboardLayout,
+          new Date(),
+          new Date()
+        ]
+      );
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في إنشاء إعدادات المستخدم:', error);
+      throw error;
+    }
   }
   
   async updateUserSettings(userId: number, settings: Partial<UserSettings>): Promise<UserSettings> {
-    // 1. أولاً نتأكد من الحصول على الإعدادات الحالية
-    const currentSettings = await this.getUserSettings(userId);
-    
-    if (!currentSettings) {
-      // إذا لم تكن الإعدادات موجودة، قم بإنشائها بدلاً من التحديث
-      return this.createUserSettings({
+    try {
+      // 1. أولاً نتأكد من الحصول على الإعدادات الحالية
+      const currentSettings = await this.getUserSettings(userId);
+      
+      if (!currentSettings) {
+        console.log(`إنشاء إعدادات جديدة للمستخدم ${userId} لأنها غير موجودة`);
+        // إذا لم تكن الإعدادات موجودة، قم بإنشائها بدلاً من التحديث
+        return this.createUserSettings({
+          userId,
+          // استخدام القيم الافتراضية المحددة في المخطط
+          theme: settings.theme || 'dark',
+          language: settings.language || 'ar',
+          showNotifications: settings.showNotifications !== undefined ? settings.showNotifications : true,
+          tradingPreferences: settings.tradingPreferences || '{}',
+          chartInterval: settings.chartInterval || '1h',
+          analysisDepth: settings.analysisDepth || 'medium',
+          signalNotifications: settings.signalNotifications !== undefined ? settings.signalNotifications : true,
+          preferredAssets: settings.preferredAssets || '["BTC/USDT", "ETH/USDT"]',
+          tradingSession: settings.tradingSession || 'all',
+          riskLevel: settings.riskLevel || 'medium',
+          refreshInterval: settings.refreshInterval || 60,
+          dashboardLayout: settings.dashboardLayout || '{}',
+        } as InsertUserSettings);
+      }
+      
+      // تحديد نوع الإعدادات التي يتم تحديثها (لتسهيل التنقيح)
+      console.log('تحديث إعدادات المستخدم', {
         userId,
-        // استخدام القيم الافتراضية المحددة في المخطط
-        theme: settings.theme || 'dark',
-        defaultAsset: settings.defaultAsset || 'BTC/USDT',
-        defaultTimeframe: settings.defaultTimeframe || '1h',
-        defaultPlatform: settings.defaultPlatform || '',
-        chartType: settings.chartType || 'candlestick',
-        showTradingTips: settings.showTradingTips !== undefined ? settings.showTradingTips : true,
-        autoRefreshData: settings.autoRefreshData !== undefined ? settings.autoRefreshData : true,
-        refreshInterval: settings.refreshInterval !== undefined ? settings.refreshInterval : 60,
-        // نسخ بقية الإعدادات من الكائن المرسل
-        useAiForSignals: settings.useAiForSignals !== undefined ? settings.useAiForSignals : true,
-        useCustomAiKey: settings.useCustomAiKey !== undefined ? settings.useCustomAiKey : false,
-        openaiApiKey: settings.openaiApiKey || null,
+        fieldsToUpdate: Object.keys(settings),
       });
+      
+      // 2. بناء استعلام التحديث
+      const updateFields: string[] = [];
+      const updateValues: any[] = [];
+      let paramIndex = 1;
+      
+      // إضافة الحقول المراد تحديثها
+      for (const [key, value] of Object.entries(settings)) {
+        if (value !== undefined) {
+          // تحويل اسم الحقل من camelCase إلى snake_case
+          const fieldName = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+          
+          updateFields.push(`${fieldName} = $${paramIndex}`);
+          updateValues.push(value);
+          paramIndex++;
+        }
+      }
+      
+      // إضافة حقل updated_at
+      updateFields.push(`updated_at = $${paramIndex}`);
+      updateValues.push(new Date());
+      paramIndex++;
+      
+      // إضافة شرط where
+      updateValues.push(userId);
+      
+      // إذا لم تكن هناك حقول للتحديث، أعد الإعدادات الحالية
+      if (updateFields.length === 1) { // فقط updated_at
+        return currentSettings;
+      }
+      
+      // 3. تنفيذ الاستعلام
+      const query = `
+        UPDATE user_settings 
+        SET ${updateFields.join(', ')} 
+        WHERE user_id = $${paramIndex-1} 
+        RETURNING *
+      `;
+      
+      console.log(`تنفيذ استعلام تحديث إعدادات المستخدم: ${userId}`);
+      const result = await db.query(query, updateValues);
+      
+      if (!result || result.length === 0) {
+        throw new Error('فشل في تحديث إعدادات المستخدم');
+      }
+      
+      console.log(`تم تحديث إعدادات المستخدم ${userId} بنجاح`);
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في تحديث إعدادات المستخدم:', error);
+      throw error;
     }
-    
-    // تحديد نوع الإعدادات التي يتم تحديثها (لتسهيل التنقيح)
-    console.log('تحديث إعدادات المستخدم', {
-      userId,
-      currentSettings: {...currentSettings, openaiApiKey: currentSettings.openaiApiKey ? '[موجود]' : null},
-      newSettings: {...settings, openaiApiKey: settings.openaiApiKey ? '[موجود]' : null},
-    });
-    
-    // 2. قم بتحديث الإعدادات الموجودة
-    const [updatedSettings] = await db
-      .update(userSettings)
-      .set({
-        ...settings,
-        updatedAt: new Date(),
-      })
-      .where(eq(userSettings.userId, userId))
-      .returning();
-    
-    if (!updatedSettings) {
-      throw new Error('لم يتم العثور على إعدادات المستخدم');
-    }
-    
-    return updatedSettings;
   }
   
   // User notification settings methods
   async getUserNotificationSettings(userId: number): Promise<UserNotificationSettings | undefined> {
-    const [settings] = await db
-      .select()
-      .from(userNotificationSettings)
-      .where(eq(userNotificationSettings.userId, userId));
-    return settings;
+    try {
+      const result = await db.query(
+        'SELECT * FROM user_notification_settings WHERE user_id = $1',
+        [userId]
+      );
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في الحصول على إعدادات إشعارات المستخدم:', error);
+      return undefined;
+    }
   }
   
   async createUserNotificationSettings(settings: InsertUserNotificationSettings): Promise<UserNotificationSettings> {
