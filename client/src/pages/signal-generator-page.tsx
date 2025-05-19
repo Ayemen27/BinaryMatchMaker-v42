@@ -51,6 +51,17 @@ export default function SignalGeneratorPage() {
     enabled: !!user,
   });
   
+  // Fetch signal usage information (remaining signals)
+  const { data: usageInfo, refetch: refetchUsageInfo } = useQuery<{
+    subscriptionLevel: string;
+    dailyLimit: number;
+    usedToday: number;
+    remainingToday: number;
+  }>({
+    queryKey: ['/api/signal-generator/usage-info'],
+    enabled: !!user,
+  });
+  
   // When user settings load, set the initial AI usage preference
   useEffect(() => {
     if (userSettings) {
@@ -115,6 +126,13 @@ export default function SignalGeneratorPage() {
       if (interval) clearInterval(interval);
     };
   }, [isGenerating]);
+  
+  // تحديث عدد الإشارات المتبقية في حالة المستخدم المجاني
+  useEffect(() => {
+    if (usageInfo) {
+      setRemainingSignals(usageInfo.remainingToday);
+    }
+  }, [usageInfo]);
   
   // Available platforms, pairs, and timeframes
   const platforms = ['Binance', 'IQ Option', 'Olymp Trade', 'Pocket Option', 'Deriv'];
@@ -531,11 +549,23 @@ export default function SignalGeneratorPage() {
                         </div>
                       )}
                       
-                      {/* Subscription Notice for Free Users */}
+                      {/* Subscription Notice for Free Users with Remaining Signals Count */}
                       {user?.subscriptionLevel === 'free' && (
                         <div className="bg-muted p-3 rounded-lg mt-4 border-l-4 border-primary">
                           <p className="text-sm">
-                            {t('freeAccountLimited')} <a href="/settings" className="text-primary hover:underline font-medium">{t('upgradePlan')}</a>
+                            {remainingSignals !== null ? (
+                              <>
+                                {remainingSignals > 0 ? (
+                                  <span className="font-medium text-primary">{t('remainingSignals', { count: remainingSignals })}</span>
+                                ) : (
+                                  <span>
+                                    {t('noMoreSignalsToday')} <a href="/settings" className="text-primary hover:underline font-medium">{t('upgradePlan')}</a>
+                                  </span>
+                                )}
+                              </>
+                            ) : (
+                              <span>{t('freeAccountLimited')} <a href="/settings" className="text-primary hover:underline font-medium">{t('upgradePlan')}</a></span>
+                            )}
                           </p>
                         </div>
                       )}
