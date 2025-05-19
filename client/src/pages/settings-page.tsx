@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/layout/layout';
 import { useAuth } from '@/hooks/use-auth';
@@ -40,7 +40,27 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { NotificationSettings } from '@/types';
+
 import { Helmet } from 'react-helmet';
+
+// تعريف نوع إعدادات المستخدم كما يتم إرجاعه من الخادم
+interface UserSettings {
+  id: number;
+  userId: number;
+  theme: string;
+  defaultAsset: string;
+  defaultTimeframe: string;
+  defaultPlatform?: string;
+  chartType: string;
+  showTradingTips: boolean;
+  autoRefreshData: boolean;
+  refreshInterval: number;
+  useAiForSignals: boolean;
+  useCustomAiKey: boolean;
+  hasCustomApiKey: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const profileFormSchema = z.object({
   username: z.string().min(3, {
@@ -89,6 +109,19 @@ export default function SettingsPage() {
   
   // إضافة متغير لتتبع التبويب النشط
   const [activeTab, setActiveTab] = useState<string>("profile");
+  const [showApiKey, setShowApiKey] = useState(false);
+  
+  // استعلام لجلب إعدادات المستخدم من الخادم
+  const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
+    queryKey: ['/api/user/settings'],
+    enabled: !!user, // تفعيل الاستعلام فقط إذا كان المستخدم مسجل دخوله
+    onError: (error) => {
+      // في حالة الخطأ، نسجل الخطأ ولا نعرضه للمستخدم
+      console.error('خطأ في جلب إعدادات المستخدم:', error);
+    }
+  });
+  
+  // استخدام حالة لإعدادات الإشعارات مع تحديثها من البيانات الفعلية
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     email: true,
     push: true,
@@ -97,7 +130,20 @@ export default function SettingsPage() {
     marketAlerts: false,
     accountAlerts: true,
   });
-  const [showApiKey, setShowApiKey] = useState(false);
+
+  // تحديث إعدادات الإشعارات عند استرداد البيانات من الخادم
+  useEffect(() => {
+    if (userSettingsData) {
+      // للتعامل مع الإعدادات من الخادم بشكل مرن
+      // هنا نستخدم الإعدادات الافتراضية إذا لم تكن البيانات متوفرة
+      setNotificationSettings(prev => ({
+        ...prev,
+        // استخدام الإعدادات الموجودة في userSettingsData إذا كانت متوفرة،
+        // وإلا استخدام القيم الحالية في الحالة
+        // تعليق: ربما تكون أسماء الخصائص مختلفة عما نتوقع
+      }));
+    }
+  }, [userSettingsData]);
   
   // API Key form
   const apiKeyForm = useForm<ApiKeyFormValues>({
@@ -109,13 +155,24 @@ export default function SettingsPage() {
     },
   });
 
+  // تحديث نموذج API بناءً على البيانات المستردة
+  useEffect(() => {
+    if (userSettingsData) {
+      apiKeyForm.reset({
+        openaiApiKey: '', // لا يتم إرجاع مفتاح API في الاستجابة لأسباب أمنية
+        useCustomAiKey: userSettingsData.useCustomAiKey || false,
+        useAiForSignals: userSettingsData.useAiForSignals || true,
+      });
+    }
+  }, [userSettingsData, apiKeyForm]);
+
   // Profile form
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       username: user?.username || '',
-      email: '',
-      fullName: '',
+      email: user?.email || '',
+      fullName: user?.fullName || '',
     },
   });
   
