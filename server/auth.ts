@@ -149,21 +149,68 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), async (req, res) => {
-    try {
-      // تحديث وقت آخر تسجيل دخول للمستخدم
-      await storage.updateUserLastLogin(req.user.id);
+  app.post("/api/login", (req, res, next) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
+      if (err) {
+        console.error("خطأ أثناء المصادقة:", err);
+        return res.status(500).json({ 
+          message: "حدث خطأ في النظام أثناء محاولة تسجيل الدخول", 
+          error: "auth_system_error" 
+        });
+      }
       
-      // تسجيل حدث تسجيل الدخول
-      console.log(`تم تسجيل دخول المستخدم: ${req.user.username} (${req.user.id}) بنجاح`);
+      if (!user) {
+        // تحقق ما إذا كان اسم المستخدم موجودًا
+        storage.getUserByUsername(req.body.username)
+          .then(existingUser => {
+            if (!existingUser) {
+              return res.status(401).json({ 
+                message: "اسم المستخدم غير موجود", 
+                error: "username_not_found" 
+              });
+            } else {
+              return res.status(401).json({ 
+                message: "كلمة المرور غير صحيحة", 
+                error: "password_incorrect" 
+              });
+            }
+          })
+          .catch(error => {
+            console.error("خطأ في التحقق من اسم المستخدم:", error);
+            return res.status(401).json({ 
+              message: "بيانات تسجيل الدخول غير صحيحة", 
+              error: "invalid_credentials" 
+            });
+          });
+        return;
+      }
       
-      // إرجاع بيانات المستخدم
-      res.status(200).json(req.user);
-    } catch (error) {
-      console.error("خطأ في تحديث وقت آخر تسجيل دخول:", error);
-      // إرجاع بيانات المستخدم حتى لو فشل تحديث وقت آخر تسجيل دخول
-      res.status(200).json(req.user);
-    }
+      // إذا نجحت المصادقة، قم بتسجيل دخول المستخدم
+      req.login(user, async (loginErr) => {
+        if (loginErr) {
+          console.error("خطأ في تسجيل الدخول:", loginErr);
+          return res.status(500).json({ 
+            message: "حدث خطأ أثناء تسجيل الدخول", 
+            error: "login_error" 
+          });
+        }
+        
+        try {
+          // تحديث وقت آخر تسجيل دخول للمستخدم
+          await storage.updateUserLastLogin(user.id);
+          
+          // تسجيل حدث تسجيل الدخول
+          console.log(`تم تسجيل دخول المستخدم: ${user.username} (${user.id}) بنجاح`);
+          
+          // إرجاع بيانات المستخدم
+          res.status(200).json(user);
+        } catch (error) {
+          console.error("خطأ في تحديث وقت آخر تسجيل دخول:", error);
+          // إرجاع بيانات المستخدم حتى لو فشل تحديث وقت آخر تسجيل دخول
+          res.status(200).json(user);
+        }
+      });
+    })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
