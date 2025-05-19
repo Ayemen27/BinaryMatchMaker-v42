@@ -10,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Loader2, BarChart2, Award, Brain, Cpu, BrainCircuit, 
   Clock, TrendingUp, LineChart, ArrowUpCircle, ArrowDownCircle, 
-  Target, Shield, Lightbulb, Sparkles, Zap
+  Target, Shield, Lightbulb, Sparkles, Zap, RefreshCw,
+  Calendar, Save
 } from 'lucide-react';
 import { SignalCard } from '@/components/signals/signal-card';
 import { Signal } from '@/types';
@@ -593,18 +594,187 @@ export default function SignalGeneratorPage() {
                     {t('advancedOptions') || 'خيارات متقدمة'}
                   </CardTitle>
                   <CardDescription>
-                    {t('advancedOptionsDesc') || 'خيارات متقدمة متاحة للمستخدمين المميزين. قم بترقية حسابك للوصول إلى هذه الميزات.'}
+                    {t('advancedOptionsDesc') || 'خيارات متقدمة لتخصيص عملية توليد الإشارات حسب تفضيلاتك.'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-6 bg-muted/50 rounded-lg text-center">
-                    <Sparkles className="h-10 w-10 text-primary/50 mx-auto mb-3" />
-                    <h3 className="text-lg font-medium mb-2">{t('premiumFeature') || 'ميزة مميزة'}</h3>
-                    <p className="text-muted-foreground mb-4">{t('upgradeToAccess') || 'قم بترقية حسابك للوصول إلى خيارات التوليد المتقدمة وتخصيص المؤشرات وإعدادات متقدمة أخرى'}</p>
-                    <Button variant="outline" className="bg-primary/10">
-                      {t('upgradePlan') || 'ترقية الخطة'}
-                    </Button>
+                <CardContent className="space-y-6">
+                
+                  {/* تحديث السعر الحالي للأزواج */}
+                  <div className="border rounded-lg p-4 mb-4 bg-background/50">
+                    <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      {t('currentPriceInfo') || 'معلومات السعر الحالي'}
+                    </h3>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {t('selectedPair') || 'الزوج المختار'}:
+                        </p>
+                        <p className="font-semibold text-lg">{pair || '-'}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {t('currentPrice') || 'السعر الحالي'}:
+                        </p>
+                        {currentPrice ? (
+                          <p className="font-semibold text-lg text-primary">{currentPrice}</p>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-1"
+                            onClick={async () => {
+                              if (!pair) {
+                                toast({
+                                  title: t('selectPairFirst') || 'اختر الزوج أولًا',
+                                  description: t('selectPairToSeePrice') || 'يجب اختيار زوج التداول لعرض السعر الحالي',
+                                  variant: 'destructive',
+                                });
+                                return;
+                              }
+                              
+                              try {
+                                const response = await fetch(`/api/market-data/${encodeURIComponent(pair)}`);
+                                if (!response.ok) throw new Error('فشل في جلب بيانات السعر');
+                                
+                                const data = await response.json();
+                                setCurrentPrice(data.price);
+                                
+                                toast({
+                                  title: t('priceUpdated') || 'تم تحديث السعر',
+                                  description: `${pair}: ${data.price}`
+                                });
+                              } catch (error) {
+                                console.error(error);
+                                toast({
+                                  title: t('fetchPriceError') || 'خطأ في جلب السعر',
+                                  description: error instanceof Error ? error.message : t('tryAgainLater') || 'يرجى المحاولة مرة أخرى لاحقًا',
+                                  variant: 'destructive'
+                                });
+                              }
+                            }}
+                          >
+                            <RefreshCw className="h-4 w-4 mr-1" />
+                            {t('fetchPrice') || 'جلب السعر'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {currentPrice && (
+                      <div className="mt-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setCurrentPrice(null)}
+                          className="mr-2"
+                        >
+                          <RefreshCw className="h-4 w-4 mr-1" />
+                          {t('refreshPrice') || 'تحديث السعر'}
+                        </Button>
+                      </div>
+                    )}
                   </div>
+                  
+                  {/* جدولة الإشارات */}
+                  <div className="border rounded-lg p-4 bg-gradient-to-r from-orange-500/5 to-orange-500/10">
+                    <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-orange-500" />
+                      {t('signalScheduling') || 'جدولة الإشارات'}
+                    </h3>
+                    
+                    <motion.div 
+                      whileHover={{ scale: 1.01 }}
+                      className="flex items-center justify-between p-4 bg-background/80 rounded-lg mb-4 border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full ${scheduledSignal ? 'bg-orange-500/20' : 'bg-muted/80'}`}>
+                          {scheduledSignal ? (
+                            <Calendar className="h-5 w-5 text-orange-500" />
+                          ) : (
+                            <Calendar className="h-5 w-5 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="font-medium">
+                            {scheduledSignal ? 
+                              (t('schedulingEnabled') || 'جدولة الإشارات مفعّلة') : 
+                              (t('schedulingDisabled') || 'جدولة الإشارات معطّلة')
+                            }
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {scheduledSignal ? 
+                              (t('schedulingEnabledDesc') || 'سيتم توليد إشارات تلقائياً عند فتح السوق') : 
+                              (t('schedulingDisabledDesc') || 'لن يتم توليد إشارات تلقائياً عند فتح السوق')
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={scheduledSignal}
+                        onCheckedChange={setScheduledSignal}
+                        aria-label={t('toggleScheduling') || 'تبديل جدولة الإشارات'}
+                        className="data-[state=checked]:bg-orange-500"
+                      />
+                    </motion.div>
+                    
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {t('schedulingNote') || 'ملاحظة: جدولة الإشارات تعمل فقط عندما يكون السوق مغلقًا. ستتلقى إشعارًا عند توليد الإشارة المجدولة.'}
+                    </p>
+                  </div>
+                  
+                  {/* حفظ الإعدادات المفضلة */}
+                  {user && (
+                    <div className="border rounded-lg p-4 mt-6 bg-primary/5">
+                      <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                        <Save className="h-5 w-5 text-primary" />
+                        {t('savePreferences') || 'حفظ الإعدادات المفضلة'}
+                      </h3>
+                      
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {t('savePreferencesDesc') || 'يمكنك حفظ إعداداتك المفضلة لاستخدامها في المرات القادمة'}
+                      </p>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="bg-primary/10"
+                        onClick={async () => {
+                          try {
+                            await fetch('/api/user/settings', {
+                              method: 'PATCH',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                defaultAsset: pair,
+                                defaultTimeframe: timeframe,
+                                useAiForSignals: useAI,
+                                otcTradingEnabled: isOtcEnabled,
+                              }),
+                            });
+                            
+                            toast({
+                              title: t('preferencesSaved') || 'تم حفظ الإعدادات',
+                              description: t('preferencesSavedDesc') || 'تم حفظ إعداداتك المفضلة بنجاح'
+                            });
+                          } catch (error) {
+                            console.error(error);
+                            toast({
+                              title: t('savePreferencesError') || 'خطأ في حفظ الإعدادات',
+                              description: error instanceof Error ? error.message : t('tryAgainLater') || 'يرجى المحاولة مرة أخرى لاحقًا',
+                              variant: 'destructive'
+                            });
+                          }
+                        }}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        {t('saveAsDefault') || 'حفظ كإعدادات افتراضية'}
+                      </Button>
+                    </div>
+                  )}
+                  
                 </CardContent>
               </Card>
             </TabsContent>
