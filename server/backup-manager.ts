@@ -6,9 +6,9 @@
  */
 
 import { 
-  initializeDatabase as initDb,
   checkTableExists,
-  runMigrations
+  runMigrations,
+  createDefaultUser
 } from './db-manager';
 
 import {
@@ -18,6 +18,8 @@ import {
   restoreSchemaOnly,
   getAvailableBackups
 } from './backup-service';
+
+import { pool } from './db';
 
 // واجهة النسخ الاحتياطي وقاعدة البيانات - تصدير الوظائف الرئيسية للاستخدام في المشروع
 
@@ -55,6 +57,27 @@ export async function restoreFromBackup(): Promise<boolean> {
 export { runMigrations };
 
 /**
+ * وظيفة مساعدة للتحقق من وجود مستخدمين في قاعدة البيانات
+ */
+async function checkUsersExist(): Promise<boolean> {
+  try {
+    // التحقق من وجود جدول المستخدمين
+    const tableExists = await checkTableExists('users');
+    if (!tableExists) {
+      return false;
+    }
+    
+    // التحقق من وجود سجلات في جدول المستخدمين
+    const result = await pool.query('SELECT COUNT(*) as count FROM users');
+    
+    return parseInt(result.rows[0].count) > 0;
+  } catch (error) {
+    console.error('[نظام قاعدة البيانات] خطأ أثناء التحقق من وجود مستخدمين:', error);
+    return false;
+  }
+}
+
+/**
  * تهيئة قاعدة البيانات
  * تقوم بتنفيذ كل خطوات تهيئة قاعدة البيانات:
  * 1. إنشاء الجداول إذا لم تكن موجودة
@@ -66,10 +89,22 @@ export async function initializeDatabase(): Promise<boolean> {
   
   try {
     // 1. التأكد من إنشاء هيكل قاعدة البيانات
-    const dbInitialized = await initDb();
-    if (!dbInitialized) {
-      console.error('[نظام قاعدة البيانات] فشل في تهيئة هيكل قاعدة البيانات');
-      return false;
+    let usersTableExists = await checkTableExists('users');
+    
+    if (!usersTableExists) {
+      console.log('[نظام قاعدة البيانات] جدول المستخدمين غير موجود، بدء عملية إنشاء الجداول...');
+      
+      // تنفيذ ترحيل قاعدة البيانات
+      const migrationSuccess = await runMigrations();
+      
+      if (!migrationSuccess) {
+        console.error('[نظام قاعدة البيانات] فشل في إنشاء جداول قاعدة البيانات');
+        return false;
+      }
+      
+      console.log('[نظام قاعدة البيانات] تم إنشاء جداول قاعدة البيانات بنجاح');
+    } else {
+      console.log('[نظام قاعدة البيانات] جداول قاعدة البيانات موجودة بالفعل');
     }
     
     // 2. التحقق مما إذا كان هناك مستخدمين في قاعدة البيانات
@@ -97,6 +132,10 @@ export async function initializeDatabase(): Promise<boolean> {
             
             if (usersRestoredExist) {
               console.log('[نظام قاعدة البيانات] تم العثور على مستخدمين بعد استرجاع البيانات');
+              
+              // بدء نظام النسخ الاحتياطي
+              startBackupSystem();
+              
               return true;
             }
           } else {
@@ -114,7 +153,6 @@ export async function initializeDatabase(): Promise<boolean> {
       
       try {
         // استدعاء وظيفة إنشاء المستخدم الافتراضي
-        const { createDefaultUser } = require('./db-manager');
         const userCreated = await createDefaultUser();
         
         if (userCreated) {
@@ -142,28 +180,6 @@ export async function initializeDatabase(): Promise<boolean> {
     }
   } catch (error) {
     console.error('[نظام قاعدة البيانات] خطأ أثناء عملية تهيئة قاعدة البيانات الشاملة:', error);
-    return false;
-  }
-}
-
-/**
- * وظيفة مساعدة للتحقق من وجود مستخدمين في قاعدة البيانات
- */
-async function checkUsersExist(): Promise<boolean> {
-  try {
-    // التحقق من وجود جدول المستخدمين
-    const tableExists = await checkTableExists('users');
-    if (!tableExists) {
-      return false;
-    }
-    
-    // التحقق من وجود سجلات في جدول المستخدمين
-    const { pool } = require('./db');
-    const result = await pool.query('SELECT COUNT(*) as count FROM users');
-    
-    return result.rows[0].count > 0;
-  } catch (error) {
-    console.error('[نظام قاعدة البيانات] خطأ أثناء التحقق من وجود مستخدمين:', error);
     return false;
   }
 }
