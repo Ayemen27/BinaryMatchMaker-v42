@@ -14,7 +14,7 @@ import {
   Calendar, Save
 } from 'lucide-react';
 import { SignalCard } from '@/components/signals/signal-card';
-import { Signal } from '@/types';
+import { Signal, UserSettings } from '@/types';
 import { Helmet } from 'react-helmet';
 import { Switch } from '@/components/ui/switch';
 import { useQuery } from '@tanstack/react-query';
@@ -45,7 +45,7 @@ export default function SignalGeneratorPage() {
   const [scheduledSignal, setScheduledSignal] = useState<boolean>(false); // طلب إشارة عندما يفتح السوق
   
   // Fetch user settings to get AI preference
-  const { data: userSettings } = useQuery({
+  const { data: userSettings } = useQuery<UserSettings>({
     queryKey: ['/api/user/settings'],
     enabled: !!user,
   });
@@ -54,10 +54,42 @@ export default function SignalGeneratorPage() {
   useEffect(() => {
     if (userSettings) {
       // تحقق من وجود الإعداد وتفعيله أو تعطيله
-      const useAiSetting = userSettings.useAiForSignals as boolean | undefined;
-      setUseAI(useAiSetting !== false);
+      setUseAI(!!userSettings.useAiForSignals);
+      
+      // تحميل إعدادات التداول خارج السوق إذا كانت متوفرة
+      if (userSettings.enableOtcTrading !== undefined) {
+        setIsOtcEnabled(!!userSettings.enableOtcTrading);
+      }
     }
   }, [userSettings]);
+  
+  // التحقق من حالة السوق عند تغيير الزوج
+  useEffect(() => {
+    if (pair) {
+      checkMarketStatus(pair);
+    }
+  }, [pair]);
+  
+  // وظيفة للتحقق من حالة السوق (مفتوح أم مغلق)
+  const checkMarketStatus = async (pairName: string) => {
+    try {
+      // استدعاء API للتحقق من حالة السوق لهذا الزوج
+      const response = await fetch(`/api/market-status/${encodeURIComponent(pairName)}`);
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      setIsMarketOpen(data.isOpen);
+      
+      // جلب السعر الحالي تلقائيًا عند التحقق من حالة السوق
+      if (data.currentPrice) {
+        setCurrentPrice(data.currentPrice);
+      }
+    } catch (error) {
+      console.error('خطأ في التحقق من حالة السوق:', error);
+      // افتراضيًا، نعتبر السوق مفتوح في حالة الخطأ
+      setIsMarketOpen(true);
+    }
+  };
   
   // Progress bar animation during generation
   useEffect(() => {
@@ -720,7 +752,53 @@ export default function SignalGeneratorPage() {
                       />
                     </motion.div>
                     
-                    <p className="text-sm text-muted-foreground mt-2">
+                    {!isMarketOpen && scheduledSignal && (
+                      <div className="bg-orange-500/10 p-3 rounded-md border border-orange-500/30 mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="h-4 w-4 text-orange-500" />
+                          <p className="text-sm font-medium text-orange-700">
+                            {t('scheduledSignalInfo') || 'معلومات الإشارة المجدولة'}
+                          </p>
+                        </div>
+                        <div className="text-sm space-y-1 text-muted-foreground">
+                          <p>
+                            <span className="font-medium">{t('pair') || 'الزوج'}: </span>
+                            {pair || '-'}
+                          </p>
+                          <p>
+                            <span className="font-medium">{t('timeframe') || 'الإطار الزمني'}: </span>
+                            {timeframe || '-'}
+                          </p>
+                          <p>
+                            <span className="font-medium">{t('scheduledFor') || 'موعد التنفيذ'}: </span>
+                            {t('marketOpen') || 'عند فتح السوق القادم'}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* إلغاء الإشارات المجدولة (إذا كان يوجد إشارات مجدولة) */}
+                    {localStorage.getItem('scheduledSignal') && scheduledSignal && (
+                      <div className="mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="border-orange-500/50 hover:bg-orange-500/10"
+                          onClick={() => {
+                            localStorage.removeItem('scheduledSignal');
+                            toast({
+                              title: t('scheduledSignalsCanceled') || 'تم إلغاء الإشارات المجدولة',
+                              description: t('scheduledSignalsCanceledDesc') || 'تم إلغاء جميع الإشارات المجدولة بنجاح'
+                            });
+                          }}
+                        >
+                          <Clock className="h-4 w-4 mr-2" />
+                          {t('cancelScheduledSignals') || 'إلغاء الإشارات المجدولة'}
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <p className="text-sm text-muted-foreground mt-4">
                       {t('schedulingNote') || 'ملاحظة: جدولة الإشارات تعمل فقط عندما يكون السوق مغلقًا. ستتلقى إشعارًا عند توليد الإشارة المجدولة.'}
                     </p>
                   </div>
