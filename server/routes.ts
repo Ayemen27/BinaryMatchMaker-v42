@@ -156,21 +156,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new signal
+  // Create new signal and associate it with the current user
   app.post("/api/signals", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      const userId = req.user.id;
       const validatedData = insertSignalSchema.parse(req.body);
-      const signal = await storage.createSignal(validatedData);
-      res.status(201).json(signal);
+      
+      // تعيين المستخدم الحالي كمنشئ للإشارة
+      const signalData = {
+        ...validatedData,
+        createdBy: userId,
+        isPublic: validatedData.isPublic !== false, // افتراضياً جعل الإشارة عامة إلا إذا تم تحديد غير ذلك
+      };
+      
+      // إنشاء الإشارة
+      const signal = await storage.createSignal(signalData);
+      
+      // إضافة الإشارة لقائمة إشارات المستخدم
+      await storage.addSignalToUser(userId, signal.id);
+      
+      // تتبع استخدام الإشارة
+      await storage.trackSignalUsage(userId, 'generated');
+      
+      res.status(201).json({
+        ...signal,
+        isFavorite: false,
+        notes: null,
+        isUserSpecific: true
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid signal data", errors: error.errors });
       }
+      console.error("خطأ في إنشاء الإشارة:", error);
       res.status(500).json({ message: "Failed to create signal" });
+    }
+  });
+  
+  // وضع علامة على إشارة كمفضلة
+  app.post("/api/signals/:id/favorite", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.id;
+      const signalId = parseInt(req.params.id);
+      const { isFavorite } = req.body;
+      
+      if (isNaN(signalId)) {
+        return res.status(400).json({ message: "Invalid signal ID" });
+      }
+      
+      if (typeof isFavorite !== 'boolean') {
+        return res.status(400).json({ message: "isFavorite must be a boolean" });
+      }
+      
+      const userSignal = await storage.markSignalAsFavorite(userId, signalId, isFavorite);
+      
+      res.json({
+        success: true,
+        signalId,
+        isFavorite
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث حالة المفضلة:", error);
+      res.status(500).json({ message: "Failed to update favorite status" });
+    }
+  });
+  
+  // إضافة ملاحظات إلى إشارة
+  app.post("/api/signals/:id/notes", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.id;
+      const signalId = parseInt(req.params.id);
+      const { notes } = req.body;
+      
+      if (isNaN(signalId)) {
+        return res.status(400).json({ message: "Invalid signal ID" });
+      }
+      
+      if (typeof notes !== 'string') {
+        return res.status(400).json({ message: "Notes must be a string" });
+      }
+      
+      const userSignal = await storage.updateUserSignalNotes(userId, signalId, notes);
+      
+      res.json({
+        success: true,
+        signalId,
+        notes
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث ملاحظات الإشارة:", error);
+      res.status(500).json({ message: "Failed to update signal notes" });
+    }
+  });
+  
+  // الحصول على إشارات المستخدم الخاصة فقط
+  app.get("/api/user/signals", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.id;
+      const userSignals = await storage.getUserSignals(userId);
+      
+      // تنسيق البيانات بشكل مناسب للواجهة
+      const formattedSignals = userSignals.map(us => ({
+        ...us.signal,
+        isFavorite: us.isFavorite,
+        notes: us.notes,
+        isUserSpecific: true
+      }));
+      
+      res.json(formattedSignals);
+    } catch (error) {
+      console.error("خطأ في جلب إشارات المستخدم:", error);
+      res.status(500).json({ message: "Failed to fetch user signals" });
+    }
+  });
+  
+  // الحصول على إشارات المستخدم المفضلة فقط
+  app.get("/api/user/signals/favorites", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.id;
+      const favoriteSignals = await storage.getUserFavoriteSignals(userId);
+      
+      // تنسيق البيانات بشكل مناسب للواجهة
+      const formattedSignals = favoriteSignals.map(us => ({
+        ...us.signal,
+        isFavorite: us.isFavorite,
+        notes: us.notes,
+        isUserSpecific: true
+      }));
+      
+      res.json(formattedSignals);
+    } catch (error) {
+      console.error("خطأ في جلب الإشارات المفضلة:", error);
+      res.status(500).json({ message: "Failed to fetch favorite signals" });
+    }
+  });
+  
+  // الحصول على إحصائيات المستخدم
+  app.get("/api/user/stats", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user.id;
+      
+      // الحصول على إحصائيات المستخدم 
+      const today = new Date();
+      const signalUsage = await storage.getSignalUsage(userId, today);
+      const userSignals = await storage.getUserSignals(userId);
+      const favoriteSignals = await storage.getUserFavoriteSignals(userId);
+      
+      const userStats = {
+        totalSignals: userSignals.length,
+        favoriteSignals: favoriteSignals.length,
+        signalsGenerated: signalUsage?.signalsGenerated || 0,
+        signalsViewed: signalUsage?.signalsViewed || 0,
+        analysisRequested: signalUsage?.analysisRequested || 0,
+        // إضافة المزيد من الإحصائيات حسب الحاجة
+      };
+      
+      res.json(userStats);
+    } catch (error) {
+      console.error("خطأ في جلب إحصائيات المستخدم:", error);
+      res.status(500).json({ message: "Failed to fetch user stats" });
     }
   });
 

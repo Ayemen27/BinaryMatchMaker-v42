@@ -62,20 +62,74 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/register", async (req, res, next) => {
-    const existingUser = await storage.getUserByUsername(req.body.username);
-    if (existingUser) {
-      return res.status(400).send("Username already exists");
+    try {
+      const existingUser = await storage.getUserByUsername(req.body.username);
+      if (existingUser) {
+        return res.status(400).json({ 
+          message: "Username already exists", 
+          error: "username_exists" 
+        });
+      }
+
+      // إنشاء المستخدم
+      const user = await storage.createUser({
+        ...req.body,
+        language: req.body.language || 'ar', // استخدام اللغة العربية افتراضياً
+        subscriptionLevel: 'free', // بدء المستخدم بالمستوى المجاني
+        isActive: true,
+        password: await hashPassword(req.body.password),
+      });
+
+      // إنشاء إعدادات المستخدم
+      await storage.createUserSettings({
+        userId: user.id,
+        theme: 'dark',
+        defaultAsset: 'BTC/USDT',
+        defaultTimeframe: '1h',
+        chartType: 'candlestick',
+        showTradingTips: true,
+        autoRefreshData: true,
+        refreshInterval: 60,
+        useAiForSignals: true
+      });
+
+      // إنشاء إعدادات الإشعارات
+      await storage.createUserNotificationSettings({
+        userId: user.id,
+        emailNotifications: true,
+        pushNotifications: true,
+        signalAlerts: true,
+        marketUpdates: true,
+        accountAlerts: true,
+        promotionalEmails: false
+      });
+
+      // إنشاء اشتراك للمستخدم
+      await storage.createUserSubscription({
+        userId: user.id,
+        type: 'free',
+        isActive: true,
+        dailySignalLimit: 5,
+        startDate: new Date()
+      });
+
+      // تسجيل دخول المستخدم تلقائياً
+      req.login(user, (err) => {
+        if (err) return next(err);
+        
+        // تحديث آخر دخول للمستخدم
+        storage.updateUserLastLogin(user.id).catch(console.error);
+        
+        // إرجاع بيانات المستخدم
+        res.status(201).json(user);
+      });
+    } catch (error) {
+      console.error("خطأ في تسجيل المستخدم:", error);
+      res.status(500).json({ 
+        message: "Failed to register user", 
+        error: "registration_error" 
+      });
     }
-
-    const user = await storage.createUser({
-      ...req.body,
-      password: await hashPassword(req.body.password),
-    });
-
-    req.login(user, (err) => {
-      if (err) return next(err);
-      res.status(201).json(user);
-    });
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
