@@ -156,13 +156,6 @@ export async function needsDataRestore(): Promise<boolean> {
       return false; // لا يمكن استرجاع البيانات إذا لم تكن الجداول موجودة بعد
     }
     
-    // التحقق من وجود بيانات في جدول المستخدمين
-    const usersTableHasData = await checkTableHasData('users');
-    if (usersTableHasData) {
-      console.log('[خدمة الاستعادة التلقائية] جدول المستخدمين يحتوي على بيانات بالفعل، لا حاجة لاسترجاع البيانات');
-      return false; // لا حاجة لاسترجاع البيانات إذا كانت موجودة بالفعل
-    }
-    
     // التحقق من وجود ملف نسخة احتياطية
     const backupFile = findLatestBackupFile();
     if (!backupFile) {
@@ -170,7 +163,38 @@ export async function needsDataRestore(): Promise<boolean> {
       return false; // لا يمكن استرجاع البيانات إذا لم تكن هناك نسخة احتياطية
     }
     
-    // إذا وصلنا إلى هنا، فإن قاعدة البيانات تحتاج إلى استرجاع البيانات
+    // التحقق من عدد المستخدمين في قاعدة البيانات
+    const query = {
+      text: `SELECT COUNT(*) as user_count FROM users;`,
+    };
+    
+    const result = await pool.query(query);
+    const userCount = parseInt(result.rows[0].user_count, 10);
+    
+    // التحقق من عدد المستخدمين في ملف النسخة الاحتياطية
+    try {
+      const backupData = fs.readFileSync(backupFile, 'utf8');
+      const data = JSON.parse(backupData);
+      
+      if (data && data.data && Array.isArray(data.data.users)) {
+        const backupUserCount = data.data.users.length;
+        
+        console.log(`[خدمة الاستعادة التلقائية] عدد المستخدمين في قاعدة البيانات: ${userCount}, عدد المستخدمين في النسخة الاحتياطية: ${backupUserCount}`);
+        
+        // إذا كانت النسخة الاحتياطية تحتوي على عدد أكبر من المستخدمين، نقوم بالاسترجاع
+        if (backupUserCount > userCount) {
+          console.log('[خدمة الاستعادة التلقائية] النسخة الاحتياطية تحتوي على عدد أكبر من المستخدمين، سيتم استرجاع البيانات');
+          return true;
+        } else {
+          console.log('[خدمة الاستعادة التلقائية] لا حاجة للاسترجاع حيث أن عدد المستخدمين الحالي أكبر أو يساوي عدد المستخدمين في النسخة الاحتياطية');
+          return false;
+        }
+      }
+    } catch (error) {
+      console.error('[خدمة الاستعادة التلقائية] خطأ أثناء قراءة ملف النسخة الاحتياطية:', error);
+    }
+    
+    // إذا وصلنا إلى هنا ولم نتمكن من تحديد عدد المستخدمين في النسخة الاحتياطية، نفترض أننا بحاجة إلى الاسترجاع
     console.log('[خدمة الاستعادة التلقائية] قاعدة البيانات تحتاج إلى استرجاع البيانات');
     return true;
   } catch (error) {
