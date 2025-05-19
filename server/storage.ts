@@ -10,7 +10,7 @@ import {
   marketData, type MarketData
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, gte, lt, desc, count, isNull } from "drizzle-orm";
+import { eq, and, gte, lt, desc, count, isNull, sql } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { pool } from "./db";
@@ -39,20 +39,23 @@ export interface IStorage {
   createUserSubscription(subscription: InsertSubscription): Promise<Subscription>;
   updateUserSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription>;
   
-  // Signal methods
+  // Signal methods - Public Signals (Admin Created)
   getSignals(): Promise<Signal[]>;
   getActiveSignals(): Promise<Signal[]>;
   getCompletedSignals(): Promise<Signal[]>;
   getSignalHistory(): Promise<Signal[]>;
+  getPublicSignals(): Promise<Signal[]>; // Get signals created by admin and marked as public
   getSignalById(id: number): Promise<Signal | undefined>;
   createSignal(signal: InsertSignal): Promise<Signal>;
   updateSignalStatus(id: number, status: 'active' | 'completed'): Promise<Signal>;
   updateSignalResult(id: number, result: 'success' | 'failure'): Promise<Signal>;
   getUserSignalUsageToday(userId: number): Promise<number>;
   
-  // User signals methods
+  // User signals methods - Private Signals (User Created)
   getUserSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]>;
   getUserFavoriteSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]>;
+  getUserGeneratedSignals(userId: number): Promise<Signal[]>; // New - Get signals created by specific user
+  createUserSignal(userId: number, signal: InsertSignal): Promise<Signal>; // New - Create signal owned by user
   addSignalToUser(userId: number, signalId: number): Promise<UserSignal>;
   markSignalAsFavorite(userId: number, signalId: number, isFavorite: boolean): Promise<UserSignal>;
   updateUserSignalNotes(userId: number, signalId: number, notes: string): Promise<UserSignal>;
@@ -321,31 +324,54 @@ export class DatabaseStorage implements IStorage {
     return updatedSubscription;
   }
   
-  // Signal methods
+  // Signal methods - Public Signals (Admin Created)
   async getSignals(): Promise<Signal[]> {
     return db.select()
       .from(signals)
-      .where(eq(signals.status, 'active'))
+      .where(
+        and(
+          eq(signals.status, 'active'),
+          eq(signals.isPublic, true)
+        )
+      )
       .orderBy(desc(signals.createdAt));
   }
   
   async getActiveSignals(): Promise<Signal[]> {
     return db.select()
       .from(signals)
-      .where(eq(signals.status, 'active'))
+      .where(
+        and(
+          eq(signals.status, 'active'),
+          eq(signals.isPublic, true)
+        )
+      )
       .orderBy(desc(signals.createdAt));
   }
   
   async getCompletedSignals(): Promise<Signal[]> {
     return db.select()
       .from(signals)
-      .where(eq(signals.status, 'completed'))
+      .where(
+        and(
+          eq(signals.status, 'completed'),
+          eq(signals.isPublic, true)
+        )
+      )
       .orderBy(desc(signals.createdAt));
   }
   
   async getSignalHistory(): Promise<Signal[]> {
     return db.select()
       .from(signals)
+      .where(eq(signals.isPublic, true))
+      .orderBy(desc(signals.createdAt));
+  }
+  
+  async getPublicSignals(): Promise<Signal[]> {
+    return db.select()
+      .from(signals)
+      .where(eq(signals.isPublic, true))
       .orderBy(desc(signals.createdAt));
   }
   
@@ -365,8 +391,40 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
         status: 'active',
         result: null,
+        isPublic: true, // الإشارات التي ينشئها المسؤول تكون عامة افتراضياً
+        createdBy: null, // لا يوجد مستخدم محدد أنشأ هذه الإشارة
       })
       .returning();
+    
+    return signal;
+  }
+  
+  // وظائف الإشارات الخاصة بالمستخدمين
+  async getUserGeneratedSignals(userId: number): Promise<Signal[]> {
+    return db.select()
+      .from(signals)
+      .where(eq(signals.createdBy, userId))
+      .orderBy(desc(signals.createdAt));
+  }
+  
+  async createUserSignal(userId: number, insertSignal: InsertSignal): Promise<Signal> {
+    const [signal] = await db.insert(signals)
+      .values({
+        ...insertSignal,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'active',
+        result: null,
+        isPublic: false, // الإشارات التي ينشئها المستخدم تكون خاصة افتراضياً
+        createdBy: userId, // تحديد المستخدم الذي أنشأ الإشارة
+      })
+      .returning();
+    
+    // إضافة الإشارة تلقائياً إلى مجموعة المستخدم
+    await this.addSignalToUser(userId, signal.id);
+    
+    // تتبع استخدام المستخدم لإنشاء الإشارات
+    await this.trackSignalUsage(userId, 'generated');
     
     return signal;
   }
@@ -873,88 +931,11 @@ export class DatabaseStorage implements IStorage {
         console.log(`[نظام البذور] تم العثور على مستخدمين موجودين بالفعل، تخطي إنشاء المستخدم الافتراضي`);
       }
       
-      // التحقق من وجود إشارات
-      const existingSignals = await db.select().from(signals).limit(1);
+      // لا نقوم بإنشاء إشارات افتراضية بعد الآن
+      // الإشارات العامة ستتم إضافتها من قبل المسؤول
+      // والإشارات الخاصة سيقوم المستخدمون بتوليدها
       
-      if (existingSignals.length === 0) {
-        console.log(`[نظام البذور] عدم وجود إشارات، إنشاء الإشارات الافتراضية...`);
-        
-        // Seed initial signals
-        const assets = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'DOGE/USDT'];
-        const indicators = [['RSI', 'MACD'], ['MA', 'MACD'], ['RSI', 'Bollinger'], ['MACD', 'OBV'], ['RSI', 'Stoch']];
-        const times = ['12:30', '10:15', '09:45', '15:20', '14:05'];
-        
-        // Create 5 active signals
-        for (let i = 0; i < 5; i++) {
-          const type = i % 2 === 0 ? 'buy' : 'sell';
-          const basePrice = (37000 + Math.random() * 3000).toFixed(2);
-          
-          const entryPrice = parseFloat(basePrice);
-          const targetPrice = type === 'buy'
-            ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
-            : (entryPrice - (entryPrice * 0.03)).toFixed(2);
-          const stopLoss = type === 'buy'
-            ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
-            : (entryPrice + (entryPrice * 0.02)).toFixed(2);
-          
-          await db.insert(signals).values({
-            asset: assets[i],
-            type: type as 'buy' | 'sell',
-            entryPrice: entryPrice.toString(),
-            targetPrice: targetPrice.toString(),
-            stopLoss: stopLoss.toString(),
-            accuracy: 85 + Math.floor(Math.random() * 11),
-            time: times[i],
-            status: 'active',
-            indicators: indicators[i],
-            platform: 'IQ Option',
-            timeframe: '5m',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            result: null
-          });
-        }
-        
-        console.log(`[نظام البذور] تم إنشاء 5 إشارات نشطة بنجاح`);
-        
-        // Create 5 completed signals
-        for (let i = 0; i < 5; i++) {
-          const type = i % 2 === 0 ? 'buy' : 'sell';
-          const basePrice = (37000 + Math.random() * 3000).toFixed(2);
-          
-          const entryPrice = parseFloat(basePrice);
-          const targetPrice = type === 'buy'
-            ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
-            : (entryPrice - (entryPrice * 0.03)).toFixed(2);
-          const stopLoss = type === 'buy'
-            ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
-            : (entryPrice + (entryPrice * 0.02)).toFixed(2);
-          
-          const createdAt = new Date(Date.now() - 86400000 * (i + 1)); // Created 1-5 days ago
-          
-          await db.insert(signals).values({
-            asset: assets[i],
-            type: type as 'buy' | 'sell',
-            entryPrice: entryPrice.toString(),
-            targetPrice: targetPrice.toString(),
-            stopLoss: stopLoss.toString(),
-            accuracy: 85 + Math.floor(Math.random() * 11),
-            time: 'أمس ' + times[i],
-            status: 'completed',
-            indicators: indicators[i],
-            platform: 'IQ Option',
-            timeframe: '15m',
-            createdAt: createdAt,
-            updatedAt: createdAt,
-            completedAt: new Date(createdAt.getTime() + 3600000 * (2 + i)), // Completed 2-6 hours later
-            result: Math.random() < 0.9 ? 'success' : 'failure'
-          });
-        }
-        
-        console.log(`[نظام البذور] تم إنشاء 5 إشارات مكتملة بنجاح`);
-      } else {
-        console.log(`[نظام البذور] تم العثور على إشارات موجودة بالفعل، تخطي إنشاء الإشارات الافتراضية`);
-      }
+      console.log(`[نظام البذور] تخطي إنشاء الإشارات الافتراضية - سيتم إنشاؤها من قبل المسؤول أو المستخدمين`);
       
       console.log(`[نظام البذور] تم الانتهاء من تهيئة البيانات الأولية بنجاح`);
     } catch (error) {
