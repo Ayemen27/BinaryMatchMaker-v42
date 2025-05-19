@@ -760,6 +760,8 @@ export class DatabaseStorage implements IStorage {
           time: times[i],
           status: 'active',
           indicators: indicators[i],
+          platform: 'IQ Option',
+          timeframe: '5m',
           createdAt: new Date(),
           updatedAt: new Date(),
           result: null
@@ -791,6 +793,8 @@ export class DatabaseStorage implements IStorage {
           time: 'أمس ' + times[i],
           status: 'completed',
           indicators: indicators[i],
+          platform: 'IQ Option',
+          timeframe: '15m',
           createdAt: createdAt,
           updatedAt: createdAt,
           completedAt: new Date(createdAt.getTime() + 3600000 * (2 + i)), // Completed 2-6 hours later
