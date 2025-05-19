@@ -80,38 +80,47 @@ export function setupAuth(app: Express) {
         password: await hashPassword(req.body.password),
       });
 
-      // إنشاء إعدادات المستخدم
-      await storage.createUserSettings({
-        userId: user.id,
-        theme: 'dark',
-        defaultAsset: 'BTC/USDT',
-        defaultTimeframe: '1h',
-        chartType: 'candlestick',
-        showTradingTips: true,
-        autoRefreshData: true,
-        refreshInterval: 60,
-        useAiForSignals: true
-      });
+      // إنشاء إعدادات المستخدم (التحقق من عدم وجودها أولاً)
+      const existingSettings = await storage.getUserSettings(user.id);
+      if (!existingSettings) {
+        await storage.createUserSettings({
+          userId: user.id,
+          theme: 'dark',
+          defaultAsset: 'BTC/USDT',
+          defaultTimeframe: '1h',
+          chartType: 'candlestick',
+          showTradingTips: true,
+          autoRefreshData: true,
+          refreshInterval: 60,
+          useAiForSignals: true
+        });
+      }
 
-      // إنشاء إعدادات الإشعارات
-      await storage.createUserNotificationSettings({
-        userId: user.id,
-        emailNotifications: true,
-        pushNotifications: true,
-        signalAlerts: true,
-        marketUpdates: true,
-        accountAlerts: true,
-        promotionalEmails: false
-      });
+      // إنشاء إعدادات الإشعارات (التحقق من عدم وجودها أولاً)
+      const existingNotificationSettings = await storage.getUserNotificationSettings(user.id);
+      if (!existingNotificationSettings) {
+        await storage.createUserNotificationSettings({
+          userId: user.id,
+          emailNotifications: true,
+          pushNotifications: true,
+          signalAlerts: true,
+          marketUpdates: true,
+          accountAlerts: true,
+          promotionalEmails: false
+        });
+      }
 
-      // إنشاء اشتراك للمستخدم بحد 3 إشارات يومياً للمستخدم المجاني
-      await storage.createUserSubscription({
-        userId: user.id,
-        type: 'free',
-        isActive: true,
-        dailySignalLimit: 3, // تحديد عدد الإشارات المسموح بها يومياً للمستخدم المجاني بـ 3
-        startDate: new Date()
-      });
+      // إنشاء اشتراك للمستخدم (التحقق من عدم وجوده أولاً)
+      const existingSubscription = await storage.getUserSubscription(user.id);
+      if (!existingSubscription) {
+        await storage.createUserSubscription({
+          userId: user.id,
+          type: 'free',
+          isActive: true,
+          dailySignalLimit: 3, // تحديد عدد الإشارات المسموح بها يومياً للمستخدم المجاني بـ 3
+          startDate: new Date()
+        });
+      }
 
       // تسجيل دخول المستخدم تلقائياً
       req.login(user, (err) => {
