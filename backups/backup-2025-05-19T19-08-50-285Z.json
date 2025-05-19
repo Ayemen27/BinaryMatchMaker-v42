@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-05-19T19:08:51.285Z",
+    "database": "neondb",
+    "tablesCount": 9,
+    "createdAt": "2025-05-19T19:08:51.285Z"
+  },
+  "data": {
+    "users": [],
+    "user_settings": [],
+    "user_notification_settings": [],
+    "signals": [],
+    "user_signals": [],
+    "subscriptions": [],
+    "market_data": [],
+    "notifications": [],
+    "user_signal_usage": []
+  }
+}
