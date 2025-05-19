@@ -57,6 +57,10 @@ export const userSettings = pgTable("user_settings", {
   showTradingTips: boolean("show_trading_tips").default(true),
   autoRefreshData: boolean("auto_refresh_data").default(true),
   refreshInterval: integer("refresh_interval").default(60), // In seconds
+  // إعدادات الذكاء الاصطناعي
+  useAiForSignals: boolean("use_ai_for_signals").default(true), // استخدام الذكاء الاصطناعي لتوليد الإشارات
+  useCustomAiKey: boolean("use_custom_ai_key").default(false), // استخدام مفتاح OpenAI خاص
+  openaiApiKey: text("openai_api_key"), // مفتاح API الخاص بـ OpenAI
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => {
