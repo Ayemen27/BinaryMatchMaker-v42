@@ -57,7 +57,9 @@ export function useSettings() {
     refetch 
   } = useQuery<UserSettings>({
     queryKey: [SETTINGS_KEY],
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // إعادة القراءة عند العودة للنافذة
+    staleTime: 0, // دائماً اعتبر البيانات قديمة
+    refetchOnMount: true, // إعادة القراءة عند إضافة المكون
   });
 
   // استخدام البيانات من الاستعلام أو القيم الافتراضية إذا كانت غير متاحة
@@ -66,6 +68,9 @@ export function useSettings() {
   // تعريف mutation لتحديث الإعدادات
   const { mutate, isPending } = useMutation({
     mutationFn: async (newSettings: Partial<UserSettings>) => {
+      // طباعة البيانات المرسلة للتأكد من صحتها
+      console.log('إرسال إعدادات للخادم:', newSettings);
+      
       const response = await apiRequest('PATCH', SETTINGS_KEY, newSettings);
       if (!response.ok) {
         const errorData = await response.json();
@@ -74,8 +79,18 @@ export function useSettings() {
       return response.json();
     },
     onSuccess: (data) => {
-      // تحديث بيانات الاستعلام في الذاكرة المؤقتة
-      queryClient.setQueryData([SETTINGS_KEY], data);
+      // طباعة البيانات المستلمة للتأكد من صحتها
+      console.log('تم استلام إعدادات محدثة من الخادم:', data);
+      
+      // تحديث بيانات الاستعلام في الذاكرة المؤقتة مع دمجها مع الإعدادات الحالية
+      queryClient.setQueryData<UserSettings>([SETTINGS_KEY], (oldData) => {
+        return { ...oldData, ...data };
+      });
+      
+      // إجبار التطبيق على إعادة تحميل الإعدادات من الخادم
+      setTimeout(() => {
+        refetch();
+      }, 100);
       
       // عرض رسالة نجاح
       toast({

@@ -69,25 +69,38 @@ export function SettingsForm() {
     isSaving 
   } = useSettings();
   
-  // إنشاء نموذج مع القيم الافتراضية
+  // إنشاء نموذج مع القيم المستلمة من الخادم عند تحميل المكون
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: defaultFormValues,
+    // استخدام القيم الفعلية من الخادم (settings) بدلاً من القيم الافتراضية
+    values: {
+      theme: settings.theme,
+      defaultAsset: settings.defaultAsset,
+      defaultTimeframe: settings.defaultTimeframe,
+      defaultPlatform: settings.defaultPlatform || "",
+      chartType: settings.chartType,
+      showTradingTips: settings.showTradingTips,
+      autoRefreshData: settings.autoRefreshData,
+      refreshInterval: settings.refreshInterval,
+    },
+    // عند تغير أي قيمة مباشرة يتم الإرسال للخادم
+    mode: "onChange",
   });
   
-  // تحديث قيم النموذج عندما تتغير الإعدادات
+  // تحديث النموذج عند تغير القيم في الخادم
   useEffect(() => {
     if (!isLoading && settings) {
+      // استخدام كل القيم من الإعدادات المستلمة
       form.reset({
-        theme: settings.theme || defaultFormValues.theme,
-        defaultAsset: settings.defaultAsset || defaultFormValues.defaultAsset,
-        defaultTimeframe: settings.defaultTimeframe || defaultFormValues.defaultTimeframe,
-        defaultPlatform: settings.defaultPlatform || defaultFormValues.defaultPlatform,
-        chartType: settings.chartType || defaultFormValues.chartType,
-        showTradingTips: settings.showTradingTips ?? defaultFormValues.showTradingTips,
-        autoRefreshData: settings.autoRefreshData ?? defaultFormValues.autoRefreshData,
-        refreshInterval: settings.refreshInterval || defaultFormValues.refreshInterval,
-      });
+        theme: settings.theme,
+        defaultAsset: settings.defaultAsset,
+        defaultTimeframe: settings.defaultTimeframe,
+        defaultPlatform: settings.defaultPlatform || "",
+        chartType: settings.chartType,
+        showTradingTips: settings.showTradingTips,
+        autoRefreshData: settings.autoRefreshData,
+        refreshInterval: settings.refreshInterval,
+      }, { keepDefaultValues: false });
     }
   }, [settings, isLoading, form.reset]);
   
@@ -98,11 +111,18 @@ export function SettingsForm() {
   
   // تغيير قيمة فردية على الفور
   function handleSettingChange(name: keyof SettingsFormValues, value: any) {
+    // تحديث قيمة الحقل في النموذج
     form.setValue(name, value);
     
-    // إرسال القيمة الجديدة إلى الخادم على الفور للحصول على تحديث فوري
+    // حفظ القيمة في المتغير المحلي حتى لا تضيع عند تغيير التبويب
     const formValues = form.getValues();
-    updateSettings({ ...formValues, [name]: value });
+    console.log(`تغيير إعداد ${name} إلى:`, value);
+    
+    // منع الإرسال المتكرر للقيم (throttle)
+    setTimeout(() => {
+      // إرسال القيمة الجديدة إلى الخادم
+      updateSettings({ [name]: value });
+    }, 300);
   }
   
   return (
