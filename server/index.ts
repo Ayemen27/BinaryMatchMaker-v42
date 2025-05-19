@@ -43,6 +43,9 @@ app.use((req, res, next) => {
   // سنقوم بمعالجة استرجاع البيانات ضمن عملية التهيئة
   await initializeDatabase();
   
+  // تشغيل خدمة الاسترجاع التلقائي للبيانات (إذا لزم الأمر)
+  await runAutoRestore();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
