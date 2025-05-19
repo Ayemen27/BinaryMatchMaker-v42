@@ -9,6 +9,7 @@ import AuthPage from "@/pages/auth-page";
 import SignalsPage from "@/pages/signals-page";
 import MarketAnalysisPage from "@/pages/market-analysis-page";
 import SignalHistoryPage from "@/pages/signal-history-page";
+import SignalGeneratorPage from "@/pages/signal-generator-page";
 import SettingsPage from "@/pages/settings-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
@@ -19,6 +20,7 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/signals" component={SignalsPage} />
+      <ProtectedRoute path="/signal-generator" component={SignalGeneratorPage} />
       <ProtectedRoute path="/market-analysis" component={MarketAnalysisPage} />
       <ProtectedRoute path="/signal-history" component={SignalHistoryPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
