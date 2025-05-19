@@ -18,53 +18,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/user/settings', userSettingsRoutes);
 
   // API routes
-  // Get all signals
+  // Get signals for current user (active + user's favorites)
   app.get("/api/signals", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const signals = await storage.getSignals();
-      res.json(signals);
+      // الحصول على معرف المستخدم الحالي
+      const userId = req.user.id;
+      
+      // الحصول على الإشارات النشطة العامة
+      const activeSignals = await storage.getActiveSignals();
+      
+      // الحصول على إشارات المستخدم (المفضلة والخاصة به)
+      const userSignals = await storage.getUserSignals(userId);
+      
+      // دمج الإشارات وإزالة التكرار
+      const userSignalIds = new Set(userSignals.map(us => us.signal.id));
+      const allSignals = [
+        ...userSignals.map(us => ({
+          ...us.signal,
+          isFavorite: us.isFavorite,
+          notes: us.notes,
+          isUserSpecific: true
+        })),
+        ...activeSignals
+          .filter(signal => !userSignalIds.has(signal.id))
+          .map(signal => ({
+            ...signal,
+            isFavorite: false,
+            notes: null,
+            isUserSpecific: false
+          }))
+      ];
+      
+      res.json(allSignals);
     } catch (error) {
+      console.error("خطأ في جلب الإشارات:", error);
       res.status(500).json({ message: "Failed to fetch signals" });
     }
   });
 
-  // Get signal history
+  // Get signal history specific to the user
   app.get("/api/signals/history", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const signals = await storage.getSignalHistory();
-      res.json(signals);
+      // الحصول على معرف المستخدم الحالي
+      const userId = req.user.id;
+      
+      // الحصول على الإشارات المكتملة العامة
+      const completedSignals = await storage.getCompletedSignals();
+      
+      // الحصول على إشارات المستخدم المكتملة
+      const userSignals = await storage.getUserSignals(userId);
+      const userCompletedSignals = userSignals
+        .filter(us => us.signal.status === 'completed');
+      
+      // دمج الإشارات وإزالة التكرار
+      const userSignalIds = new Set(userCompletedSignals.map(us => us.signal.id));
+      const historySignals = [
+        ...userCompletedSignals.map(us => ({
+          ...us.signal,
+          isFavorite: us.isFavorite,
+          notes: us.notes,
+          isUserSpecific: true
+        })),
+        ...completedSignals
+          .filter(signal => !userSignalIds.has(signal.id))
+          .map(signal => ({
+            ...signal,
+            isFavorite: false,
+            notes: null,
+            isUserSpecific: false
+          }))
+      ];
+      
+      res.json(historySignals);
     } catch (error) {
+      console.error("خطأ في جلب سجل الإشارات:", error);
       res.status(500).json({ message: "Failed to fetch signal history" });
     }
   });
 
-  // Get signal by ID
+  // Get signal by ID with user-specific data
   app.get("/api/signals/:id", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      const userId = req.user.id;
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid signal ID" });
       }
 
+      // Get the signal
       const signal = await storage.getSignalById(id);
       if (!signal) {
         return res.status(404).json({ message: "Signal not found" });
       }
 
-      res.json(signal);
+      // Track the view in signal usage
+      await storage.trackSignalUsage(userId, 'viewed');
+
+      // Check if user has this signal in their collection
+      const userSignals = await storage.getUserSignals(userId);
+      const userSignal = userSignals.find(us => us.signal.id === id);
+
+      if (userSignal) {
+        // Return with user-specific data
+        res.json({
+          ...signal,
+          isFavorite: userSignal.isFavorite,
+          notes: userSignal.notes,
+          isUserSpecific: true
+        });
+      } else {
+        // If user doesn't have relation to this signal yet, create it
+        await storage.addSignalToUser(userId, id);
+        
+        // Return without user specifics
+        res.json({
+          ...signal,
+          isFavorite: false,
+          notes: null,
+          isUserSpecific: false
+        });
+      }
     } catch (error) {
+      console.error("خطأ في جلب الإشارة:", error);
       res.status(500).json({ message: "Failed to fetch signal" });
     }
   });
