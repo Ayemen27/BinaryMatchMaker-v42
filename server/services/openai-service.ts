@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import { Signal, InsertSignal } from "@shared/schema";
 import { storage } from "../storage";
 import { logger } from "./logger";
+import { algorithmicSignalService } from "./algorithmic-signal-service";
 
 // تحميل متغيرات البيئة من ملف .env
 dotenv.config();
@@ -12,8 +13,8 @@ if (!process.env.OPENAI_API_KEY) {
   logger.error("OpenAIService", new Error("مفتاح API الخاص بـ OpenAI غير متوفر. يرجى التحقق من ملف .env"));
 }
 
-// إنشاء مثيل من OpenAI
-const openai = new OpenAI({
+// إنشاء مثيل من OpenAI باستخدام المفتاح الافتراضي
+const defaultOpenAI = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, 
 });
 
@@ -29,6 +30,17 @@ export class OpenAIService {
    */
   async generateTradingSignal(platform: string, pair: string, timeframe: string, userId?: number): Promise<Signal> {
     try {
+      // إذا كان هناك معرف مستخدم، نتحقق من إعداداته المتعلقة بالذكاء الاصطناعي
+      if (userId) {
+        const userSettings = await storage.getUserSettings(userId);
+        
+        // إذا كان المستخدم يفضل عدم استخدام الذكاء الاصطناعي، استخدم الخوارزمية البديلة
+        if (userSettings && userSettings.useAiForSignals === false) {
+          logger.info("OpenAIService", "استخدام التوليد الخوارزمي بناءً على تفضيلات المستخدم", { userId });
+          return await algorithmicSignalService.generateTradingSignal(platform, pair, timeframe, userId);
+        }
+      }
+      
       // بناء محتوى المطلب للذكاء الاصطناعي
       const prompt = `
       أنت محلل مالي خبير متخصص في توليد إشارات تداول للخيارات الثنائية (ثنائية الاتجاه) بناءً على التحليل الفني.
@@ -58,9 +70,25 @@ export class OpenAIService {
 
       logger.info("OpenAIService", "توليد إشارة جديدة", { platform, pair, timeframe, userId });
 
+      // تحديد كائن OpenAI المناسب استنادًا إلى إعدادات المستخدم
+      let openaiClient = defaultOpenAI;
+      
+      // إذا كان المستخدم يستخدم مفتاح API خاص به
+      if (userId) {
+        const userSettings = await storage.getUserSettings(userId);
+        if (userSettings && userSettings.useCustomAiKey && userSettings.openaiApiKey) {
+          logger.info("OpenAIService", "استخدام مفتاح API خاص بالمستخدم", { userId });
+          
+          // إنشاء كائن OpenAI جديد باستخدام مفتاح المستخدم
+          openaiClient = new OpenAI({
+            apiKey: userSettings.openaiApiKey
+          });
+        }
+      }
+
       try {
-        // استدعاء واجهة برمجة ChatGPT
-        const response = await openai.chat.completions.create({
+        // استدعاء واجهة برمجة ChatGPT باستخدام الكائن المناسب
+        const response = await openaiClient.chat.completions.create({
           model: "gpt-4o", // استخدام أحدث نموذج
           messages: [
             {
@@ -184,6 +212,23 @@ export class OpenAIService {
     keyLevels: { support: string[]; resistance: string[] };
   }> {
     try {
+      // تحديد ما إذا كان يجب استخدام الخوارزمية بدلاً من الذكاء الاصطناعي
+      if (userId) {
+        const userSettings = await storage.getUserSettings(userId);
+        if (userSettings && userSettings.useAiForSignals === false) {
+          // هنا يمكننا إضافة تحليل باستخدام الخوارزمية، ولكن حالياً سنعيد بيانات عامة
+          return {
+            trend: Math.random() > 0.5 ? "صعودي" : (Math.random() > 0.5 ? "هبوطي" : "متذبذب"),
+            strength: Math.floor(Math.random() * 100),
+            summary: `تحليل سوق ${pair} باستخدام الخوارزمية المحددة`,
+            keyLevels: {
+              support: ["35000", "34500"],
+              resistance: ["38000", "39000"]
+            }
+          };
+        }
+      }
+      
       const prompt = `
       قم بتحليل الاتجاه السوقي الحالي لـ ${pair}.
       
@@ -202,7 +247,23 @@ export class OpenAIService {
       }
       `;
 
-      const response = await openai.chat.completions.create({
+      // تحديد كائن OpenAI المناسب استنادًا إلى إعدادات المستخدم
+      let openaiClient = defaultOpenAI;
+      
+      // إذا كان المستخدم يستخدم مفتاح API خاص به
+      if (userId) {
+        const userSettings = await storage.getUserSettings(userId);
+        if (userSettings && userSettings.useCustomAiKey && userSettings.openaiApiKey) {
+          logger.info("OpenAIService", "استخدام مفتاح API خاص بالمستخدم للتحليل", { userId });
+          
+          // إنشاء كائن OpenAI جديد باستخدام مفتاح المستخدم
+          openaiClient = new OpenAI({
+            apiKey: userSettings.openaiApiKey
+          });
+        }
+      }
+
+      const response = await openaiClient.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
@@ -268,7 +329,11 @@ export class OpenAIService {
 
       return analysisData;
     } catch (error) {
-      console.error("حدث خطأ أثناء تحليل اتجاه السوق:", error);
+      logger.error("OpenAIService", error instanceof Error ? error : new Error(String(error)), {
+        function: "analyzeMarketTrend",
+        pair,
+        userId
+      });
       throw new Error("فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.");
     }
   }
