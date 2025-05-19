@@ -14,11 +14,10 @@ console.log('متغيرات البيئة المتاحة:', {
   SUPABASE_ANON_KEY_DEFINED: Boolean(process.env.SUPABASE_ANON_KEY)
 });
 
-// تعيين قيم افتراضية للتطوير المحلي (سيتم استخدامها فقط إذا لم يتم تعيين المتغيرات البيئية)
-// مع استخدام القيم الصحيحة من ملف .env
-const DATABASE_URL = process.env.DATABASE_URL || "postgresql://postgres:Ay--772293228@db.iqeulzwbiovlsuytoxvk.supabase.co:5432/postgres";
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://iqeulzwbiovlsuytoxvk.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxZXVsendiaW92bHN1eXRveHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2ODkxMzcsImV4cCI6MjA2MzI2NTEzN30.9Z8QjE9FNYAZYoRmi6iSCmxfIA0-yKSqOoOeXlhebjY";
+// استخدام متغيرات البيئة للاتصال بقاعدة بيانات Supabase
+const DATABASE_URL = process.env.DATABASE_URL;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 // التحقق من توفر متغيرات البيئة اللازمة
 if (!DATABASE_URL) {
