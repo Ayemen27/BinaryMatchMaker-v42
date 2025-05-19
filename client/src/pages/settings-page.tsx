@@ -128,6 +128,8 @@ export default function SettingsPage() {
   const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
     queryKey: ['/api/user/settings'],
     enabled: !!user, // تفعيل الاستعلام فقط إذا كان المستخدم مسجل دخوله
+    staleTime: 0, // عدم استخدام البيانات المخزنة مؤقتًا
+    gcTime: 0, // عدم تخزين البيانات بشكل مؤقت (استبدلنا cacheTime بـ gcTime في الإصدار الجديد)
     onSuccess: (data) => {
       console.log('تم جلب إعدادات المستخدم بنجاح:', data);
       
@@ -231,39 +233,7 @@ export default function SettingsPage() {
     },
   });
   
-  // إضافة نموذج للإعدادات العامة
-  const generalSettingsForm = useForm({
-    defaultValues: {
-      theme: 'dark',
-      defaultAsset: 'BTC/USDT',
-      defaultTimeframe: '1h',
-      chartType: 'candlestick',
-      showTradingTips: true,
-      autoRefreshData: true,
-      refreshInterval: 60,
-    },
-  });
-
-  // استعلام لجلب إعدادات المستخدم
-  const { data: userSettings, isLoading } = useQuery({
-    queryKey: ['/api/user/settings'],
-    enabled: !!user,
-    refetchOnWindowFocus: false,
-    onSuccess: (data) => {
-      if (data) {
-        // تحديث نموذج الإعدادات بالبيانات الواردة من الخادم
-        generalSettingsForm.reset({
-          theme: data.theme || 'dark',
-          defaultAsset: data.defaultAsset || 'BTC/USDT',
-          defaultTimeframe: data.defaultTimeframe || '1h',
-          chartType: data.chartType || 'candlestick',
-          showTradingTips: data.showTradingTips === undefined ? true : data.showTradingTips,
-          autoRefreshData: data.autoRefreshData === undefined ? true : data.autoRefreshData,
-          refreshInterval: data.refreshInterval || 60,
-        });
-      }
-    }
-  });
+  // لا نحتاج إلى نموذج إضافي للإعدادات العامة، نستخدم فقط النموذج الأساسي settingsForm
 
   // إتاحة تعديلات الإعدادات - هذا الدالة تُستخدم لحفظ التغييرات عند تعديل أي حقل
   const settingsMutation = useMutation({
