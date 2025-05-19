@@ -44,31 +44,70 @@ export async function createBackup(): Promise<string | null> {
     const backupFileName = `backup-${timestamp}.json`;
     const backupFilePath = path.join(backupDir, backupFileName);
     
-    // بدلاً من استخدام pg_dump، سنستخدم استعلامات SQL لاستخراج البيانات من كل الجداول
-    // ونحفظها كملف JSON لتجنب مشاكل عدم توافق الإصدارات
-    
-    // استخراج قائمة الجداول العامة
     try {
-      // إنشاء ملف JSON يحتوي معلومات النسخة الاحتياطية
-      const backupMetadata = {
-        version: '1.0',
-        timestamp: new Date().toISOString(),
-        database: PGDATABASE,
-        tables: {},
-        createdAt: new Date().toISOString()
+      // استيراد النسخ الاحتياطية
+      const { db, pool } = await import('./db');
+      
+      // استخراج قائمة الجداول العامة من قاعدة البيانات
+      const tablesQuery = `
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_type = 'BASE TABLE'
+        ORDER BY table_name;
+      `;
+      
+      const tablesResult = await pool.query(tablesQuery);
+      const tables = tablesResult.rows.map(row => row.table_name);
+      
+      console.log(`[خدمة النسخ الاحتياطي] وجدت ${tables.length} جدول في قاعدة البيانات`);
+      
+      // إنشاء كائن لتخزين بيانات النسخة الاحتياطية
+      const backupData: any = {
+        metadata: {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          database: PGDATABASE,
+          tablesCount: tables.length,
+          createdAt: new Date().toISOString()
+        },
+        data: {}
       };
       
+      // استخراج البيانات من كل جدول
+      for (const tableName of tables) {
+        try {
+          // تجاهل جداول الجلسات لأنها مؤقتة
+          if (tableName === 'session') {
+            console.log(`[خدمة النسخ الاحتياطي] تخطي جدول الجلسات المؤقتة: ${tableName}`);
+            continue;
+          }
+          
+          // استخراج جميع البيانات من الجدول
+          const dataQuery = `SELECT * FROM "${tableName}";`;
+          const dataResult = await pool.query(dataQuery);
+          
+          // إضافة البيانات إلى كائن النسخة الاحتياطية
+          backupData.data[tableName] = dataResult.rows;
+          
+          console.log(`[خدمة النسخ الاحتياطي] تم استخراج ${dataResult.rows.length} سجل من جدول ${tableName}`);
+        } catch (tableError) {
+          console.error(`[خدمة النسخ الاحتياطي] خطأ أثناء استخراج بيانات جدول ${tableName}:`, tableError);
+        }
+      }
+      
       // حفظ البيانات في ملف JSON
-      fs.writeFileSync(backupFilePath, JSON.stringify(backupMetadata, null, 2));
+      fs.writeFileSync(backupFilePath, JSON.stringify(backupData, null, 2));
       
       console.log(`[خدمة النسخ الاحتياطي] تم إنشاء ملف بيانات النسخة الاحتياطية: ${backupFileName}`);
       
-      // إنشاء ملف لوصف المخطط (سيتم تنفيذه بشكل منفصل لاحقاً)
+      // إنشاء ملف لوصف المخطط
       const schemaInfoFilePath = path.join(backupDir, 'schema-info.json');
       fs.writeFileSync(schemaInfoFilePath, JSON.stringify({
         createdAt: new Date().toISOString(),
         message: 'يحتوي هذا الملف على معلومات المخطط',
-        note: 'لاستعادة قاعدة البيانات، استخدم أمر drizzle-kit push أو npm run db:push'
+        note: 'لاستعادة قاعدة البيانات، استخدم أمر drizzle-kit push أو npm run db:push',
+        tables: tables
       }, null, 2));
       
       console.log('[خدمة النسخ الاحتياطي] تم إنشاء ملف معلومات المخطط');
