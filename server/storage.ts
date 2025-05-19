@@ -404,53 +404,25 @@ export class DatabaseStorage implements IStorage {
   
   // User signals methods
   async getUserSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]> {
-    // استعلام الحصول على إشارات المستخدم
-    const results = await db.execute(
-      sql`SELECT us.*, s.* 
-          FROM user_signals us
-          INNER JOIN signals s ON us.signal_id = s.id
-          WHERE us.user_id = ${userId}
-          ORDER BY us.created_at DESC`
-    );
-    
-    // تحويل البيانات المستخرجة إلى النموذج المطلوب
-    return results.map(row => {
-      const userSignal: UserSignal = {
-        id: row.id,
-        userId: row.user_id,
-        signalId: row.signal_id,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-        isFavorite: row.is_favorite,
-        isTaken: row.is_taken,
-        result: row.result,
-        notes: row.notes
-      };
+    try {
+      // استخدام استعلام drizzle المباشر
+      const results = await db.select()
+        .from(userSignals)
+        .innerJoin(signals, eq(userSignals.signalId, signals.id))
+        .where(eq(userSignals.userId, userId))
+        .orderBy(desc(userSignals.createdAt));
       
-      const signal: Signal = {
-        id: row.id,
-        type: row.type,
-        asset: row.asset,
-        entryPrice: row.entry_price,
-        targetPrice: row.target_price,
-        stopLoss: row.stop_loss,
-        timeframe: row.timeframe,
-        expiryTime: row.expiry_time ? new Date(row.expiry_time) : null,
-        status: row.status,
-        result: row.result,
-        createdAt: new Date(row.created_at),
-        updatedAt: new Date(row.updated_at),
-        createdBy: row.created_by,
-        confidence: row.confidence,
-        analysis: row.analysis,
-        isPublic: row.is_public
-      };
-      
-      return {
-        ...userSignal,
-        signal
-      };
-    });
+      // تحويل النتائج إلى التنسيق المطلوب
+      return results.map(({ userSignals: us, signals: s }) => {
+        return {
+          ...us,
+          signal: s
+        };
+      });
+    } catch (error) {
+      console.error("خطأ في استرجاع إشارات المستخدم:", error);
+      return [];
+    }
   }
   
   async getUserFavoriteSignals(userId: number): Promise<(UserSignal & { signal: Signal })[]> {
