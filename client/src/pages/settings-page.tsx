@@ -62,6 +62,18 @@ interface UserSettings {
   updatedAt: string;
 }
 
+// تعريف مخطط إعدادات المستخدم
+const userSettingsSchema = z.object({
+  theme: z.string().default('dark'),
+  defaultAsset: z.string().default('BTC/USDT'),
+  defaultTimeframe: z.string().default('1h'),
+  defaultPlatform: z.string().optional(),
+  chartType: z.string().default('candlestick'),
+  showTradingTips: z.boolean().default(true),
+  autoRefreshData: z.boolean().default(true),
+  refreshInterval: z.number().default(60),
+});
+
 const profileFormSchema = z.object({
   username: z.string().min(3, {
     message: "Username must be at least 3 characters.",
@@ -115,13 +127,59 @@ export default function SettingsPage() {
   const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
     queryKey: ['/api/user/settings'],
     enabled: !!user, // تفعيل الاستعلام فقط إذا كان المستخدم مسجل دخوله
+    onSuccess: (data) => {
+      console.log('تم جلب إعدادات المستخدم بنجاح:', data);
+      
+      // تحديث إعدادات واجهة المستخدم عند جلب البيانات بنجاح
+      if (data) {
+        // تحديث نموذج إعدادات المستخدم
+        settingsForm.reset({
+          theme: data.theme || 'dark',
+          defaultAsset: data.defaultAsset || 'BTC/USDT',
+          defaultTimeframe: data.defaultTimeframe || '1h',
+          defaultPlatform: data.defaultPlatform || '',
+          chartType: data.chartType || 'candlestick',
+          showTradingTips: data.showTradingTips ?? true,
+          autoRefreshData: data.autoRefreshData ?? true,
+          refreshInterval: data.refreshInterval || 60,
+        });
+      }
+    },
     onError: (error) => {
-      // في حالة الخطأ، نسجل الخطأ ولا نعرضه للمستخدم
       console.error('خطأ في جلب إعدادات المستخدم:', error);
+      toast({
+        title: t('loadingError') || 'خطأ في التحميل',
+        description: t('settingsLoadError') || 'حدث خطأ أثناء تحميل الإعدادات',
+        variant: "destructive",
+      });
     }
   });
   
-  // استخدام حالة لإعدادات الإشعارات مع تحديثها من البيانات الفعلية
+  // نموذج إعدادات المستخدم العامة
+  const settingsForm = useForm<{
+    theme: string;
+    defaultAsset: string;
+    defaultTimeframe: string;
+    defaultPlatform: string;
+    chartType: string;
+    showTradingTips: boolean;
+    autoRefreshData: boolean;
+    refreshInterval: number;
+  }>({
+    resolver: zodResolver(userSettingsSchema),
+    defaultValues: {
+      theme: 'dark',
+      defaultAsset: 'BTC/USDT',
+      defaultTimeframe: '1h',
+      defaultPlatform: '',
+      chartType: 'candlestick',
+      showTradingTips: true,
+      autoRefreshData: true,
+      refreshInterval: 60,
+    },
+  });
+  
+  // استخدام حالة لإعدادات الإشعارات
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
     email: true,
     push: true,
@@ -130,20 +188,6 @@ export default function SettingsPage() {
     marketAlerts: false,
     accountAlerts: true,
   });
-
-  // تحديث إعدادات الإشعارات عند استرداد البيانات من الخادم
-  useEffect(() => {
-    if (userSettingsData) {
-      // للتعامل مع الإعدادات من الخادم بشكل مرن
-      // هنا نستخدم الإعدادات الافتراضية إذا لم تكن البيانات متوفرة
-      setNotificationSettings(prev => ({
-        ...prev,
-        // استخدام الإعدادات الموجودة في userSettingsData إذا كانت متوفرة،
-        // وإلا استخدام القيم الحالية في الحالة
-        // تعليق: ربما تكون أسماء الخصائص مختلفة عما نتوقع
-      }));
-    }
-  }, [userSettingsData]);
   
   // API Key form
   const apiKeyForm = useForm<ApiKeyFormValues>({
@@ -186,6 +230,67 @@ export default function SettingsPage() {
     },
   });
   
+  // إضافة نموذج للإعدادات العامة
+  const generalSettingsForm = useForm({
+    defaultValues: {
+      theme: 'dark',
+      defaultAsset: 'BTC/USDT',
+      defaultTimeframe: '1h',
+      chartType: 'candlestick',
+      showTradingTips: true,
+      autoRefreshData: true,
+      refreshInterval: 60,
+    },
+  });
+
+  // استعلام لجلب إعدادات المستخدم
+  const { data: userSettings, isLoading } = useQuery({
+    queryKey: ['/api/user/settings'],
+    enabled: !!user,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      if (data) {
+        // تحديث نموذج الإعدادات بالبيانات الواردة من الخادم
+        generalSettingsForm.reset({
+          theme: data.theme || 'dark',
+          defaultAsset: data.defaultAsset || 'BTC/USDT',
+          defaultTimeframe: data.defaultTimeframe || '1h',
+          chartType: data.chartType || 'candlestick',
+          showTradingTips: data.showTradingTips === undefined ? true : data.showTradingTips,
+          autoRefreshData: data.autoRefreshData === undefined ? true : data.autoRefreshData,
+          refreshInterval: data.refreshInterval || 60,
+        });
+      }
+    }
+  });
+
+  // إتاحة تعديلات الإعدادات - هذا الدالة تُستخدم لحفظ التغييرات عند تعديل أي حقل
+  const settingsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest("PATCH", "/api/user/settings", data)
+        .then(res => res.json());
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/settings'] });
+      toast({
+        title: t('settingsUpdated') || 'تم تحديث الإعدادات',
+        description: t('settingsUpdateSuccess') || 'تم حفظ الإعدادات بنجاح',
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: t('updateFailed') || 'فشل التحديث',
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+
+  // دالة لحفظ الإعدادات عند تغييرها
+  const saveSettings = (data: any) => {
+    settingsMutation.mutate(data);
+  };
+
   // Profile mutation
   const profileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
