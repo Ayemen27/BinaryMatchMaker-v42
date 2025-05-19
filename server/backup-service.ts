@@ -152,10 +152,24 @@ export async function createBackup(): Promise<string | null> {
 export function startBackupSystem(intervalMinutes: number = 5): void {
   console.log("[خدمة النسخ الاحتياطي] تم بدء نظام النسخ الاحتياطي");
   
-  // محاولة إنشاء نسخة احتياطية مباشرة عند بدء النظام (بدون انتظار إذا فشلت)
-  createBackup().catch(err => {
-    console.error('[خدمة النسخ الاحتياطي] خطأ في النسخة الاحتياطية الأولية:', err);
-  });
+  // التحقق من وجود بيانات قبل إنشاء نسخة احتياطية عند بدء التشغيل
+  setTimeout(async () => {
+    try {
+      // التحقق من وجود مستخدمين قبل إنشاء نسخة احتياطية
+      const { pool } = await import('./db');
+      const usersResult = await pool.query('SELECT COUNT(*) as count FROM users');
+      const userCount = parseInt(usersResult.rows[0].count);
+      
+      if (userCount > 0) {
+        console.log(`[خدمة النسخ الاحتياطي] وجدت ${userCount} مستخدم في قاعدة البيانات، جاري إنشاء نسخة احتياطية...`);
+        await createBackup();
+      } else {
+        console.log('[خدمة النسخ الاحتياطي] لا يوجد مستخدمين في قاعدة البيانات، تخطي إنشاء النسخة الاحتياطية الأولية');
+      }
+    } catch (err) {
+      console.error('[خدمة النسخ الاحتياطي] خطأ أثناء التحقق من البيانات قبل إنشاء النسخة الاحتياطية الأولية:', err);
+    }
+  }, 5000); // انتظار 5 ثوانٍ للتأكد من اكتمال بدء النظام
   
   // جدولة النسخ الاحتياطي الدوري
   if (intervalMinutes > 0) {
@@ -163,7 +177,17 @@ export function startBackupSystem(intervalMinutes: number = 5): void {
     
     setInterval(async () => {
       try {
-        await createBackup();
+        // التحقق من وجود مستخدمين قبل إنشاء نسخة احتياطية دورية
+        const { pool } = await import('./db');
+        const usersResult = await pool.query('SELECT COUNT(*) as count FROM users');
+        const userCount = parseInt(usersResult.rows[0].count);
+        
+        if (userCount > 0) {
+          console.log(`[خدمة النسخ الاحتياطي الدوري] وجدت ${userCount} مستخدم في قاعدة البيانات، جاري إنشاء نسخة احتياطية...`);
+          await createBackup();
+        } else {
+          console.log('[خدمة النسخ الاحتياطي الدوري] لا يوجد مستخدمين في قاعدة البيانات، تخطي إنشاء النسخة الاحتياطية الدورية');
+        }
       } catch (error) {
         console.error('[خدمة النسخ الاحتياطي] خطأ في النسخة الاحتياطية الدورية:', error);
       }
