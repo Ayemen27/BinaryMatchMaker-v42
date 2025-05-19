@@ -43,6 +43,7 @@ export default function SignalGeneratorPage() {
   const [lastSignalTime, setLastSignalTime] = useState<Date | null>(null); // وقت آخر إشارة تم توليدها
   const [isMarketOpen, setIsMarketOpen] = useState<boolean>(true); // حالة السوق (مفتوح أو مغلق)
   const [scheduledSignal, setScheduledSignal] = useState<boolean>(false); // طلب إشارة عندما يفتح السوق
+  const [remainingSignals, setRemainingSignals] = useState<number | null>(null); // عدد الإشارات المتبقية للمستخدم المجاني
   
   // Fetch user settings to get AI preference
   const { data: userSettings } = useQuery<UserSettings>({
