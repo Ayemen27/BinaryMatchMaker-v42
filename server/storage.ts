@@ -195,6 +195,37 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUserSettings(userId: number, settings: Partial<UserSettings>): Promise<UserSettings> {
+    // 1. أولاً نتأكد من الحصول على الإعدادات الحالية
+    const currentSettings = await this.getUserSettings(userId);
+    
+    if (!currentSettings) {
+      // إذا لم تكن الإعدادات موجودة، قم بإنشائها بدلاً من التحديث
+      return this.createUserSettings({
+        userId,
+        // استخدام القيم الافتراضية المحددة في المخطط
+        theme: settings.theme || 'dark',
+        defaultAsset: settings.defaultAsset || 'BTC/USDT',
+        defaultTimeframe: settings.defaultTimeframe || '1h',
+        defaultPlatform: settings.defaultPlatform || '',
+        chartType: settings.chartType || 'candlestick',
+        showTradingTips: settings.showTradingTips !== undefined ? settings.showTradingTips : true,
+        autoRefreshData: settings.autoRefreshData !== undefined ? settings.autoRefreshData : true,
+        refreshInterval: settings.refreshInterval !== undefined ? settings.refreshInterval : 60,
+        // نسخ بقية الإعدادات من الكائن المرسل
+        useAiForSignals: settings.useAiForSignals !== undefined ? settings.useAiForSignals : true,
+        useCustomAiKey: settings.useCustomAiKey !== undefined ? settings.useCustomAiKey : false,
+        openaiApiKey: settings.openaiApiKey || null,
+      });
+    }
+    
+    // تحديد نوع الإعدادات التي يتم تحديثها (لتسهيل التنقيح)
+    console.log('تحديث إعدادات المستخدم', {
+      userId,
+      currentSettings: {...currentSettings, openaiApiKey: currentSettings.openaiApiKey ? '[موجود]' : null},
+      newSettings: {...settings, openaiApiKey: settings.openaiApiKey ? '[موجود]' : null},
+    });
+    
+    // 2. قم بتحديث الإعدادات الموجودة
     const [updatedSettings] = await db
       .update(userSettings)
       .set({
@@ -205,7 +236,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     if (!updatedSettings) {
-      throw new Error('User settings not found');
+      throw new Error('لم يتم العثور على إعدادات المستخدم');
     }
     
     return updatedSettings;
