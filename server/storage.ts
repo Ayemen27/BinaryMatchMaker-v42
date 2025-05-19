@@ -296,9 +296,6 @@ export class DatabaseStorage implements IStorage {
       updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
       // لا نضيف قيمة لـ updateValues لأننا نستخدم CURRENT_TIMESTAMP مباشرة في الاستعلام
       
-      // إضافة شرط where
-      updateValues.push(userId);
-      
       // إذا لم تكن هناك حقول للتحديث، أعد الإعدادات الحالية
       if (updateFields.length === 1) { // فقط updated_at
         return currentSettings;
@@ -308,11 +305,17 @@ export class DatabaseStorage implements IStorage {
       const query = `
         UPDATE user_settings 
         SET ${updateFields.join(', ')} 
-        WHERE user_id = $${paramIndex-1} 
+        WHERE user_id = $${paramIndex} 
         RETURNING *
       `;
       
+      // إضافة معرف المستخدم لشرط WHERE
+      updateValues.push(userId);
+      
       console.log(`تنفيذ استعلام تحديث إعدادات المستخدم: ${userId}`);
+      console.log(`استعلام: ${query}`);
+      console.log(`قيم المعلمات:`, updateValues);
+      
       const result = await db.query(query, updateValues);
       
       if (!result || result.length === 0) {
