@@ -1,0 +1,420 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-05-19T13:44:17.230Z",
+    "database": "neondb",
+    "tables": [
+      "users",
+      "user_settings",
+      "user_notification_settings",
+      "subscriptions",
+      "signals",
+      "user_signals",
+      "user_signal_usage",
+      "notifications",
+      "market_data"
+    ]
+  },
+  "data": {
+    "user_settings": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "theme": "dark",
+        "default_asset": "BTC/USDT",
+        "default_timeframe": "1h",
+        "default_platform": null,
+        "chart_type": "candlestick",
+        "show_trading_tips": true,
+        "auto_refresh_data": true,
+        "refresh_interval": 60,
+        "use_ai_for_signals": true,
+        "use_custom_ai_key": false,
+        "openai_api_key": null,
+        "created_at": "2025-05-19T13:37:30.679",
+        "updated_at": "2025-05-19T13:40:01.664"
+      }
+    ],
+    "signals": [
+      {
+        "id": 1,
+        "asset": "BTC/USDT",
+        "type": "buy",
+        "entry_price": "39681.28",
+        "target_price": "40871.72",
+        "stop_loss": "38887.65",
+        "accuracy": 91,
+        "time": "12:30",
+        "status": "active",
+        "indicators": [
+          "RSI",
+          "MACD"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "5m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-19T13:22:49.42",
+        "updated_at": "2025-05-19T13:22:49.42",
+        "completed_at": null,
+        "result": null
+      },
+      {
+        "id": 2,
+        "asset": "ETH/USDT",
+        "type": "sell",
+        "entry_price": "38124.38",
+        "target_price": "36980.65",
+        "stop_loss": "38886.87",
+        "accuracy": 90,
+        "time": "10:15",
+        "status": "active",
+        "indicators": [
+          "MA",
+          "MACD"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "5m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-19T13:22:49.947",
+        "updated_at": "2025-05-19T13:22:49.947",
+        "completed_at": null,
+        "result": null
+      },
+      {
+        "id": 3,
+        "asset": "SOL/USDT",
+        "type": "buy",
+        "entry_price": "39374.61",
+        "target_price": "40555.85",
+        "stop_loss": "38587.12",
+        "accuracy": 92,
+        "time": "09:45",
+        "status": "active",
+        "indicators": [
+          "RSI",
+          "Bollinger"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "5m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-19T13:22:50.196",
+        "updated_at": "2025-05-19T13:22:50.196",
+        "completed_at": null,
+        "result": null
+      },
+      {
+        "id": 4,
+        "asset": "XRP/USDT",
+        "type": "sell",
+        "entry_price": "38877.74",
+        "target_price": "37711.41",
+        "stop_loss": "39655.29",
+        "accuracy": 92,
+        "time": "15:20",
+        "status": "active",
+        "indicators": [
+          "MACD",
+          "OBV"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "5m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-19T13:22:50.439",
+        "updated_at": "2025-05-19T13:22:50.439",
+        "completed_at": null,
+        "result": null
+      },
+      {
+        "id": 5,
+        "asset": "DOGE/USDT",
+        "type": "buy",
+        "entry_price": "39647.24",
+        "target_price": "40836.66",
+        "stop_loss": "38854.30",
+        "accuracy": 93,
+        "time": "14:05",
+        "status": "active",
+        "indicators": [
+          "RSI",
+          "Stoch"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "5m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-19T13:22:50.673",
+        "updated_at": "2025-05-19T13:22:50.673",
+        "completed_at": null,
+        "result": null
+      },
+      {
+        "id": 6,
+        "asset": "BTC/USDT",
+        "type": "buy",
+        "entry_price": "38305.88",
+        "target_price": "39455.06",
+        "stop_loss": "37539.76",
+        "accuracy": 95,
+        "time": "أمس 12:30",
+        "status": "completed",
+        "indicators": [
+          "RSI",
+          "MACD"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "15m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-18T13:22:50.92",
+        "updated_at": "2025-05-18T13:22:50.92",
+        "completed_at": "2025-05-18T15:22:50.92",
+        "result": "success"
+      },
+      {
+        "id": 7,
+        "asset": "ETH/USDT",
+        "type": "sell",
+        "entry_price": "37064.83",
+        "target_price": "35952.89",
+        "stop_loss": "37806.13",
+        "accuracy": 90,
+        "time": "أمس 10:15",
+        "status": "completed",
+        "indicators": [
+          "MA",
+          "MACD"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "15m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-17T13:22:51.154",
+        "updated_at": "2025-05-17T13:22:51.154",
+        "completed_at": "2025-05-17T16:22:51.154",
+        "result": "success"
+      },
+      {
+        "id": 8,
+        "asset": "SOL/USDT",
+        "type": "buy",
+        "entry_price": "39048.5",
+        "target_price": "40219.96",
+        "stop_loss": "38267.53",
+        "accuracy": 86,
+        "time": "أمس 09:45",
+        "status": "completed",
+        "indicators": [
+          "RSI",
+          "Bollinger"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "15m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-16T13:22:51.396",
+        "updated_at": "2025-05-16T13:22:51.396",
+        "completed_at": "2025-05-16T17:22:51.396",
+        "result": "success"
+      },
+      {
+        "id": 9,
+        "asset": "XRP/USDT",
+        "type": "sell",
+        "entry_price": "38102.14",
+        "target_price": "36959.08",
+        "stop_loss": "38864.18",
+        "accuracy": 89,
+        "time": "أمس 15:20",
+        "status": "completed",
+        "indicators": [
+          "MACD",
+          "OBV"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "15m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-15T13:22:51.627",
+        "updated_at": "2025-05-15T13:22:51.627",
+        "completed_at": "2025-05-15T18:22:51.627",
+        "result": "success"
+      },
+      {
+        "id": 10,
+        "asset": "DOGE/USDT",
+        "type": "buy",
+        "entry_price": "39454.68",
+        "target_price": "40638.32",
+        "stop_loss": "38665.59",
+        "accuracy": 95,
+        "time": "أمس 14:05",
+        "status": "completed",
+        "indicators": [
+          "RSI",
+          "Stoch"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "15m",
+        "analysis": null,
+        "reason": null,
+        "created_by": null,
+        "is_public": true,
+        "created_at": "2025-05-14T13:22:51.866",
+        "updated_at": "2025-05-14T13:22:51.866",
+        "completed_at": "2025-05-14T19:22:51.866",
+        "result": "success"
+      },
+      {
+        "id": 11,
+        "asset": "BTC/USD",
+        "type": "buy",
+        "entry_price": "39332.56",
+        "target_price": "39627.55",
+        "stop_loss": "39155.56",
+        "accuracy": 92,
+        "time": "13:38",
+        "status": "active",
+        "indicators": [
+          "RSI",
+          "Moving Average",
+          "Stochastic"
+        ],
+        "platform": "IQ Option",
+        "timeframe": "1m",
+        "analysis": {
+          "reasoning": "كسر مستوى مقاومة هام مع إشارات إيجابية من RSI وMoving Average لزوج BTC/USD.",
+          "potentialProfit": "0.75%",
+          "riskRewardRatio": "1.67"
+        },
+        "reason": "كسر مستوى مقاومة هام مع إشارات إيجابية من RSI وMoving Average لزوج BTC/USD.",
+        "created_by": 1,
+        "is_public": true,
+        "created_at": "2025-05-19T13:38:08.578",
+        "updated_at": "2025-05-19T13:38:08.578",
+        "completed_at": null,
+        "result": null
+      }
+    ],
+    "user_signal_usage": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "date": "2025-05-19T00:00:00",
+        "signals_generated": 1,
+        "signals_viewed": 0,
+        "analysis_requested": 0
+      }
+    ],
+    "users": [
+      {
+        "id": 1,
+        "username": "Binarjoinanalytic",
+        "password": "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f",
+        "email": null,
+        "full_name": null,
+        "subscription_level": "free",
+        "subscription_expiry": null,
+        "language": "ar",
+        "created_at": "2025-05-19T13:37:30.43",
+        "last_login": null,
+        "avatar": null,
+        "phone_number": null,
+        "is_active": true
+      }
+    ],
+    "notifications": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "type": "signal",
+        "title": "تم إنشاء إشارة جديدة",
+        "message": "تم إنشاء إشارة شراء جديدة لـ BTC/USD على الإطار الزمني 1m",
+        "is_read": false,
+        "link": null,
+        "related_id": 11,
+        "created_at": "2025-05-19T13:38:09.81"
+      }
+    ],
+    "market_data": [
+      {
+        "id": 1,
+        "asset": "BTC/USD",
+        "price": "39323.00",
+        "change_24h": "-3.07%",
+        "high_24h": "40109.46",
+        "low_24h": "38536.54",
+        "volume_24h": "868593",
+        "market_cap": "201092447857",
+        "timestamp": "2025-05-19T13:38:08.33",
+        "data_source": "Algorithmic Model"
+      }
+    ],
+    "user_notification_settings": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "email_notifications": true,
+        "push_notifications": true,
+        "signal_alerts": true,
+        "market_updates": true,
+        "account_alerts": true,
+        "promotional_emails": false,
+        "created_at": "2025-05-19T13:37:30.913",
+        "updated_at": "2025-05-19T13:37:30.913"
+      }
+    ],
+    "user_signals": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "signal_id": 11,
+        "is_favorite": false,
+        "is_taken": false,
+        "notes": null,
+        "result": null,
+        "created_at": "2025-05-19T13:38:09.581",
+        "updated_at": "2025-05-19T13:38:09.581"
+      }
+    ],
+    "subscriptions": [
+      {
+        "id": 1,
+        "user_id": 1,
+        "type": "free",
+        "start_date": "2025-05-19T13:37:31.145",
+        "end_date": null,
+        "is_active": true,
+        "daily_signal_limit": 3,
+        "transaction_id": null,
+        "payment_method": null,
+        "amount": null,
+        "currency": null,
+        "auto_renew": false,
+        "created_at": "2025-05-19T13:37:31.145",
+        "updated_at": "2025-05-19T13:37:31.145"
+      }
+    ]
+  }
+}

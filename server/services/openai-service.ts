@@ -186,14 +186,26 @@ export class OpenAIService {
           service: "openai"
         }, userId);
         
-        // في حالة تجاوز الحصة أو مشاكل مفتاح API، نلقي خطأ محدد
+        // تحليل نوع الخطأ لإعطاء رسالة مفيدة للمستخدم
+        const errorMessage = openAIError instanceof Error ? openAIError.message : String(openAIError);
         const errorObj = openAIError as any; // تحويل نوع الخطأ لاستخراج الخصائص بشكل آمن
-        if (errorObj?.code === 'insufficient_quota' || errorObj?.code === 'invalid_api_key') {
-          throw new Error("مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.");
+        
+        if (errorMessage.includes("exceeded your current quota") || errorObj?.code === 'insufficient_quota') {
+          // خطأ تجاوز حد الاستخدام
+          throw new Error("مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.");
+        } else if (errorMessage.includes("invalid api key") || errorObj?.code === 'invalid_api_key') {
+          // خطأ في مفتاح API
+          throw new Error("مشكلة في مفتاح الذكاء الاصطناعي: المفتاح غير صالح أو منتهي الصلاحية. يرجى التواصل مع الدعم الفني لتحديث المفتاح.");
+        } else if (errorMessage.includes("rate limit") || errorObj?.code === 'rate_limit_exceeded') {
+          // خطأ تجاوز معدل الاستخدام
+          throw new Error("تم تجاوز الحد الأقصى لعدد طلبات الذكاء الاصطناعي. يرجى المحاولة لاحقًا أو استخدام الخوارزميات التقليدية مؤقتًا.");
+        } else if (errorMessage.includes("server error") || errorObj?.code?.includes('server')) {
+          // خطأ في الخادم
+          throw new Error("خدمة الذكاء الاصطناعي غير متاحة حاليًا. يرجى المحاولة لاحقًا أو استخدام الخوارزميات التقليدية لتوليد الإشارات.");
         }
         
-        // إعادة إلقاء الخطأ الأصلي إذا كان خطأً آخر
-        throw new Error("فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.");
+        // إعادة إلقاء الخطأ الأصلي مع معلومات إضافية إذا كان خطأً آخر
+        throw new Error("تعذر استخدام خدمة الذكاء الاصطناعي. يرجى تجربة استخدام الخوارزميات التقليدية بدلاً من ذلك.");
       }
     } catch (error) {
       // تسجيل أي خطأ آخر خارج عملية OpenAI
