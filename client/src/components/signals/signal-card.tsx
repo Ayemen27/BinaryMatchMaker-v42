@@ -26,25 +26,33 @@ export function SignalCard({ signal }: SignalCardProps) {
   const typeConfig = {
     buy: {
       icon: TrendingUp,
-      colorClass: "bg-success/20 text-success border-success",
-      gradientClass: "from-success/10 to-success/0",
-      badgeClass: "bg-success/20 text-success hover:bg-success/30",
+      // Using vibrant green colors like in Binance
+      colorClass: "bg-[#16c784] text-white border-[#16c784]",
+      gradientClass: "from-[#16c784]/10 to-transparent",
+      badgeClass: "bg-[#16c784] text-white hover:bg-[#0fb976]",
       // Signal color theme for buy
-      borderClass: "border-success/30 dark:border-success/50",
-      headerClass: "bg-success/5 dark:bg-success/10",
-      highlightClass: "text-success font-semibold",
-      accuracyBarClass: "bg-success"
+      borderClass: "border-[#16c784]/50",
+      headerClass: "bg-[#16c784]/5",
+      highlightClass: "text-[#16c784] font-semibold",
+      accuracyBarClass: "bg-[#16c784]",
+      bgClass: "bg-[#effcf6]", // Light background for light mode
+      darkBgClass: "dark:bg-[#071f13]", // Dark background for dark mode
+      percentageClass: "text-[#16c784]"
     },
     sell: {
       icon: TrendingDown,
-      colorClass: "bg-destructive/20 text-destructive border-destructive",
-      gradientClass: "from-destructive/10 to-destructive/0",
-      badgeClass: "bg-destructive/20 text-destructive hover:bg-destructive/30",
+      // Using vibrant red colors like in Binance
+      colorClass: "bg-[#ea3943] text-white border-[#ea3943]",
+      gradientClass: "from-[#ea3943]/10 to-transparent",
+      badgeClass: "bg-[#ea3943] text-white hover:bg-[#d5323b]",
       // Signal color theme for sell
-      borderClass: "border-destructive/30 dark:border-destructive/50",
-      headerClass: "bg-destructive/5 dark:bg-destructive/10",
-      highlightClass: "text-destructive font-semibold",
-      accuracyBarClass: "bg-destructive"
+      borderClass: "border-[#ea3943]/50",
+      headerClass: "bg-[#ea3943]/5",
+      highlightClass: "text-[#ea3943] font-semibold",
+      accuracyBarClass: "bg-[#ea3943]",
+      bgClass: "bg-[#fdf1f1]", // Light background for light mode
+      darkBgClass: "dark:bg-[#230d0d]", // Dark background for dark mode
+      percentageClass: "text-[#ea3943]"
     }
   };
   
@@ -92,17 +100,18 @@ export function SignalCard({ signal }: SignalCardProps) {
       "rounded-lg overflow-hidden transition-all hover:shadow-md border",
       isActive 
         ? signal.type === 'buy'
-          ? "border-success/20 dark:border-success/30" 
-          : "border-destructive/20 dark:border-destructive/30"
+          ? "border-[#16c784]/30" 
+          : "border-[#ea3943]/30"
         : "border-border/10 dark:border-border/5 opacity-85",
-      "bg-card dark:bg-card/95"
+      signal.type === 'buy' ? config.bgClass : config.bgClass,
+      signal.type === 'buy' ? config.darkBgClass : config.darkBgClass
     )}>
       {/* Header */}
       <div className={cn(
         "p-4",
         signal.type === 'buy' 
-          ? "bg-gradient-to-br from-success/10 to-transparent dark:from-success/15 dark:to-transparent" 
-          : "bg-gradient-to-br from-destructive/10 to-transparent dark:from-destructive/15 dark:to-transparent"
+          ? "bg-gradient-to-br from-[#16c784]/5 to-transparent dark:from-[#16c784]/10 dark:to-transparent" 
+          : "bg-gradient-to-br from-[#ea3943]/5 to-transparent dark:from-[#ea3943]/10 dark:to-transparent"
       )}>
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center space-x-2">
@@ -120,8 +129,8 @@ export function SignalCard({ signal }: SignalCardProps) {
               className={cn(
                 "flex items-center px-2.5 py-1 gap-1.5 transition-colors shadow-sm", 
                 signal.type === 'buy'
-                  ? "bg-success/15 dark:bg-success/25 text-success border-success/30 dark:border-success/40 font-medium"
-                  : "bg-destructive/15 dark:bg-destructive/25 text-destructive border-destructive/30 dark:border-destructive/40 font-medium"
+                  ? "bg-[#16c784] text-white border-[#16c784]/30 font-medium"
+                  : "bg-[#ea3943] text-white border-[#ea3943]/30 font-medium"
               )}
             >
               <TypeIcon className="h-3.5 w-3.5" />
@@ -146,7 +155,7 @@ export function SignalCard({ signal }: SignalCardProps) {
             </p>
             <p className={cn(
               "font-semibold", 
-              signal.type === 'buy' ? "text-success/90 dark:text-success/80" : "text-destructive/90 dark:text-destructive/80"
+              signal.type === 'buy' ? "text-[#16c784]" : "text-[#ea3943]"
             )}>{signal.targetPrice}</p>
           </div>
           <div>
@@ -154,14 +163,14 @@ export function SignalCard({ signal }: SignalCardProps) {
               <AlertTriangle className="h-3 w-3" />
               {t('stopLoss')}
             </p>
-            <p className="font-semibold text-destructive/90 dark:text-destructive/80">{signal.stopLoss}</p>
+            <p className="font-semibold text-[#ea3943]">{signal.stopLoss}</p>
           </div>
           <div>
             <p className="text-muted-foreground text-xs flex items-center gap-1 mb-1">
               <BarChart3 className="h-3 w-3" />
               {t('potentialProfit')}
             </p>
-            <p className="font-semibold text-success/90 dark:text-success/80">+{profitPercentage}%</p>
+            <p className="font-semibold text-[#16c784]">+{profitPercentage}%</p>
           </div>
         </div>
         
@@ -171,7 +180,7 @@ export function SignalCard({ signal }: SignalCardProps) {
             <span className="text-muted-foreground">{t('signalAccuracy')}</span>
             <span className={cn(
               "font-medium",
-              signal.type === 'buy' ? "text-success dark:text-success/90" : "text-destructive dark:text-destructive/90"
+              signal.type === 'buy' ? "text-[#16c784]" : "text-[#ea3943]"
             )}>{signal.accuracy}%</span>
           </div>
           <div className="w-full bg-muted/50 dark:bg-muted/30 rounded-full h-2 overflow-hidden">
@@ -179,8 +188,8 @@ export function SignalCard({ signal }: SignalCardProps) {
               className={cn(
                 "h-2 rounded-full shadow-inner", 
                 signal.type === 'buy' 
-                  ? "bg-success/80 dark:bg-success/90" 
-                  : "bg-destructive/80 dark:bg-destructive/90"
+                  ? "bg-[#16c784]" 
+                  : "bg-[#ea3943]"
               )} 
               style={{ width: `${signal.accuracy}%` }}
             ></div>
@@ -193,7 +202,7 @@ export function SignalCard({ signal }: SignalCardProps) {
             {signal.indicators.map((indicator, index) => (
               <span 
                 key={index} 
-                className="px-2 py-0.5 border-border/30 dark:border-border/20 bg-background/60 dark:bg-background/30 border rounded-md text-xs text-foreground/90"
+                className="px-2 py-0.5 border-border/30 dark:border-border/20 bg-background/80 dark:bg-background/30 border rounded-md text-xs text-foreground/90"
               >
                 {indicator}
               </span>
@@ -203,7 +212,7 @@ export function SignalCard({ signal }: SignalCardProps) {
       </div>
       
       {/* Footer */}
-      <div className="px-4 py-2.5 flex justify-between items-center border-t border-border/10 dark:border-border/5 bg-card dark:bg-card/95">
+      <div className="px-4 py-2.5 flex justify-between items-center border-t border-border/10 dark:border-border/5 bg-white dark:bg-card/95">
         <span className="text-xs text-muted-foreground flex items-center">
           <Clock className="h-3 w-3 mr-1.5" />
           {signal.time}
@@ -211,7 +220,12 @@ export function SignalCard({ signal }: SignalCardProps) {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-xs h-8 gap-1 hover:bg-primary/5 dark:hover:bg-primary/10 text-primary"
+          className={cn(
+            "text-xs h-8 gap-1",
+            signal.type === 'buy'
+              ? "text-[#16c784] hover:bg-[#16c784]/10"
+              : "text-[#ea3943] hover:bg-[#ea3943]/10"
+          )}
         >
           {t('details')}
           <ArrowRight className="h-3 w-3" />
