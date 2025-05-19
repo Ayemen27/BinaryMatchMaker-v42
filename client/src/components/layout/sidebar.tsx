@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
 import { 
   LayoutDashboard, LineChart, Activity, History, 
-  Settings, Crown, ChevronRight
+  Settings, Crown, ChevronRight, Cpu, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -31,6 +31,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       icon: Activity, 
       current: location === '/signals',
       badge: 3 
+    },
+    { 
+      name: t('signalGenerator'), 
+      href: '/signal-generator', 
+      icon: Cpu, 
+      current: location === '/signal-generator'
     },
     { 
       name: t('marketAnalysis'), 

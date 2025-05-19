@@ -1,0 +1,223 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/hooks/use-auth';
+import { Layout } from '@/components/layout/layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, BarChart2, Award } from 'lucide-react';
+import { SignalCard } from '@/components/signals/signal-card';
+import { Signal } from '@/types';
+import { Helmet } from 'react-helmet';
+
+export default function SignalGeneratorPage() {
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedSignal, setGeneratedSignal] = useState<Signal | null>(null);
+  
+  // Form states
+  const [platform, setPlatform] = useState<string>('');
+  const [pair, setPair] = useState<string>('');
+  const [timeframe, setTimeframe] = useState<string>('');
+  
+  // Available platforms, pairs, and timeframes
+  const platforms = ['Binance', 'IQ Option', 'Olymp Trade', 'Pocket Option', 'Deriv'];
+  const pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD', 'XRP/USD', 'BNB/USD', 'SOL/USD'];
+  const timeframes = ['1m', '5m', '15m', '30m', '1h', '4h', '1d'];
+  
+  const handleGenerateSignal = async () => {
+    // Validate form
+    if (!platform || !pair || !timeframe) {
+      toast({
+        title: t('formError'),
+        description: t('selectAllFields'),
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    // Start loading
+    setIsGenerating(true);
+    
+    try {
+      // In a real implementation, this would make an API call to the backend
+      // to generate a signal using AI based on the selected parameters
+      
+      // Simulate a delay (remove in production)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Dummy signal data (in production, this would come from the API)
+      const newSignal: Signal = {
+        id: Date.now(),
+        asset: pair,
+        type: Math.random() > 0.5 ? 'buy' : 'sell',
+        entryPrice: `$${(Math.random() * 1000).toFixed(2)}`,
+        targetPrice: `$${(Math.random() * 1500).toFixed(2)}`,
+        stopLoss: `$${(Math.random() * 800).toFixed(2)}`,
+        accuracy: 90 + Math.floor(Math.random() * 8), // 90-98% accuracy
+        time: new Date().toISOString(),
+        status: 'active',
+        indicators: ['RSI', 'MACD', 'Bollinger Bands'],
+        createdAt: new Date(),
+        result: null
+      };
+      
+      setGeneratedSignal(newSignal);
+      
+      toast({
+        title: t('signalGenerated'),
+        description: t('signalGeneratedDesc'),
+      });
+    } catch (error) {
+      toast({
+        title: t('errorGeneratingSignal'),
+        description: t('tryAgainLater'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  
+  return (
+    <Layout>
+      <Helmet>
+        <title>Binarjoin Analytics | {t('signalGenerator')}</title>
+        <meta name="description" content={t('signalGeneratorDesc')} />
+      </Helmet>
+      
+      <div className="container py-6">
+        <h1 className="text-3xl font-bold mb-6">{t('signalGenerator')}</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Signal Generation Form */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>{t('generateAiSignal')}</CardTitle>
+              <CardDescription>{t('selectOptionsBelow')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Platform Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="platform">{t('platform')}</Label>
+                    <Select value={platform} onValueChange={setPlatform}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectPlatform')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {platforms.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Asset Pair Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="pair">{t('assetPair')}</Label>
+                    <Select value={pair} onValueChange={setPair}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectPair')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {pairs.map((p) => (
+                          <SelectItem key={p} value={p}>{p}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Timeframe Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timeframe">{t('timeframe')}</Label>
+                    <Select value={timeframe} onValueChange={setTimeframe}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectTimeframe')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeframes.map((tf) => (
+                          <SelectItem key={tf} value={tf}>{tf}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* Generate Button */}
+                <Button 
+                  className="w-full" 
+                  onClick={handleGenerateSignal}
+                  disabled={isGenerating || !platform || !pair || !timeframe}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('generating')}
+                    </>
+                  ) : (
+                    <>{t('generateSignal')}</>
+                  )}
+                </Button>
+                
+                {/* Subscription Notice for Free Users */}
+                {user?.subscriptionLevel === 'free' && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {t('freeAccountLimited')} <a href="/settings" className="text-primary hover:underline">{t('upgradePlan')}</a>
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Signal Benefits */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('aiSignalBenefits')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <div className="bg-primary/20 p-2 rounded-full mr-3">
+                    <Award className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{t('highAccuracy')}</p>
+                    <p className="text-sm text-muted-foreground">{t('accuracyDesc')}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="bg-primary/20 p-2 rounded-full mr-3">
+                    <BarChart2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">{t('advancedAlgorithms')}</p>
+                    <p className="text-sm text-muted-foreground">{t('algorithmsDesc')}</p>
+                  </div>
+                </div>
+                
+                {/* Add more benefits here */}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Generated Signal */}
+        {generatedSignal && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold mb-4">{t('generatedSignal')}</h2>
+            <div className="max-w-md">
+              <SignalCard signal={generatedSignal} />
+            </div>
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+}
