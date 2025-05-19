@@ -2,6 +2,7 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import ws from "ws";
 import * as schema from "@shared/schema";
+import { initializeDatabase, startAutoBackup } from './database-manager';
 
 neonConfig.webSocketConstructor = ws;
 
@@ -11,5 +12,19 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// تهيئة قاعدة البيانات واسترجاعها إذا لزم الأمر
+const initDB = async () => {
+  console.log('[نظام قاعدة البيانات] بدء التحقق من قاعدة البيانات وتهيئتها...');
+  await initializeDatabase();
+  // بدء نظام النسخ الاحتياطي التلقائي
+  startAutoBackup();
+};
+
+// المستودع لاتصال قاعدة البيانات
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle(pool, { schema });
+
+// تنفيذ التهيئة بشكل غير متزامن
+initDB().catch(err => {
+  console.error('[نظام قاعدة البيانات] خطأ أثناء تهيئة قاعدة البيانات:', err);
+});
