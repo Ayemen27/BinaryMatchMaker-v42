@@ -820,33 +820,37 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getSignalUsage(userId: number, date?: Date): Promise<UserSignalUsage | undefined> {
-    const targetDate = date || new Date();
-    targetDate.setHours(0, 0, 0, 0);
-    
-    const nextDate = new Date(targetDate);
-    nextDate.setDate(nextDate.getDate() + 1);
-    
-    const [usage] = await db
-      .select()
-      .from(userSignalUsage)
-      .where(
-        and(
-          eq(userSignalUsage.userId, userId),
-          gte(userSignalUsage.date, targetDate),
-          lt(userSignalUsage.date, nextDate)
-        )
+    try {
+      const targetDate = date || new Date();
+      targetDate.setHours(0, 0, 0, 0);
+      
+      const nextDate = new Date(targetDate);
+      nextDate.setDate(nextDate.getDate() + 1);
+      
+      const result = await db.query(
+        'SELECT * FROM user_signal_usage WHERE user_id = $1 AND date >= $2 AND date < $3',
+        [userId, targetDate, nextDate]
       );
-    
-    return usage;
+      
+      return result.length > 0 ? result[0] : undefined;
+    } catch (error) {
+      console.error('خطأ في الحصول على معلومات استخدام الإشارات:', error);
+      return undefined;
+    }
   }
   
   // Notification methods
   async getUserNotifications(userId: number): Promise<Notification[]> {
-    return db
-      .select()
-      .from(notifications)
-      .where(eq(notifications.userId, userId))
-      .orderBy(desc(notifications.createdAt));
+    try {
+      const result = await db.query(
+        'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+        [userId]
+      );
+      return result || [];
+    } catch (error) {
+      console.error('خطأ في الحصول على إشعارات المستخدم:', error);
+      return [];
+    }
   }
   
   async getUserUnreadNotifications(userId: number): Promise<Notification[]> {
