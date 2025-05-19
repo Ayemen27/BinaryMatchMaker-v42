@@ -844,15 +844,33 @@ export class DatabaseStorage implements IStorage {
     marketCap?: string;
     dataSource?: string;
   }): Promise<MarketData> {
-    const [savedData] = await db
-      .insert(marketData)
-      .values({
-        ...data,
-        timestamp: new Date(),
-      })
-      .returning();
+    // التحقق أولاً مما إذا كانت هناك بيانات موجودة لهذا الزوج
+    const existingData = await this.getMarketData(data.asset);
     
-    return savedData;
+    if (existingData) {
+      // تحديث البيانات الموجودة بدلاً من إنشاء سجل جديد
+      const [updatedData] = await db
+        .update(marketData)
+        .set({
+          ...data,
+          timestamp: new Date(),
+        })
+        .where(eq(marketData.asset, data.asset))
+        .returning();
+      
+      return updatedData;
+    } else {
+      // إنشاء سجل جديد إذا لم تكن هناك بيانات موجودة
+      const [savedData] = await db
+        .insert(marketData)
+        .values({
+          ...data,
+          timestamp: new Date(),
+        })
+        .returning();
+      
+      return savedData;
+    }
   }
   
   private async seedInitialData() {
