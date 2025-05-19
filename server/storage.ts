@@ -384,15 +384,21 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createSignal(insertSignal: InsertSignal): Promise<Signal> {
+    // الحصول على أعلى قيمة معرف موجودة في جدول الإشارات
+    const maxIdResult = await db.select({ maxId: sql`MAX(id)` }).from(signals);
+    const maxId = maxIdResult[0]?.maxId || 0;
+    
+    // إضافة إشارة جديدة مع معرف جديد
     const [signal] = await db.insert(signals)
       .values({
         ...insertSignal,
+        id: maxId + 1, // تعيين معرف جديد أعلى من أعلى معرف موجود
         createdAt: new Date(),
         updatedAt: new Date(),
-        status: 'active',
+        status: insertSignal.status || 'active',
         result: null,
-        isPublic: true, // الإشارات التي ينشئها المسؤول تكون عامة افتراضياً
-        createdBy: null, // لا يوجد مستخدم محدد أنشأ هذه الإشارة
+        isPublic: insertSignal.isPublic !== undefined ? insertSignal.isPublic : true, // الإشارات التي ينشئها المسؤول تكون عامة افتراضياً
+        createdBy: insertSignal.createdBy || null, // لا يوجد مستخدم محدد أنشأ هذه الإشارة
       })
       .returning();
     
