@@ -728,79 +728,167 @@ export class DatabaseStorage implements IStorage {
   }
   
   private async seedInitialData() {
-    // Check if we already have signals
-    const existingSignals = await db.select().from(signals).limit(1);
-    
-    if (existingSignals.length === 0) {
-      // Seed initial signals
-      const assets = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'DOGE/USDT'];
-      const indicators = [['RSI', 'MACD'], ['MA', 'MACD'], ['RSI', 'Bollinger'], ['MACD', 'OBV'], ['RSI', 'Stoch']];
-      const times = ['12:30', '10:15', '09:45', '15:20', '14:05'];
+    try {
+      console.log(`[نظام البذور] البدء في فحص وتهيئة البيانات الأولية...`);
       
-      // Create 5 active signals
-      for (let i = 0; i < 5; i++) {
-        const type = i % 2 === 0 ? 'buy' : 'sell';
-        const basePrice = (37000 + Math.random() * 3000).toFixed(2);
+      // التحقق من وجود مستخدمين
+      const existingUsers = await db.select().from(users).limit(1);
+      
+      if (existingUsers.length === 0) {
+        console.log(`[نظام البذور] عدم وجود مستخدمين، إنشاء المستخدم الافتراضي...`);
         
-        const entryPrice = parseFloat(basePrice);
-        const targetPrice = type === 'buy'
-          ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
-          : (entryPrice - (entryPrice * 0.03)).toFixed(2);
-        const stopLoss = type === 'buy'
-          ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
-          : (entryPrice + (entryPrice * 0.02)).toFixed(2);
+        // إنشاء كلمة مرور للمستخدم الافتراضي - يجب تشفيرها
+        // سنقوم بتشفير كلمة المرور باستخدام دالة hashPassword من ملف auth.ts
         
-        await db.insert(signals).values({
-          asset: assets[i],
-          type: type as 'buy' | 'sell',
-          entryPrice: entryPrice.toString(),
-          targetPrice: targetPrice.toString(),
-          stopLoss: stopLoss.toString(),
-          accuracy: 85 + Math.floor(Math.random() * 11),
-          time: times[i],
-          status: 'active',
-          indicators: indicators[i],
-          platform: 'IQ Option',
-          timeframe: '5m',
+        // استيراد وظيفة تشفير كلمة المرور (للاستخدام المستقبلي)
+        // حاليًا نستخدم القيمة المشفرة مسبقًا لكلمة المرور "Ay**--772293228"
+        const hashedPassword = "e051a0d56106a5927530411e9b3385f99397cdbcd470a5e789825c6453e3675df873dd5cfee1d617f2ca05bc64f758ed6e24c735235cd288d28df39172f803bf.3ca8193a4531de57f89d226f3634a57f";
+        
+        // إنشاء المستخدم الافتراضي
+        const [user] = await db.insert(users).values({
+          username: "Binarjoinanalytic",
+          password: hashedPassword,
+          language: "ar",
           createdAt: new Date(),
-          updatedAt: new Date(),
-          result: null
+          isActive: true
+        }).returning();
+        
+        console.log(`[نظام البذور] تم إنشاء المستخدم الافتراضي بنجاح مع المعرف: ${user.id}`);
+        
+        // إنشاء إعدادات المستخدم
+        await db.insert(userSettings).values({
+          userId: user.id,
+          theme: "dark",
+          defaultAsset: "BTC/USDT",
+          defaultTimeframe: "1h",
+          chartType: "candlestick",
+          showTradingTips: true,
+          autoRefreshData: true,
+          refreshInterval: 60,
+          useAiForSignals: true,
+          createdAt: new Date(),
+          updatedAt: new Date()
         });
+        
+        console.log(`[نظام البذور] تم إنشاء إعدادات المستخدم بنجاح`);
+        
+        // إنشاء إعدادات إشعارات المستخدم
+        await db.insert(userNotificationSettings).values({
+          userId: user.id,
+          emailNotifications: true,
+          pushNotifications: true,
+          signalAlerts: true,
+          marketUpdates: true,
+          accountAlerts: true,
+          promotionalEmails: false,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        console.log(`[نظام البذور] تم إنشاء إعدادات إشعارات المستخدم بنجاح`);
+        
+        // إنشاء اشتراك للمستخدم
+        await db.insert(subscriptions).values({
+          userId: user.id,
+          type: "free",
+          startDate: new Date(),
+          isActive: true,
+          dailySignalLimit: 5,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        
+        console.log(`[نظام البذور] تم إنشاء اشتراك المستخدم بنجاح`);
+      } else {
+        console.log(`[نظام البذور] تم العثور على مستخدمين موجودين بالفعل، تخطي إنشاء المستخدم الافتراضي`);
       }
       
-      // Create 5 completed signals
-      for (let i = 0; i < 5; i++) {
-        const type = i % 2 === 0 ? 'buy' : 'sell';
-        const basePrice = (37000 + Math.random() * 3000).toFixed(2);
+      // التحقق من وجود إشارات
+      const existingSignals = await db.select().from(signals).limit(1);
+      
+      if (existingSignals.length === 0) {
+        console.log(`[نظام البذور] عدم وجود إشارات، إنشاء الإشارات الافتراضية...`);
         
-        const entryPrice = parseFloat(basePrice);
-        const targetPrice = type === 'buy'
-          ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
-          : (entryPrice - (entryPrice * 0.03)).toFixed(2);
-        const stopLoss = type === 'buy'
-          ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
-          : (entryPrice + (entryPrice * 0.02)).toFixed(2);
+        // Seed initial signals
+        const assets = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'XRP/USDT', 'DOGE/USDT'];
+        const indicators = [['RSI', 'MACD'], ['MA', 'MACD'], ['RSI', 'Bollinger'], ['MACD', 'OBV'], ['RSI', 'Stoch']];
+        const times = ['12:30', '10:15', '09:45', '15:20', '14:05'];
         
-        const createdAt = new Date(Date.now() - 86400000 * (i + 1)); // Created 1-5 days ago
+        // Create 5 active signals
+        for (let i = 0; i < 5; i++) {
+          const type = i % 2 === 0 ? 'buy' : 'sell';
+          const basePrice = (37000 + Math.random() * 3000).toFixed(2);
+          
+          const entryPrice = parseFloat(basePrice);
+          const targetPrice = type === 'buy'
+            ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
+            : (entryPrice - (entryPrice * 0.03)).toFixed(2);
+          const stopLoss = type === 'buy'
+            ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
+            : (entryPrice + (entryPrice * 0.02)).toFixed(2);
+          
+          await db.insert(signals).values({
+            asset: assets[i],
+            type: type as 'buy' | 'sell',
+            entryPrice: entryPrice.toString(),
+            targetPrice: targetPrice.toString(),
+            stopLoss: stopLoss.toString(),
+            accuracy: 85 + Math.floor(Math.random() * 11),
+            time: times[i],
+            status: 'active',
+            indicators: indicators[i],
+            platform: 'IQ Option',
+            timeframe: '5m',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            result: null
+          });
+        }
         
-        await db.insert(signals).values({
-          asset: assets[i],
-          type: type as 'buy' | 'sell',
-          entryPrice: entryPrice.toString(),
-          targetPrice: targetPrice.toString(),
-          stopLoss: stopLoss.toString(),
-          accuracy: 85 + Math.floor(Math.random() * 11),
-          time: 'أمس ' + times[i],
-          status: 'completed',
-          indicators: indicators[i],
-          platform: 'IQ Option',
-          timeframe: '15m',
-          createdAt: createdAt,
-          updatedAt: createdAt,
-          completedAt: new Date(createdAt.getTime() + 3600000 * (2 + i)), // Completed 2-6 hours later
-          result: Math.random() < 0.9 ? 'success' : 'failure'
-        });
+        console.log(`[نظام البذور] تم إنشاء 5 إشارات نشطة بنجاح`);
+        
+        // Create 5 completed signals
+        for (let i = 0; i < 5; i++) {
+          const type = i % 2 === 0 ? 'buy' : 'sell';
+          const basePrice = (37000 + Math.random() * 3000).toFixed(2);
+          
+          const entryPrice = parseFloat(basePrice);
+          const targetPrice = type === 'buy'
+            ? (entryPrice + (entryPrice * 0.03)).toFixed(2)
+            : (entryPrice - (entryPrice * 0.03)).toFixed(2);
+          const stopLoss = type === 'buy'
+            ? (entryPrice - (entryPrice * 0.02)).toFixed(2)
+            : (entryPrice + (entryPrice * 0.02)).toFixed(2);
+          
+          const createdAt = new Date(Date.now() - 86400000 * (i + 1)); // Created 1-5 days ago
+          
+          await db.insert(signals).values({
+            asset: assets[i],
+            type: type as 'buy' | 'sell',
+            entryPrice: entryPrice.toString(),
+            targetPrice: targetPrice.toString(),
+            stopLoss: stopLoss.toString(),
+            accuracy: 85 + Math.floor(Math.random() * 11),
+            time: 'أمس ' + times[i],
+            status: 'completed',
+            indicators: indicators[i],
+            platform: 'IQ Option',
+            timeframe: '15m',
+            createdAt: createdAt,
+            updatedAt: createdAt,
+            completedAt: new Date(createdAt.getTime() + 3600000 * (2 + i)), // Completed 2-6 hours later
+            result: Math.random() < 0.9 ? 'success' : 'failure'
+          });
+        }
+        
+        console.log(`[نظام البذور] تم إنشاء 5 إشارات مكتملة بنجاح`);
+      } else {
+        console.log(`[نظام البذور] تم العثور على إشارات موجودة بالفعل، تخطي إنشاء الإشارات الافتراضية`);
       }
+      
+      console.log(`[نظام البذور] تم الانتهاء من تهيئة البيانات الأولية بنجاح`);
+    } catch (error) {
+      console.error(`[نظام البذور] خطأ أثناء تهيئة البيانات الأولية:`, error);
     }
   }
 }
