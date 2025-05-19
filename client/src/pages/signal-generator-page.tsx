@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/use-auth';
 import { Layout } from '@/components/layout/layout';
@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, BarChart2, Award } from 'lucide-react';
+import { Loader2, BarChart2, Award, Brain, Cpu, BrainCircuit } from 'lucide-react';
 import { SignalCard } from '@/components/signals/signal-card';
 import { Signal } from '@/types';
 import { Helmet } from 'react-helmet';
+import { Switch } from '@/components/ui/switch';
+import { useQuery } from '@tanstack/react-query';
 
 export default function SignalGeneratorPage() {
   const { t } = useTranslation();
@@ -23,6 +25,21 @@ export default function SignalGeneratorPage() {
   const [platform, setPlatform] = useState<string>('');
   const [pair, setPair] = useState<string>('');
   const [timeframe, setTimeframe] = useState<string>('');
+  const [useAI, setUseAI] = useState<boolean>(true);
+  const [generationMethod, setGenerationMethod] = useState<'ai' | 'algorithmic'>('ai');
+  
+  // Fetch user settings to get AI preference
+  const { data: userSettings } = useQuery({
+    queryKey: ['/api/user/settings'],
+    enabled: !!user,
+  });
+  
+  // When user settings load, set the initial AI usage preference
+  useEffect(() => {
+    if (userSettings) {
+      setUseAI(userSettings.useAiForSignals !== false);
+    }
+  }, [userSettings]);
   
   // Available platforms, pairs, and timeframes
   const platforms = ['Binance', 'IQ Option', 'Olymp Trade', 'Pocket Option', 'Deriv'];
