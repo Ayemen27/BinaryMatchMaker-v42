@@ -65,7 +65,7 @@ export function GeneralSettings() {
   
   // تعريف القيم الافتراضية للاستخدام في حالة عدم وجود قيمة من الخادم
   const defaultSettings = {
-    theme: 'dark',
+    theme: 'light',
     defaultAsset: 'BTC/USDT',
     defaultTimeframe: '1h',
     defaultPlatform: '',
