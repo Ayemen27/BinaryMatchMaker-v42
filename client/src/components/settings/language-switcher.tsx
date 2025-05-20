@@ -33,9 +33,8 @@ export function LanguageSwitcher({ className, onLanguageChange }: LanguageSwitch
     // تطبيق اللغة
     i18n.changeLanguage(lng).then(() => {
       console.log(`تم تغيير اللغة إلى: ${lng}`);
-      
-      // إعادة تحميل الصفحة لتفعيل الترجمة بشكل كامل (حل مؤقت)
-      // window.location.reload();
+    }).catch(error => {
+      console.error("خطأ في تغيير اللغة:", error);
     });
     
     // حفظ اللغة المختارة في التخزين المحلي
@@ -43,6 +42,10 @@ export function LanguageSwitcher({ className, onLanguageChange }: LanguageSwitch
     
     // تغيير اتجاه الصفحة حسب اللغة
     document.documentElement.dir = lng === "ar" ? "rtl" : "ltr";
+    
+    // تعيين سمات HTML لتحسين الدعم
+    document.documentElement.lang = lng;
+    document.documentElement.setAttribute('data-language', lng);
     
     // استدعاء دالة التغيير من الخارج إذا وجدت
     if (onLanguageChange) {

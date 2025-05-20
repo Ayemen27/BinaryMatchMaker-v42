@@ -37,10 +37,10 @@ export default function UnifiedSettingsPage() {
       
       <div className="p-3 md:p-6 max-w-7xl mx-auto">
         {/* رأس الصفحة */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 bg-gradient-to-r from-primary/10 to-primary/5 p-4 md:p-6 rounded-lg shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-6 bg-gradient-to-r from-primary/10 to-primary/5 p-3 md:p-6 rounded-lg shadow-sm">
           <div>
-            <h1 className="text-2xl font-bold">{t('settings')}</h1>
-            <p className="text-muted-foreground">{t('settingsDescription')}</p>
+            <h1 className="text-xl md:text-2xl font-bold">{t('settings')}</h1>
+            <p className="text-sm md:text-base text-muted-foreground">{t('settingsDescription')}</p>
           </div>
           
           {/* زر ربما نضيفه لاحقًا: استعادة الإعدادات الافتراضية */}
