@@ -14,7 +14,7 @@ import { eq, and, gte, lt, desc, count, isNull, sql } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { pool } from "./db";
-import { mapDatabaseToApp, mapAppToDatabase } from "./utils/field-mapper";
+// تم إزالة استيراد field-mapper كجزء من خطة إصلاح التطابق بين أسماء الحقول
 
 export interface IStorage {
   // User methods
@@ -102,9 +102,9 @@ export class DatabaseStorage implements IStorage {
       const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
       
       if (result.length > 0) {
-        // استخدام محول الحقول لضمان توافق أسماء الحقول بين قاعدة البيانات والتطبيق
-        const user = mapDatabaseToApp<User>(result[0]);
-        console.log('تم استرجاع بيانات المستخدم مع تحويل الحقول:', { id: user.id, fullName: user.fullName });
+        // الآن يتم استخدام البيانات مباشرة بدون تحويل الحقول
+        const user = result[0] as User;
+        console.log('تم استرجاع بيانات المستخدم مباشرة:', { id: user.id, fullName: user.fullName });
         return user;
       }
       return undefined;
