@@ -162,7 +162,7 @@ export default function SubscriptionPage() {
       price: currency === 'USD' ? `$${planPrices.premium.USD}` : `${planPrices.premium.STARS}`,
       period: t('yearly'),
       description: "BinarJoinAnalytic V.4.1 - ثورة إشارات التداول 🔥",
-      color: 'from-amber-500 to-yellow-600',
+      color: 'from-amber-400 to-yellow-500',
       icon: <Medal className="h-5 w-5" />,
       botVersions: ['BinarJoinAnalytic V.4.1'],
       features: [
