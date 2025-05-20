@@ -1,0 +1,131 @@
+.select-container {
+    margin-top: 0.5rem;  
+    margin-bottom: 0.5rem; 
+    position: relative;
+}
+
+.bot-version {
+    width: 100%;
+    padding: 0.4rem;  
+    border-radius: 0.5rem;
+    border: 1px solid #e0e0e0;
+    appearance: none;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 0.85rem;  
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.3rem; 
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 0.75rem;  
+    position: relative;
+}
+
+.features {
+    line-height: 1.5; 
+    padding: 0.75rem; 
+    margin: 0.5rem 0; 
+}
+
+.features ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.features li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem; 
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.features li i {
+    margin-right: 1rem;
+    color: var(--primary);
+    font-size: 1.2rem;
+    width: 1.75rem; 
+    text-align: center;
+}
+
+body.dark-mode .features li {
+    color: var(--text-dark);
+}
+
+.plan-footer {
+    padding: 0.75rem;  
+}
+
+.error-message {
+    margin-top: 0.25rem;  
+    font-size: 0.75rem;  
+}
+
+.plan-card {
+    padding: 1rem; 
+    margin-bottom: 1rem; 
+}
+
+@media (max-width: 768px) {
+    .select-container {
+        margin-top: 0.25rem;
+    }
+
+    .bot-version {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+
+    /* Reduce chat widget size for mobile */
+    .bp-widget {
+        width: 250px !important;
+        max-width: 250px !important;
+    }
+
+    .bp-widget-widget {
+        height: 350px !important;
+        max-height: 350px !important;
+    }
+
+    .container {
+        padding: 1rem; 
+        margin-top: 70px; 
+    }
+
+    .plans {
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+    }
+
+    .plan-card {
+        padding: 0.75rem; 
+    }
+
+    .navbar {
+        padding: 0 0.5rem; 
+    }
+}
+
+.bp-widget-chat-container {
+    padding: 0.5rem !important;
+}
+
+.bp-widget-messages-container {
+    padding: 0.25rem !important;
+}
+
+.bp-widget-composer {
+    padding: 0.25rem !important;
+    margin: 0.25rem !important;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem; 
+    margin-top: 80px; 
+}

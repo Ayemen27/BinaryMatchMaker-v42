@@ -1,0 +1,128 @@
+<script>
+    // Modify the selectPayment function to handle all payment methods
+    function selectPayment(method) {
+        // Prevent default and stop propagation
+        event.preventDefault();
+        event.stopPropagation();
+
+        // List of active payment methods
+        const activePaymentMethods = [
+            'binance', 'okx', 'bybit', 
+            'trustwallet', 'metamask', 
+            'okx-wallet', 'binance-wallet', 'bybit-wallet', 
+            'westernunion', 'moneygram'
+        ];
+
+        // Check if the method is in the active list
+        if (!activePaymentMethods.includes(method)) {
+            // If not active, show disabled message
+            showDisabledMessage(method);
+            return;
+        }
+
+        const currentCurrency = localStorage.getItem('currency') || 'USD';
+        const selectedPlan = localStorage.getItem('selectedPlan') || 'Weekly Plan';
+        const selectedPrice = localStorage.getItem('selectedPrice') || '$9.99';
+
+        const modalContent = document.querySelector('.modal-content');
+        if (!modalContent) return;
+
+        modalContent.innerHTML = `
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <button class="back-btn" onclick="returnToPaymentOptions()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>Enter Your Information for ${method.toUpperCase()} Payment</h2>
+            <div class="user-info-form">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="Enter your full name">
+                    <div class="form-error" id="fullNameError">Please enter your full name</div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                    <div class="form-error" id="emailError">Please enter a valid email</div>
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <select id="country" style="width: 100%"></select>
+                    <div class="form-error" id="countryError">Please select your country</div>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone">
+                    <div class="form-error" id="phoneError">Please enter a valid phone number</div>
+                </div>
+                <button class="proceed-btn" onclick="proceedToPayment('${method}', '${selectedPlan}', '${selectedPrice}')">
+                    <i class="fas fa-check"></i> Continue with ${method.toUpperCase()} Payment
+                </button>
+            </div>
+        `;
+        
+        initializeFormComponents();
+    }
+
+    // Modify proceedToPayment to handle all methods
+    function proceedToPayment(method, plan, price) {
+        const fullName = document.getElementById('fullName')?.value || '';
+        const email = document.getElementById('email')?.value || '';
+        const country = $('#country').select2('data')[0]?.text || '';
+        const phoneInput = document.getElementById('phone');
+        const phone = phoneInput && window.intlTelInput(phoneInput).getNumber() || '';
+
+        if (!fullName || !email || !country || !phone) {
+            alert('Please fill in all required fields');
+            return;
+        }
+
+        const currentCurrency = localStorage.getItem('currency') || 'USD';
+        const modalContent = document.querySelector('.modal-content');
+        if (!modalContent) return;
+
+        // Encode detailed message for Telegram bot
+        const message = encodeURIComponent(
+            `Payment Request via ${method.toUpperCase()}\n\n` +
+            `Customer Information:\n` +
+            `- Full Name: ${fullName}\n` +
+            `- Email: ${email}\n` +
+            `- Country: ${country}\n` +
+            `- Phone: ${phone}\n\n` +
+            `Subscription Details:\n` +
+            `- Plan: ${plan}\n` +
+            `- Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+            `- Price: ${price}\n` +
+            `- Payment Method: ${method}`
+        );
+
+        // Process payment based on method
+        modalContent.innerHTML = `
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div class="payment-processing">
+                <div class="loading-spinner"></div>
+                <h3>Processing ${method.toUpperCase()} Payment</h3>
+                <p>Redirecting to support...</p>
+            </div>
+        `;
+
+        // Redirect to Telegram bot with payment details
+        setTimeout(() => {
+            window.open(`https://t.me/Binarjoinanelytic_bot?text=${message}`, '_blank');
+            closeModal();
+        }, 1500);
+    }
+
+    // Ensure all buttons can be clicked
+    document.addEventListener('DOMContentLoaded', () => {
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        paymentOptions.forEach(option => {
+            option.addEventListener('click', function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const method = this.textContent.toLowerCase().replace(/\s+/g, '');
+                selectPayment(method);
+            });
+        });
+    });
+</script>

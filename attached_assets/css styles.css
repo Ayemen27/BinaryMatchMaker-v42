@@ -1,0 +1,72 @@
+/* Add or modify these styles to improve overall layout and spacing */
+.container {
+    margin-top: 80px; /* Slightly reduced top margin */
+    padding: 1rem; /* Reduced padding */
+}
+
+.floating-buttons {
+    bottom: 0.5rem; /* Closer to the bottom */
+    left: 0.25rem; /* Slightly adjusted positioning */
+}
+
+.floating-btn {
+    width: 180px; /* Slightly narrower buttons */
+    height: 45px; /* Reduced height */
+    transform: translateX(-150px); /* Adjusted slide-in */
+}
+
+@media (max-width: 768px) {
+    .floating-buttons {
+        bottom: 0.25rem; /* Even closer to bottom on mobile */
+        gap: 0.25rem; /* Reduced gap between floating buttons */
+    }
+
+    .floating-btn {
+        width: 160px; /* Further reduced width */
+        height: 40px; /* Reduced height */
+        transform: translateX(-130px); /* Adjusted slide-in */
+    }
+}
+
+.features ul {
+    line-height: 1.6; /* Increased line height for better readability */
+    margin-bottom: 1rem; /* Add bottom margin to the entire list */
+}
+
+.features li {
+    margin-bottom: 0.75rem; /* More space between list items */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Space between icon and text */
+}
+
+.features li i {
+    flex-shrink: 0; /* Prevent icon from shrinking */
+    color: var(--primary);
+    font-size: 1.2rem;
+    width: 2rem; /* Consistent width for icons */
+    text-align: center;
+}
+
+/* Highlight key features */
+.features li:nth-child(1), 
+.features li:nth-child(2) {
+    font-weight: 600; /* Slightly bolder for important features */
+    color: var(--secondary);
+}
+
+body.dark-mode .features li:nth-child(1), 
+body.dark-mode .features li:nth-child(2) {
+    color: var(--text-dark);
+}
+
+/* Add subtle background to alternate list items */
+.features li:nth-child(even) {
+    background-color: rgba(255, 221, 61, 0.05);
+    border-radius: 0.25rem;
+    padding: 0.25rem 0.5rem;
+}
+
+body.dark-mode .features li:nth-child(even) {
+    background-color: rgba(255, 221, 61, 0.1);
+}
