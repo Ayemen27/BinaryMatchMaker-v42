@@ -5,7 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "./queryClient";
-import { GeneralSettings, NotificationSettings, UserProfile, AllSettings } from "@/types/settings";
+import type { GeneralSettings, NotificationSettings, UserProfile, AllSettings } from "@/types/settings";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
