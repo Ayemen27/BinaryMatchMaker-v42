@@ -272,7 +272,7 @@ export default function SubscriptionPage() {
           >
             {currency === 'USD' ? <Star className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
             {currency === 'USD' ? t('switchToStars') : t('switchToUSD')}
-            <RefreshCw className="h-4 w-4 mr-1" />
+            <RefreshCw className="h-3 w-3 mr-1" />
           </Button>
         </div>
         
@@ -284,7 +284,7 @@ export default function SubscriptionPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="bg-primary text-primary-foreground p-2 rounded-full">
-                      <Check className="h-5 w-5" />
+                      <Check className="h-4 w-4" />
                     </div>
                     <div>
                       <p className="font-medium">{t('activeSubscription')}</p>
@@ -355,8 +355,8 @@ export default function SubscriptionPage() {
                     dir="rtl"
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-4 w-4 ml-1 icon-rotate" /> <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span></>
-                      : <><RefreshCw className="h-4 w-4 ml-1 icon-rotate" /> <span>{`التبديل إلى الدولار`}</span></>
+                      ? <><RefreshCw className="h-3 w-3 ml-1 icon-rotate" /> <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span></>
+                      : <><RefreshCw className="h-3 w-3 ml-1 icon-rotate" /> <span>{`التبديل إلى الدولار`}</span></>
                     }
                   </button>
                   
@@ -377,7 +377,7 @@ export default function SubscriptionPage() {
                       ))}
                     </select>
                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                      <ChevronDown className="h-3 w-3 text-gray-500" />
                     </div>
                   </div>
                 </CardHeader>
@@ -512,9 +512,9 @@ export default function SubscriptionPage() {
               className="social-link flex items-center bg-gray-100 hover:bg-gray-200 p-3 rounded-lg transition-all"
               key={link.name}
             >
-              {link.name === 'Telegram' && <img src="/telegram.svg" alt="Telegram" className="w-6 h-6 mr-2" />}
-              {link.name === 'WhatsApp' && <img src="/whatsapp.svg" alt="WhatsApp" className="w-6 h-6 mr-2" />}
-              {link.name === 'YouTube' && <img src="/youtube.svg" alt="YouTube" className="w-6 h-6 mr-2" />}
+              {link.name === 'Telegram' && <img src="/telegram.svg" alt="Telegram" className="w-4 h-4 mr-2" />}
+              {link.name === 'WhatsApp' && <img src="/whatsapp.svg" alt="WhatsApp" className="w-4 h-4 mr-2" />}
+              {link.name === 'YouTube' && <img src="/youtube.svg" alt="YouTube" className="w-4 h-4 mr-2" />}
               <span className="font-medium">{link.name}</span>
             </a>
           ))}
