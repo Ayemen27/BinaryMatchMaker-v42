@@ -8,12 +8,15 @@
     transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 12px;
     background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
     border: 1px solid #ffdd3e;
     max-width: 100%;
     margin: 0 auto;
+    font-size: 0.85rem;
+    transform-origin: center;
+    transform: scale(0.95);
   }
   
   .plan-card.weekly-plan {
