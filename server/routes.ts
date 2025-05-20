@@ -484,28 +484,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/user/language", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
+        console.warn('[تحديث اللغة] محاولة وصول غير مصرح بها:', { ip: req.ip });
         return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
       }
 
-      console.log('طلب تحديث لغة المستخدم - PUT:', {
+      console.log('[تحديث اللغة] طلب تحديث لغة المستخدم - PUT:', {
         userId: req.user.id,
-        body: req.body
+        currentLanguage: req.user.language,
+        requestedLanguage: req.body.language,
+        timestamp: new Date().toISOString()
       });
 
       const { language } = req.body;
+      
+      // تحقق أكثر صرامة من قيمة اللغة
+      if (!language) {
+        console.warn('[تحديث اللغة] لم يتم تحديد لغة في الطلب:', { userId: req.user.id });
+        return res.status(400).json({ message: "يجب تحديد اللغة في الطلب" });
+      }
+      
       if (language !== 'ar' && language !== 'en') {
-        return res.status(400).json({ message: "لغة غير صالحة" });
+        console.warn('[تحديث اللغة] تم تقديم لغة غير صالحة:', { 
+          userId: req.user.id, 
+          invalidLanguage: language 
+        });
+        return res.status(400).json({ 
+          message: "لغة غير صالحة، استخدم 'ar' للعربية أو 'en' للإنجليزية",
+          validOptions: ['ar', 'en'] 
+        });
       }
 
+      // حفظ اللغة القديمة للمقارنة والتتبع
+      const oldLanguage = req.user.language;
+      
+      // استدعاء الوظيفة المحسنة لتحديث اللغة
       const updatedUser = await storage.updateUserLanguage(req.user.id, language);
+      
+      console.log('[تحديث اللغة] تم تحديث لغة المستخدم بنجاح:', {
+        userId: req.user.id,
+        oldLanguage,
+        newLanguage: language,
+        timestamp: new Date().toISOString()
+      });
+      
+      // إرسال استجابة أكثر تفصيلاً تتضمن معلومات التتبع
       res.json({
-        ...updatedUser,
         language,
-        _serverTime: new Date().toISOString()
+        success: true,
+        previousLanguage: oldLanguage,
+        updatedAt: new Date().toISOString(),
+        message: `تم تحديث اللغة إلى ${language === 'ar' ? 'العربية' : 'الإنجليزية'} بنجاح`
       });
     } catch (error) {
-      console.error("خطأ في تحديث تفضيلات اللغة:", error);
-      res.status(500).json({ message: "فشل تحديث تفضيلات اللغة" });
+      console.error("[تحديث اللغة] خطأ في تحديث تفضيلات اللغة:", error);
+      res.status(500).json({ 
+        message: "فشل تحديث تفضيلات اللغة", 
+        error: error instanceof Error ? error.message : "خطأ غير معروف",
+        success: false
+      });
     }
   });
   
@@ -513,24 +549,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/user/language", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
+        console.warn('[تحديث اللغة] محاولة وصول غير مصرح بها:', { ip: req.ip });
         return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
       }
 
-      console.log('طلب تحديث لغة المستخدم - PATCH:', {
+      console.log('[تحديث اللغة] طلب تحديث لغة المستخدم - PATCH:', {
         userId: req.user.id,
-        body: req.body
+        currentLanguage: req.user.language,
+        requestedLanguage: req.body.language,
+        timestamp: new Date().toISOString()
       });
 
       const { language } = req.body;
+      
+      // تحقق أكثر صرامة من قيمة اللغة
+      if (!language) {
+        console.warn('[تحديث اللغة] لم يتم تحديد لغة في الطلب:', { userId: req.user.id });
+        return res.status(400).json({ message: "يجب تحديد اللغة في الطلب" });
+      }
+      
       if (language !== 'ar' && language !== 'en') {
-        return res.status(400).json({ message: "لغة غير صالحة" });
+        console.warn('[تحديث اللغة] تم تقديم لغة غير صالحة:', { 
+          userId: req.user.id, 
+          invalidLanguage: language 
+        });
+        return res.status(400).json({ 
+          message: "لغة غير صالحة، استخدم 'ar' للعربية أو 'en' للإنجليزية",
+          validOptions: ['ar', 'en'] 
+        });
       }
 
+      // حفظ اللغة القديمة للمقارنة والتتبع
+      const oldLanguage = req.user.language;
+      
+      // استدعاء الوظيفة المحسنة لتحديث اللغة
       const updatedUser = await storage.updateUserLanguage(req.user.id, language);
-      res.json(updatedUser);
+      
+      console.log('[تحديث اللغة] تم تحديث لغة المستخدم بنجاح:', {
+        userId: req.user.id,
+        oldLanguage,
+        newLanguage: language,
+        timestamp: new Date().toISOString()
+      });
+      
+      // إرسال استجابة أكثر تفصيلاً تتضمن معلومات التتبع
+      res.json({
+        language,
+        success: true,
+        previousLanguage: oldLanguage,
+        updatedAt: new Date().toISOString(),
+        message: `تم تحديث اللغة إلى ${language === 'ar' ? 'العربية' : 'الإنجليزية'} بنجاح`
+      });
     } catch (error) {
-      console.error("خطأ في تحديث تفضيلات اللغة:", error);
-      res.status(500).json({ message: "فشل تحديث تفضيلات اللغة" });
+      console.error("[تحديث اللغة] خطأ في تحديث تفضيلات اللغة:", error);
+      res.status(500).json({ 
+        message: "فشل تحديث تفضيلات اللغة", 
+        error: error instanceof Error ? error.message : "خطأ غير معروف",
+        success: false
+      });
     }
   });
 
