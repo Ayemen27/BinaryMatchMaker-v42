@@ -353,7 +353,8 @@ export function SettingsForm() {
                 </div>
                 <FormControl>
                   <Switch
-                    checked={field.value !== undefined ? field.value : settings.showTradingTips}
+                    checked={settings.showTradingTips}
+                    defaultChecked={settings.showTradingTips}
                     onCheckedChange={(value) => {
                       field.onChange(value);
                       handleSettingChange("showTradingTips", value);
@@ -377,7 +378,8 @@ export function SettingsForm() {
                 </div>
                 <FormControl>
                   <Switch
-                    checked={field.value !== undefined ? field.value : settings.autoRefreshData}
+                    checked={settings.autoRefreshData}
+                    defaultChecked={settings.autoRefreshData}
                     onCheckedChange={(value) => {
                       field.onChange(value);
                       handleSettingChange("autoRefreshData", value);
