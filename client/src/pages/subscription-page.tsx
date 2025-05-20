@@ -195,7 +195,7 @@ export default function SubscriptionPage() {
   // مفوض التعامل مع ترقية الاشتراك
   const handleUpgrade = (planId: string) => {
     if (isProcessing) return;
-    if (!selectedBotVersions[planId]) {
+    if (!selectedBotVersions[planId] || selectedBotVersions[planId] === '_default') {
       toast({
         title: t('botVersionRequired'),
         description: t('pleasSelectBotVersion'),
@@ -229,7 +229,7 @@ export default function SubscriptionPage() {
     const defaultVersions: {[key: string]: string} = {};
     plans.forEach(plan => {
       if (plan.botVersions && plan.botVersions.length > 0) {
-        defaultVersions[plan.id] = '';
+        defaultVersions[plan.id] = '_default';
       }
     });
     setSelectedBotVersions(defaultVersions);
@@ -358,7 +358,7 @@ export default function SubscriptionPage() {
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t('selectBotVersion')}</SelectItem>
+                        <SelectItem value="_default">{t('selectBotVersion')}</SelectItem>
                         {plan.botVersions.map((version) => (
                           <SelectItem key={version} value={version}>
                             {version}
