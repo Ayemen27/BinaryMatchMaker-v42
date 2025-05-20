@@ -161,24 +161,24 @@ export default function SubscriptionPage() {
       label: t('premiumAnnualPlan'),
       price: currency === 'USD' ? `$${planPrices.premium.USD}` : `${planPrices.premium.STARS}`,
       period: t('yearly'),
-      description: "BinarJoinAnalytic V.4.1 - ثورة إشارات التداول 🔥",
+      description: t('newBinarJoinVersion'),
       color: 'from-amber-400 to-yellow-500',
       icon: <Medal className="h-4 w-4" />,
       botVersions: ['BinarJoinAnalytic V.4.1'],
       features: [
-        { text: 'تحليل بيانات السوق المتقدمة', available: true },
-        { text: 'إشارات التداول المدعومة بالروبوت', available: true },
-        { text: 'رؤى السوق فائقة السرعة', available: true },
-        { text: 'استراتيجيات مميزة حصرية', available: true },
-        { text: 'مدیر حساب مخصص', available: true },
-        { text: 'توصيل الإشارة ذات الأولوية', available: true },
+        { text: t('advancedMarketAnalysis'), available: true },
+        { text: t('botSupportedTradingSignals'), available: true },
+        { text: t('ultraFastMarketInsights'), available: true },
+        { text: t('exclusiveStrategies'), available: true },
+        { text: t('dedicatedAccountManager'), available: true },
+        { text: t('prioritySignalDelivery'), available: true },
       ],
-      idealFor: "مخصص للاصدار V.4.1 - ثورة في إشارات التداول ودقة التوقعات!",
+      idealFor: t('idealForV41'),
       isPopular: false,
       callToAction: t('getPremiumDataAccess'),
       disabled: false,
       isNew: true,
-      extraDescription: 'إشارات دقيقة، قرارات أكثر ذكاءً! مع Binar Join Analytic V.4.1 الجديد، احصل على إشارات محدثة دقيقة بدقيقة لمساعدتك على اتخاذ قرارات استثمارية ناجحة.'
+      extraDescription: t('v41ExtraDescription')
     }
   ];
   
