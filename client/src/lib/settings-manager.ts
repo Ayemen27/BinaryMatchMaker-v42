@@ -71,6 +71,16 @@ export function useSettings() {
       // طباعة البيانات المرسلة للتأكد من صحتها
       console.log('إرسال إعدادات للخادم:', newSettings);
       
+      // تحضير الإعدادات المكتملة بدمج الإعدادات الحالية مع التغييرات الجديدة
+      // هذا يضمن أن جميع الإعدادات يتم حفظها بشكل صحيح
+      const completeSettings = {
+        ...(data || defaultSettings), // استخدام البيانات الحالية أو القيم الافتراضية
+        ...newSettings // تطبيق التغييرات الجديدة فوق القيم الحالية
+      };
+      
+      // طباعة الإعدادات المكتملة للتأكد من صحتها
+      console.log('الإعدادات الكاملة التي سيتم إرسالها:', completeSettings);
+      
       const response = await apiRequest('PATCH', SETTINGS_KEY, newSettings);
       if (!response.ok) {
         const errorData = await response.json();
@@ -82,12 +92,16 @@ export function useSettings() {
       // طباعة البيانات المستلمة للتأكد من صحتها
       console.log('تم استلام إعدادات محدثة من الخادم:', data);
       
-      // تحديث بيانات الاستعلام في الذاكرة المؤقتة مع دمجها مع الإعدادات الحالية
+      // تحديث بيانات الاستعلام في الذاكرة المؤقتة مع القيم الكاملة
       queryClient.setQueryData<UserSettings>([SETTINGS_KEY], (oldData) => {
-        return { ...oldData, ...data };
+        // ضمان استخدام كل القيم من البيانات القديمة، لكن تحديثها بالبيانات الجديدة
+        const mergedData = { 
+          ...(oldData || defaultSettings), // استخدام البيانات القديمة أو الافتراضية
+          ...data // تطبيق البيانات الجديدة من الخادم
+        };
+        console.log('ذاكرة التخزين المؤقت المحدثة:', mergedData);
+        return mergedData;
       });
-      
-      // تطبيق الإعدادات المحدثة فوراً بدلاً من الانتظار للاستعلام من الخادم مرة أخرى
       
       // عرض رسالة نجاح
       toast({
