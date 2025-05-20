@@ -53,30 +53,30 @@ export default function UnifiedSettingsPage() {
         {/* محتوى الصفحة */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* معلومات الحساب في الجانب */}
-          <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+          <div className="lg:col-span-4 xl:col-span-3 space-y-4 order-2 lg:order-1">
             {isLoading ? (
-              <div className="flex items-center justify-center h-40 border rounded-lg bg-background">
+              <div className="flex items-center justify-center h-40 border rounded-lg bg-background shadow-sm">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
               <>
-                <AccountInfoCard userData={allSettings?.user} className="mb-6" />
+                <AccountInfoCard userData={allSettings?.user || {}} className="mb-4" />
                 
                 {/* لوحة الإحصائيات */}
-                <StatsDashboard userData={allSettings?.user} className="mb-6" />
+                <StatsDashboard userData={allSettings?.user || {}} className="mb-4" />
                 
                 {/* مبدل اللغة */}
                 <LanguageSwitcher 
-                  className="mb-6" 
+                  className="mb-4" 
                   onLanguageChange={(lng) => {
                     // تحديث اللغة في التخزين المحلي فقط دون محاولة تحديث البيانات
                     console.log("تم تغيير اللغة إلى:", lng);
-                    // سيتم حفظ اللغة في وظيفة handleLanguageChange داخل مكون LanguageSwitcher
+                    i18n.changeLanguage(lng); // تأكيد على تغيير اللغة مباشرة
                   }}
                 />
                 
                 {/* نصائح وإرشادات */}
-                <Alert className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 border-blue-200 dark:border-blue-900">
+                <Alert className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 border-blue-200 dark:border-blue-900 shadow-sm">
                   <AlertDescription>
                     <p className="text-sm leading-relaxed">
                       {t('settingsTip')}
@@ -88,7 +88,7 @@ export default function UnifiedSettingsPage() {
           </div>
           
           {/* علامات تبويب الإعدادات في القسم الرئيسي */}
-          <div className="lg:col-span-8 xl:col-span-9">
+          <div className="lg:col-span-8 xl:col-span-9 order-1 lg:order-2">
             <SettingsTabs />
           </div>
         </div>
