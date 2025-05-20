@@ -48,7 +48,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffd900;
+    color: #ffdd3e;
   }
   
   .price-usd::before {
@@ -129,7 +129,7 @@
   }
   
   .feature-icon {
-    color: #ffd900;
+    color: #ffdd3e;
     margin-right: 0.5rem;
     flex-shrink: 0;
   }
@@ -139,7 +139,7 @@
     font-size: 1.1rem;
     margin-bottom: 0.75rem;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #ffd900;
+    border-bottom: 2px solid #ffdd3e;
   }
   
   .subscription-button {
@@ -148,16 +148,16 @@
     font-weight: bold;
     font-size: 1rem;
     border-radius: 30px;
-    background-color: #ffd900;
+    background-color: #ffdd3e;
     color: #333;
     border: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(255, 217, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(255, 221, 62, 0.3);
     margin-top: 1rem;
   }
   
   .subscription-button:hover {
-    background-color: #ffcd00;
+    background-color: #ffda2c;
     transform: translateY(-2px);
   }
   
@@ -220,7 +220,7 @@
     border-radius: 15px;
     padding: 1.5rem;
     margin-top: 2rem;
-    border: 2px solid #ffd900;
+    border: 2px solid #ffdd3e;
   }
   
   @media (max-width: 768px) {

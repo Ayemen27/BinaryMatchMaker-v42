@@ -391,7 +391,7 @@ export default function SubscriptionPage() {
                   <ul className="features-list space-y-3 mb-4">
                     {plan.features.map((feature, idx) => (
                       <li key={idx}>
-                        <Check className="h-4 w-4 text-yellow-500 mr-2 mt-1 feature-icon" />
+                        <Check className="h-4 w-4 text-yellow-500 mr-2 mt-1" />
                         <span className="feature-text">
                           {feature.text}
                         </span>
