@@ -49,19 +49,38 @@ router.get("/", async (req: Request, res: Response) => {
     // طباعة البيانات الأصلية للتشخيص
     console.log('[تصحيح] البيانات الأصلية من قاعدة البيانات:', JSON.stringify(settings, null, 2));
     
-    // تجهيز البيانات للإرسال إلى واجهة المستخدم:
-    // 1. تحويل أسماء الحقول من snake_case إلى camelCase
-    // 2. إزالة الحقول الحساسة (مثل مفتاح API)
-    const convertedSettings = prepareResponseData(settings, ['openai_api_key']);
-    
     // نحتاج للتعامل مع كائن settings كملف عادي (أي كائن) وليس كنوع TypeScript
     // لأن الاستعلام المباشر من قاعدة البيانات سيعيد الأسماء بصيغة snake_case
     const rawSettings = settings as Record<string, any>;
     
+    // تحويل أسماء الحقول من snake_case إلى camelCase
+    const transformedSettings = {} as Record<string, any>;
+    for (const key in rawSettings) {
+      if (Object.prototype.hasOwnProperty.call(rawSettings, key)) {
+        // تحويل اسم الحقل من snake_case إلى camelCase
+        // مثال: default_asset -> defaultAsset
+        const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+        transformedSettings[camelKey] = rawSettings[key];
+        
+        // سجل تحويل اسم الحقل للتصحيح
+        if (key !== camelKey) {
+          console.log(`تحويل حقل: ${key} -> ${camelKey}`);
+        }
+      }
+    }
+    
+    // حماية المفتاح السري
+    const hasCustomApiKey = !!rawSettings.openai_api_key;
+    
+    // حذف المفتاح من البيانات المرسلة لأسباب أمنية
+    if ('openaiApiKey' in transformedSettings) {
+      delete transformedSettings.openaiApiKey;
+    }
+    
     // إضافة معلومات إضافية مثل وجود مفتاح API
     const responseData = {
-      ...convertedSettings,
-      hasCustomApiKey: !!(rawSettings.openai_api_key) // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
+      ...transformedSettings,
+      hasCustomApiKey // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
     };
     
     console.log('[تصحيح] البيانات المرسلة إلى العميل:', JSON.stringify(responseData, null, 2));
