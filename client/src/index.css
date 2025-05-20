@@ -9,7 +9,7 @@
     position: relative;
     overflow: hidden;
     border-radius: 16px;
-    background: white;
+    background: #fffbf0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     border: 1px solid #ffdd3e;
     max-width: 100%;
@@ -26,15 +26,15 @@
   }
   
   .plan-card.monthly-plan {
-    background: #f8f9ff;
+    background: #fffbf0;
   }
   
   .plan-card.annual-plan {
-    background: #fff8ff;
+    background: #fffbf0;
   }
   
   .plan-card.premium-plan {
-    background: #fffdf0;
+    background: #fffbf0;
   }
   
   /* أنماط البطاقة السنوية للإصدار v.4.1 */
