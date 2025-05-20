@@ -1,59 +1,86 @@
 /**
- * أنواع البيانات لإعدادات المستخدم
+ * أنواع بيانات الإعدادات الموحدة
  */
 
-// إعدادات المستخدم العامة
+// ملف شخصي المستخدم
+export interface UserProfile {
+  id: number;
+  username: string;
+  email?: string;
+  fullName?: string;
+  language: string;
+  subscriptionLevel?: string;
+}
+
+// الإعدادات العامة
 export interface GeneralSettings {
-  id?: number;
-  userId?: number;
   theme: string;
   defaultAsset: string;
   defaultTimeframe: string;
-  defaultPlatform: string;
+  defaultPlatform?: string;
   chartType: string;
   showTradingTips: boolean;
   autoRefreshData: boolean;
   refreshInterval: number;
+  // إعدادات API
   useAiForSignals?: boolean;
   useCustomAiKey?: boolean;
   openaiApiKey?: string;
+  // إعدادات إضافية
   enableOtcTrading?: boolean;
   allowScheduledSignals?: boolean;
   respectTimeframes?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
+  preferredPlatforms?: string[];
+  preferredPairs?: string[];
+  preferredTimeframes?: string[];
 }
 
-// إعدادات إشعارات المستخدم
+// إعدادات الإشعارات
 export interface NotificationSettings {
-  id?: number;
-  userId?: number;
   emailNotifications: boolean;
   pushNotifications: boolean;
   signalAlerts: boolean;
   marketUpdates: boolean;
   accountAlerts: boolean;
   promotionalEmails: boolean;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-// بيانات المستخدم الأساسية
-export interface UserProfile {
-  id?: number;
-  username: string;
-  email?: string;
-  fullName?: string;
-  language: string;
-  subscriptionLevel?: string;
-  subscriptionExpiry?: string;
-  createdAt?: string;
-  lastLogin?: string;
-}
-
-// كل إعدادات المستخدم مجمعة
+// جميع الإعدادات
 export interface AllSettings {
-  general?: GeneralSettings;
-  notifications?: NotificationSettings;
-  user?: UserProfile;
+  user: UserProfile | null;
+  general: GeneralSettings | null;
+  notifications: NotificationSettings | null;
+}
+
+// أنواع بيانات نموذج الإعدادات للعرض
+export interface SettingsFormData {
+  profileSettings: {
+    username: string;
+    email: string;
+    fullName: string;
+    language: string;
+  };
+  generalSettings: {
+    theme: string;
+    defaultAsset: string;
+    defaultTimeframe: string;
+    defaultPlatform: string;
+    chartType: string;
+    showTradingTips: boolean;
+    autoRefreshData: boolean;
+    refreshInterval: number;
+  };
+  notificationSettings: {
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    signalAlerts: boolean;
+    marketUpdates: boolean;
+    accountAlerts: boolean;
+    promotionalEmails: boolean;
+  };
+  apiSettings: {
+    useAiForSignals: boolean;
+    useCustomAiKey: boolean;
+    openaiApiKey: string;
+  };
 }
