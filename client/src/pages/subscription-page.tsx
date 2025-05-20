@@ -242,8 +242,8 @@ export default function SubscriptionPage() {
   
   // دعم للواجهات الأخرى
   const socialLinks = [
-    { name: 'Telegram', icon: 'telegram', url: 'https://t.me/Binarjoinanelytic_bot', image: '/telegram.svg' },
-    { name: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/message/WFOMDMQWZUJMN1', image: '/whatsapp.svg' },
+    { name: 'Telegram', icon: 'telegram', url: 'https://t.me/binarjoinanalytic_bot', image: '/telegram.svg' },
+    { name: 'WhatsApp', icon: 'whatsapp', url: 'https://whatsapp.com/channel/0029VauwAhTDeON0dKoq4h0i', image: '/whatsapp.svg' },
     { name: 'YouTube', icon: 'youtube', url: 'https://youtube.com/@binarjoinanalytic', image: '/youtube.svg' }
   ];
   
