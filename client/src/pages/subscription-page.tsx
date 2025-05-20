@@ -335,12 +335,12 @@ export default function SubscriptionPage() {
                   </div>
                 )}
                 
-                <CardHeader className="pb-1 pt-2 px-2 text-center plan-header">
-                  <div className="plan-title text-xs font-semibold">
+                <CardHeader className="pb-2 pt-3 px-3 text-center plan-header">
+                  <div className="plan-title font-semibold">
                     {plan.label}
                   </div>
                   
-                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''} text-2xl font-bold`}>
+                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''} text-3xl font-bold`}>
                     {currency === 'USD' 
                       ? planPrices[plan.id as keyof typeof planPrices].USD 
                       : planPrices[plan.id as keyof typeof planPrices].STARS
@@ -350,29 +350,29 @@ export default function SubscriptionPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="plan-currency-toggle text-xs py-0 h-6 text-[10px]"
+                    className="plan-currency-toggle text-xs py-1"
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-2.5 w-2.5 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
-                      : <><RefreshCw className="h-2.5 w-2.5 mr-1" />{t('switchToUSD')}</>
+                      ? <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
+                      : <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToUSD')}</>
                     }
                   </Button>
                   
-                  <div className="plan-description mt-1 text-[10px]">{plan.description}</div>
+                  <div className="plan-description mt-2 text-sm">{plan.description}</div>
                   
-                  <div className="bot-version-container mt-1">
+                  <div className="bot-version-container mt-2">
                     <Select
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="bot-version-select h-7 text-[10px]">
+                      <SelectTrigger className="bot-version-select">
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="_default">{t('selectBotVersion')}</SelectItem>
                         {plan.botVersions.map((version) => (
-                          <SelectItem key={version} value={version} className="text-[10px]">
+                          <SelectItem key={version} value={version}>
                             {version}
                           </SelectItem>
                         ))}
@@ -382,7 +382,7 @@ export default function SubscriptionPage() {
                 </CardHeader>
                 
                 <CardContent className="pt-0 pb-0 px-3">
-                  <h3 className="feature-heading text-center text-sm font-semibold mb-2">
+                  <h3 className="feature-heading text-center font-semibold mb-2">
                     {plan.id === 'weekly' && t('planHighlights')}
                     {plan.id === 'monthly' && t('advancedFeatures')}
                     {plan.id === 'annual' && t('exclusiveProfessionalFeatures')}
@@ -413,10 +413,10 @@ export default function SubscriptionPage() {
                     </div>
                   )}
                   
-                  <ul className="features-list space-y-1 mb-2 text-xs">
+                  <ul className="features-list space-y-2 mb-4">
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start">
-                        <Check className="h-3 w-3 text-yellow-500 mr-1 mt-0.5 flex-shrink-0" />
+                        <Check className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
                         <span className="feature-text">
                           {feature.text}
                         </span>
@@ -425,25 +425,25 @@ export default function SubscriptionPage() {
                   </ul>
                 </CardContent>
                 
-                <CardFooter className="pt-1 pb-3 px-3 flex flex-col">
-                  <div className="ideal-for mb-2 text-xs flex items-center justify-center text-center">
+                <CardFooter className="pt-2 pb-4 px-3 flex flex-col">
+                  <div className="ideal-for mb-3 flex items-center justify-center text-center text-sm">
                     {plan.id === 'monthly' && (
-                      <Zap className="h-3 w-3 text-yellow-500 mr-1 flex-shrink-0" />
+                      <Zap className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
                     )}
                     {plan.id === 'premium' && (
-                      <Star className="h-3 w-3 text-yellow-500 mr-1 flex-shrink-0" />
+                      <Star className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
                     )}
                     <span>{plan.idealFor}</span>
                   </div>
                   
                   <Button 
-                    className="subscription-button h-8 text-xs"
+                    className="subscription-button"
                     onClick={() => !isDisabled && handleUpgrade(plan.id)}
                     disabled={isDisabled}
                   >
                     {isProcessing && selectedPlan === plan.id ? (
                       <>
-                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         {t('processing')}
                       </>
                     ) : isPlanActive ? (
