@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { storage } from "../storage";
 import { z } from "zod";
 import { logger } from "../services/logger";
+import { prepareResponseData, prepareRequestData } from "../utils/field-converter";
 
 // إنشاء موجه الطرق
 const router = express.Router();
@@ -50,7 +51,11 @@ router.get("/", async (req: Request, res: Response) => {
     
     logger.info("UserNotifications", "تم استرجاع إعدادات الإشعارات", { userId });
     
-    return res.status(200).json(settings);
+    // تحويل أسماء الحقول من snake_case إلى camelCase قبل إرسالها للواجهة
+    const transformedSettings = prepareResponseData(settings);
+    console.log('[تصحيح] إعدادات الإشعارات المرسلة للواجهة:', JSON.stringify(transformedSettings, null, 2));
+    
+    return res.status(200).json(transformedSettings);
   } catch (error) {
     logger.error("UserNotifications", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
     return res.status(500).json({ 
@@ -85,10 +90,14 @@ router.put("/", async (req: Request, res: Response) => {
     const userId = req.user!.id;
     const settingsData = result.data;
     
+    // تحويل أسماء الحقول من camelCase إلى snake_case قبل التحديث في قاعدة البيانات
+    const transformedData = prepareRequestData(settingsData);
+    
     // سجل عملية تحديث الإعدادات
     logger.info("UserNotifications", "بدء عملية تحديث إعدادات الإشعارات", { 
       userId, 
-      fieldsToUpdate: Object.keys(settingsData)
+      fieldsToUpdate: Object.keys(settingsData),
+      transformedData: transformedData
     });
 
     // التحقق من وجود إعدادات للمستخدم
@@ -114,7 +123,8 @@ router.put("/", async (req: Request, res: Response) => {
       logger.info("UserNotifications", "تم إنشاء إعدادات إشعارات جديدة للمستخدم", { userId });
     } else {
       // تحديث الإعدادات الموجودة
-      // دمج الإعدادات الحالية مع الإعدادات الجديدة
+      // يتم استخدام البيانات المحولة (transformedData) لضمان توافق أسماء الحقول مع قاعدة البيانات
+      // ولكن سنستخدم الحقول الأصلية هنا (settingsData) لأننا سنعتمد على storage مع تحويل خاص بها
       const updatedSettings = {
         userId,
         emailNotifications: settingsData.emailNotifications !== undefined 
@@ -147,8 +157,12 @@ router.put("/", async (req: Request, res: Response) => {
       });
     }
     
+    // تحويل أسماء الحقول من snake_case إلى camelCase قبل إرسالها للواجهة
+    const transformedSettings = prepareResponseData(userSettings);
+    console.log('[تصحيح] تم تحديث إعدادات الإشعارات للمستخدم وإرسالها للواجهة:', JSON.stringify(transformedSettings, null, 2));
+    
     return res.status(200).json({
-      ...userSettings,
+      ...transformedSettings,
       _serverTime: new Date().toISOString()
     });
   } catch (error) {
