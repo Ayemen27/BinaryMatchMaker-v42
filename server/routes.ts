@@ -569,9 +569,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // تنقية البيانات من القيم غير المحددة
-      const cleanSettings = Object.entries(notificationSettings)
+      const cleanSettings: Record<string, any> = Object.entries(notificationSettings)
         .filter(([_key, value]) => value !== undefined)
-        .reduce((obj, [key, value]) => {
+        .reduce((obj: Record<string, any>, [key, value]) => {
           obj[key] = value;
           return obj;
         }, {});
@@ -589,17 +589,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!existingSettings) {
         console.log(`إنشاء إعدادات إشعارات جديدة للمستخدم ${userId}`);
         // إنشاء إعدادات جديدة إذا لم تكن موجودة
-        updatedSettings = await storage.createUserNotificationSettings({
+        
+        // تعريف الإعدادات الافتراضية مع القيم المخصصة
+        const defaultNotificationSettings: Record<string, any> = {
           userId,
-          ...cleanSettings,
-          // إعدادات افتراضية للحقول غير المحددة
-          emailNotifications: cleanSettings.emailNotifications ?? true,
-          pushNotifications: cleanSettings.pushNotifications ?? true,
-          signalAlerts: cleanSettings.signalAlerts ?? true,
-          marketUpdates: cleanSettings.marketUpdates ?? true,
-          accountAlerts: cleanSettings.accountAlerts ?? true,
-          promotionalEmails: cleanSettings.promotionalEmails ?? false
-        });
+          emailNotifications: true,
+          pushNotifications: true,
+          signalAlerts: true,
+          marketUpdates: true,
+          accountAlerts: true,
+          promotionalEmails: false
+        };
+        
+        // دمج الإعدادات المخصصة مع الإعدادات الافتراضية
+        const mergedSettings = {
+          ...defaultNotificationSettings,
+          ...cleanSettings
+        };
+        
+        updatedSettings = await storage.createUserNotificationSettings(mergedSettings);
       } else {
         // تحديث الإعدادات الموجودة
         updatedSettings = await storage.updateUserNotificationSettings(userId, cleanSettings);
