@@ -183,7 +183,7 @@ export function SettingsForm() {
                 <FormLabel>{t("theme")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("theme", value)}
-                  value={field.value !== undefined ? field.value : settings.theme}
+                  value={settings.theme} // استخدام القيمة مباشرة من مدير الإعدادات
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -210,7 +210,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={field.value || settings.defaultAsset}
+                  value={settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -241,7 +241,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultTimeframe")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
-                  value={field.value || settings.defaultTimeframe}
+                  value={settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>

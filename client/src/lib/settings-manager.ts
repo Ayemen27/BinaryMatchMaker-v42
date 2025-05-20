@@ -49,6 +49,26 @@ const SETTINGS_KEY = '/api/user/settings';
 export function useSettings() {
   const { toast } = useToast();
 
+  // محاولة استرجاع الإعدادات المخزنة محلياً
+  const getLocalSettings = (): UserSettings | null => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedSettings = localStorage.getItem('userSettings');
+        if (storedSettings) {
+          const parsedSettings = JSON.parse(storedSettings);
+          console.log('تم استرجاع الإعدادات من التخزين المحلي:', parsedSettings);
+          return parsedSettings;
+        }
+      }
+    } catch (error) {
+      console.error('خطأ أثناء استرجاع الإعدادات من التخزين المحلي:', error);
+    }
+    return null;
+  };
+
+  // الإعدادات المخزنة محلياً (إذا وجدت)
+  const localSettings = getLocalSettings();
+
   // استعلام لجلب إعدادات المستخدم
   const { 
     data, 
@@ -62,8 +82,8 @@ export function useSettings() {
     refetchOnMount: true, // إعادة القراءة عند إضافة المكون
   });
 
-  // استخدام البيانات من الاستعلام أو القيم الافتراضية إذا كانت غير متاحة
-  const settings = data || defaultSettings;
+  // استخدام البيانات من الاستعلام أو الإعدادات المحلية أو القيم الافتراضية إذا كانت غير متاحة
+  const settings = data || localSettings || defaultSettings;
 
   // تعريف mutation لتحديث الإعدادات
   const { mutate, isPending } = useMutation({
@@ -94,11 +114,25 @@ export function useSettings() {
       
       // تحديث بيانات الاستعلام في الذاكرة المؤقتة مع القيم الكاملة
       queryClient.setQueryData<UserSettings>([SETTINGS_KEY], (oldData) => {
-        // ضمان استخدام كل القيم من البيانات القديمة، لكن تحديثها بالبيانات الجديدة
+        // نسخة احتياطية من البيانات القديمة
+        const prevData = oldData || defaultSettings;
+        
+        // إنشاء كائن جديد يجمع بين البيانات السابقة والبيانات الجديدة
         const mergedData = { 
-          ...(oldData || defaultSettings), // استخدام البيانات القديمة أو الافتراضية
-          ...data // تطبيق البيانات الجديدة من الخادم
+          ...prevData, // استخدام البيانات القديمة أولاً كأساس
+          ...data,     // ثم تطبيق البيانات الجديدة من الخادم
         };
+        
+        // حفظ البيانات في محرك تخزين مرتبط بالمتصفح إذا كان متاحاً
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            localStorage.setItem('userSettings', JSON.stringify(mergedData));
+            console.log('تم حفظ الإعدادات المحدثة في التخزين المحلي');
+          }
+        } catch (error) {
+          console.error('خطأ أثناء حفظ الإعدادات في التخزين المحلي:', error);
+        }
+        
         console.log('ذاكرة التخزين المؤقت المحدثة:', mergedData);
         return mergedData;
       });
