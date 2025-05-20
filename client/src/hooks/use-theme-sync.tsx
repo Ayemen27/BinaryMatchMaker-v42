@@ -7,8 +7,8 @@ import { useEffect, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import { useSettings } from '@/lib/settings-manager';
 
-// هوك خاص بمزامنة السمة
-export function useThemeSync() {
+// مكون مزامنة السمة - يتم استخدامه مباشرة في التطبيق الرئيسي
+export function ThemeSync() {
   // الوصول إلى مدير السمات من next-themes
   const { setTheme, theme } = useTheme();
   
@@ -17,6 +17,9 @@ export function useThemeSync() {
   
   // المتغير لمنع التحديثات المستمرة - متغير ثابت لكل حالة
   const isUpdatingRef = useRef(false);
+  
+  // متغير لتخزين آخر قيمة ثيم تم تطبيقها
+  const lastThemeRef = useRef(theme);
   
   // مزامنة أحادية الاتجاه: من قاعدة البيانات إلى الواجهة عند التحميل
   useEffect(() => {
@@ -45,30 +48,21 @@ export function useThemeSync() {
   
   // مزامنة أحادية الاتجاه: من الواجهة إلى قاعدة البيانات عند تغيير المستخدم للثيم
   useEffect(() => {
-    // إنشاء متغير لتخزين آخر ثيم تم تطبيقه
-    const lastTheme = useRef(theme);
-    
     // تجاهل التحديثات إذا كان التحميل قيد التقدم أو عملية التحديث جارية
     if (isLoading || isUpdatingRef.current) return;
     
     // فقط إذا تغير الثيم بالفعل (لمنع التحديثات عند التحميل الأولي)
-    if (settings && theme && lastTheme.current !== theme) {
+    if (settings && theme && lastThemeRef.current !== theme) {
       console.log(`[مزامنة الثيم] حفظ الثيم المحدث في قاعدة البيانات: ${theme}`);
       
       // تحديث الإعدادات في قاعدة البيانات
       updateSetting('theme', theme);
       
       // تحديث آخر ثيم
-      lastTheme.current = theme;
+      lastThemeRef.current = theme;
     }
   }, [theme, settings, isLoading, updateSetting]);
   
-  // لا نحتاج لإرجاع أي قيمة
-  return null;
-}
-
-// مكون مزامنة الثيم - يتم استخدامه في التطبيق الرئيسي
-export function ThemeSync() {
-  useThemeSync();
+  // مكون React يجب أن يرجع JSX
   return null;
 }
