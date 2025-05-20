@@ -1,4 +1,13 @@
 {
+  "dashboard": "لوحة التحكم",
+  "signals": "الإشارات",
+  "signalGenerator": "مولد الإشارات",
+  "marketAnalysis": "تحليل السوق",
+  "signalHistoryMenu": "سجل الإشارات",
+  "analyticsTitle": "تحليلات متقدمة",
+  "upgradePlan": "ترقية الخطة",
+  "remainingSignals": "الإشارات المتبقية: {{count}}",
+  
   "settings": "الإعدادات",
   "settingsDescription": "تخصيص إعدادات حسابك وتفضيلاتك",
   "settingsTip": "يمكنك تخصيص جميع جوانب تجربتك في منصة Binarjoin Analytics. تأكد من حفظ التغييرات بعد الانتهاء.",

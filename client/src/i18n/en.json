@@ -1,4 +1,13 @@
 {
+  "dashboard": "Dashboard",
+  "signals": "Signals",
+  "signalGenerator": "Signal Generator",
+  "marketAnalysis": "Market Analysis",
+  "signalHistoryMenu": "Signal History",
+  "analyticsTitle": "Advanced Analytics",
+  "upgradePlan": "Upgrade Plan",
+  "remainingSignals": "Remaining Signals: {{count}}",
+  
   "settings": "Settings",
   "settingsDescription": "Customize your account settings and preferences",
   "settingsTip": "You can customize all aspects of your experience in Binarjoin Analytics. Make sure to save changes when you're done.",
