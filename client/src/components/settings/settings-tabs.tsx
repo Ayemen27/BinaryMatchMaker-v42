@@ -59,7 +59,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { GeneralSettings, NotificationSettings, UserProfile } from "@/types/settings";
+import type { GeneralSettings, NotificationSettings, UserProfile, AllSettings } from "@/types/settings";
 
 // مخططات التحقق من صحة الإعدادات
 const profileSchema = z.object({
