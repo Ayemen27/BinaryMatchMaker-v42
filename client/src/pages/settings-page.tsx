@@ -40,13 +40,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
-// تعريف واجهة الإشعارات للاستخدام المحلي
+// تعريف واجهة الإشعارات للاستخدام المحلي - مطابقة للأعمدة في قاعدة البيانات
 interface NotificationSettings {
-  receiveSignalAlerts: boolean;
-  receiveMarketUpdates: boolean;
-  receiveNewFeatures: boolean;
-  allowEmailNotifications: boolean;
-  allowPushNotifications: boolean;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  signalAlerts: boolean;
+  marketUpdates: boolean;
+  accountAlerts: boolean;
+  promotionalEmails: boolean;
 }
 
 import { Helmet } from 'react-helmet';
@@ -193,14 +194,14 @@ export default function SettingsPage() {
     },
   });
   
-  // استخدام حالة لإعدادات الإشعارات
+  // استخدام حالة لإعدادات الإشعارات - تم تحديث أسماء الحقول لتتطابق مع قاعدة البيانات
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    email: true,
-    push: true,
-    signalGeneration: true,
-    signalResults: true,
-    marketAlerts: false,
+    emailNotifications: true,
+    pushNotifications: true,
+    signalAlerts: true,
+    marketUpdates: false,
     accountAlerts: true,
+    promotionalEmails: false,
   });
   
   // API Key form
@@ -844,8 +845,8 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="email-notifications" 
-                      checked={notificationSettings.email}
-                      onCheckedChange={(checked) => handleNotificationChange('email', checked)}
+                      checked={notificationSettings.emailNotifications}
+                      onCheckedChange={(checked) => handleNotificationChange('emailNotifications', checked)}
                     />
                   </div>
                   
@@ -856,8 +857,8 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="push-notifications" 
-                      checked={notificationSettings.push}
-                      onCheckedChange={(checked) => handleNotificationChange('push', checked)}
+                      checked={notificationSettings.pushNotifications}
+                      onCheckedChange={(checked) => handleNotificationChange('pushNotifications', checked)}
                     />
                   </div>
                   
