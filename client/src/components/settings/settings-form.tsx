@@ -192,14 +192,17 @@ export function SettingsForm() {
       document.documentElement.classList.add(value);
     }
     
-    // إضافة التغيير إلى قائمة التغييرات المعلقة باستخدام الوظيفة الجديدة
+    // تتبع التغيير أولاً للتحليلات
     trackSettingChange(name, value);
     
-    // عرض تنبيه صغير للمستخدم بأن التغيير تم تسجيله وينتظر الحفظ
+    // إرسال التغيير مباشرة إلى الخادم - هذه هي المشكلة الأساسية التي تم إصلاحها 
+    updateSetting(name, value);
+    
+    // عرض تنبيه صغير للمستخدم بأن التغيير تم تسجيله وحفظه مباشرة
     toast({
       title: t("settingChanged") || "تم تغيير الإعداد",
-      description: t("saveToApply") || "اضغط على حفظ لتطبيق التغييرات",
-      duration: 3000
+      description: t("settingSaved") || "تم حفظ الإعداد تلقائياً",
+      duration: 2000
     });
   }
   
@@ -242,7 +245,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={settings.defaultAsset}
+                  value={form.watch("defaultAsset")}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -273,7 +276,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultTimeframe")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
-                  value={form.watch("defaultTimeframe") || settings.defaultTimeframe}
+                  value={form.watch("defaultTimeframe")}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -304,7 +307,7 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={form.watch("chartType") || settings.chartType}
+                  value={form.watch("chartType")}
                 >
                   <FormControl>
                     <SelectTrigger>
