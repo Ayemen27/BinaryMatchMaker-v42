@@ -6,6 +6,7 @@ import { Signal, insertSignalSchema, UserNotificationSettings } from "@shared/sc
 import { z } from "zod";
 import signalGeneratorRoutes from "./routes/signal-generator";
 import userSettingsRoutes from "./routes/user-settings";
+import userNotificationsRoutes from "./routes/user-notifications";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -16,6 +17,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // User settings routes
   app.use('/api/user/settings', userSettingsRoutes);
+  
+  // User notifications routes
+  app.use('/api/user/notifications', userNotificationsRoutes);
 
   // API routes
   // Get signals for current user (active + user's favorites)
