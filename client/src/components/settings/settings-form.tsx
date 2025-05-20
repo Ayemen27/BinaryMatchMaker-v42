@@ -195,8 +195,9 @@ export function SettingsForm() {
     // تتبع التغيير أولاً للتحليلات
     trackSettingChange(name, value);
     
-    // إرسال التغيير مباشرة إلى الخادم - هذه هي المشكلة الأساسية التي تم إصلاحها 
-    updateSetting(name, value);
+    // إرسال التغيير مباشرة إلى الخادم باستخدام updateSettings بدلاً من updateSetting
+    // إنشاء كائن به الحقل المتغير فقط
+    updateSettings({ [name]: value });
     
     // عرض تنبيه صغير للمستخدم بأن التغيير تم تسجيله وحفظه مباشرة
     toast({
