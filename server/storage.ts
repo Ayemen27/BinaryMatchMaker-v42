@@ -188,11 +188,11 @@ export class DatabaseStorage implements IStorage {
         return `${key} = $${index + 2}`;
       });
       
-      // ملاحظة: لا نستخدم حقل updated_at لأنه غير موجود في الجدول
+      // إضافة حقل updated_at للتحديث
       
       const query = `
         UPDATE users 
-        SET ${updateParts.join(', ')} 
+        SET ${updateParts.join(', ')}, updated_at = CURRENT_TIMESTAMP 
         WHERE id = $1
         RETURNING *
       `;
@@ -234,16 +234,30 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUserLanguage(id: number, language: string): Promise<User> {
-    const [updatedUser] = await db.update(users)
-      .set({ language })
-      .where(eq(users.id, id))
-      .returning();
-    
-    if (!updatedUser) {
-      throw new Error('User not found');
+    try {
+      console.log(`تحديث لغة المستخدم (${id}) إلى: ${language}`);
+      
+      // استعلام SQL مباشر لتحديث اللغة
+      const query = `
+        UPDATE users 
+        SET language = $2, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = $1
+        RETURNING *
+      `;
+      
+      const result = await db.query(query, [id, language]);
+      
+      if (!result || result.length === 0) {
+        console.error(`لم يتم العثور على المستخدم رقم ${id}`);
+        throw new Error('لم يتم العثور على المستخدم');
+      }
+      
+      console.log(`تم تحديث لغة المستخدم ${id} بنجاح إلى: ${language}`);
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في تحديث لغة المستخدم:', error);
+      throw error;
     }
-    
-    return updatedUser;
   }
   
   async updateUserLastLogin(id: number): Promise<void> {

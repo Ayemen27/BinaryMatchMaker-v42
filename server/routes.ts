@@ -609,8 +609,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         updatedSettings = await storage.createUserNotificationSettings(mergedSettings);
       } else {
-        // تحديث الإعدادات الموجودة
-        updatedSettings = await storage.updateUserNotificationSettings(userId, cleanSettings);
+        // تحديث الإعدادات الموجودة 
+        // إضافة معرف المستخدم قبل التحديث
+        updatedSettings = await storage.updateUserNotificationSettings(userId, {
+          ...cleanSettings, 
+          // تأكد من أن userId موجود
+          userId
+        });
       }
       
       // إضافة مراقبة وجهة
