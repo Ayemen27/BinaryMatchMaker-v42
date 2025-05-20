@@ -30,10 +30,19 @@ export function LanguageSwitcher({ className, onLanguageChange }: LanguageSwitch
   
   // تغيير اللغة واستدعاء الدالة إذا وجدت
   const handleLanguageChange = (lng: string) => {
-    i18n.changeLanguage(lng);
+    // تطبيق اللغة
+    i18n.changeLanguage(lng).then(() => {
+      console.log(`تم تغيير اللغة إلى: ${lng}`);
+      
+      // إعادة تحميل الصفحة لتفعيل الترجمة بشكل كامل (حل مؤقت)
+      // window.location.reload();
+    });
     
     // حفظ اللغة المختارة في التخزين المحلي
     localStorage.setItem("language", lng);
+    
+    // تغيير اتجاه الصفحة حسب اللغة
+    document.documentElement.dir = lng === "ar" ? "rtl" : "ltr";
     
     // استدعاء دالة التغيير من الخارج إذا وجدت
     if (onLanguageChange) {
