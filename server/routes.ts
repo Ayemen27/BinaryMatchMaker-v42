@@ -546,49 +546,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         body: req.body
       });
       
-      // التحقق من صحة البيانات المرسلة
-      const notificationSettingsSchema = z.object({
-        receiveSignalAlerts: z.boolean().optional(),
-        receiveMarketUpdates: z.boolean().optional(),
-        receiveNewFeatures: z.boolean().optional(),
-        allowEmailNotifications: z.boolean().optional(),
-        allowPushNotifications: z.boolean().optional(),
-        emailNotifications: z.boolean().optional(),
-        pushNotifications: z.boolean().optional(),
-        signalAlerts: z.boolean().optional(),
-        marketUpdates: z.boolean().optional(),
-        accountAlerts: z.boolean().optional(),
-        promotionalEmails: z.boolean().optional(),
-      });
-      
-      // تحقق من صحة البيانات
-      const result = notificationSettingsSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ 
-          message: "بيانات إشعارات غير صالحة", 
-          details: result.error.errors 
-        });
-      }
-      
       const userId = req.user.id;
       
-      // تحويل البيانات إلى التنسيق المناسب لقاعدة البيانات
-      const notificationSettings: Partial<UserNotificationSettings> = {
-        emailNotifications: req.body.emailNotifications || req.body.allowEmailNotifications,
-        pushNotifications: req.body.pushNotifications || req.body.allowPushNotifications,
-        signalAlerts: req.body.signalAlerts || req.body.receiveSignalAlerts,
-        marketUpdates: req.body.marketUpdates || req.body.receiveMarketUpdates,
-        accountAlerts: req.body.accountAlerts,
-        promotionalEmails: req.body.promotionalEmails || req.body.receiveNewFeatures,
+      // إعداد بيانات التحديث لتتوافق مع بنية الجدول في قاعدة البيانات
+      const notificationSettings = {
+        emailNotifications: typeof req.body.emailNotifications !== 'undefined' ? req.body.emailNotifications : 
+                         typeof req.body.allowEmailNotifications !== 'undefined' ? req.body.allowEmailNotifications : undefined,
+        
+        pushNotifications: typeof req.body.pushNotifications !== 'undefined' ? req.body.pushNotifications : 
+                        typeof req.body.allowPushNotifications !== 'undefined' ? req.body.allowPushNotifications : undefined,
+        
+        signalAlerts: typeof req.body.signalAlerts !== 'undefined' ? req.body.signalAlerts : 
+                   typeof req.body.receiveSignalAlerts !== 'undefined' ? req.body.receiveSignalAlerts : undefined,
+        
+        marketUpdates: typeof req.body.marketUpdates !== 'undefined' ? req.body.marketUpdates : 
+                    typeof req.body.receiveMarketUpdates !== 'undefined' ? req.body.receiveMarketUpdates : undefined,
+        
+        accountAlerts: typeof req.body.accountAlerts !== 'undefined' ? req.body.accountAlerts : undefined,
+        
+        promotionalEmails: typeof req.body.promotionalEmails !== 'undefined' ? req.body.promotionalEmails : 
+                        typeof req.body.receiveNewFeatures !== 'undefined' ? req.body.receiveNewFeatures : undefined,
       };
+      
+      // تنقية البيانات من القيم غير المحددة
+      const cleanSettings = Object.entries(notificationSettings)
+        .filter(([_key, value]) => value !== undefined)
+        .reduce((obj, [key, value]) => {
+          obj[key] = value;
+          return obj;
+        }, {});
       
       console.log('تحديث إعدادات الإشعارات لقاعدة البيانات:', {
         userId,
-        settings: notificationSettings
+        settings: cleanSettings
       });
       
-      // تحديث الإعدادات في قاعدة البيانات
-      const updatedSettings = await storage.updateUserNotificationSettings(userId, notificationSettings);
+      // التحقق من وجود إعدادات للمستخدم
+      const existingSettings = await storage.getUserNotificationSettings(userId);
+      
+      let updatedSettings;
+      
+      if (!existingSettings) {
+        console.log(`إنشاء إعدادات إشعارات جديدة للمستخدم ${userId}`);
+        // إنشاء إعدادات جديدة إذا لم تكن موجودة
+        updatedSettings = await storage.createUserNotificationSettings({
+          userId,
+          ...cleanSettings,
+          // إعدادات افتراضية للحقول غير المحددة
+          emailNotifications: cleanSettings.emailNotifications ?? true,
+          pushNotifications: cleanSettings.pushNotifications ?? true,
+          signalAlerts: cleanSettings.signalAlerts ?? true,
+          marketUpdates: cleanSettings.marketUpdates ?? true,
+          accountAlerts: cleanSettings.accountAlerts ?? true,
+          promotionalEmails: cleanSettings.promotionalEmails ?? false
+        });
+      } else {
+        // تحديث الإعدادات الموجودة
+        updatedSettings = await storage.updateUserNotificationSettings(userId, cleanSettings);
+      }
       
       // إضافة مراقبة وجهة
       console.log('تم تحديث إعدادات الإشعارات بنجاح:', updatedSettings);
