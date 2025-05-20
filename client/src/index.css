@@ -30,6 +30,100 @@
     background: #fffdf0;
   }
   
+  /* أنماط البطاقة السنوية للإصدار v.4.1 */
+  .version-info-box {
+    border-top: 1px dashed #ffd700;
+    border-bottom: 1px dashed #ffd700;
+    padding: 0.75rem;
+    margin: 0.5rem 0 1rem 0;
+    background-color: #fffdf0;
+    border-radius: 8px;
+    position: relative;
+  }
+  
+  .version-info-box .new-badge-inline {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #ff3a33;
+    border-radius: 12px;
+    padding: 2px 8px;
+  }
+  
+  .version-info-box .new-badge-text {
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .version-info-box .premium-title {
+    color: #ff3a33;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .version-info-box .fire-icon {
+    margin-left: 0.25rem;
+  }
+  
+  .version-info-box .premium-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+  
+  .version-info-box .premium-subtitle {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .features-highlight {
+    margin: 0.75rem 0;
+    padding-left: 0.5rem;
+    list-style-type: none;
+  }
+  
+  .features-highlight li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .version-info-box .premium-features li {
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  .version-info-box .check-icon {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .version-info-box .premium-cta {
+    text-align: center;
+    margin: 1rem 0;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .version-info-box .premium-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 0.5rem;
+  }
+  
   .plan-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
