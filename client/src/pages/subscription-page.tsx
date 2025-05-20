@@ -80,8 +80,8 @@ export default function SubscriptionPage() {
   const botVersions = {
     weekly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0'],
     monthly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0'],
-    annual: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic Pro v3.5'],
-    premium: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic Pro v3.5', 'BinarJoinAnalytic V.4.1']
+    annual: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0'],
+    premium: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0']
   };
   
   // بنية خطط الاشتراك مع مزيد من التفاصيل والميزات
@@ -369,7 +369,7 @@ export default function SubscriptionPage() {
                       className="w-full text-right appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2.5 h-11 pr-4 pl-8 outline-none"
                       dir="rtl"
                     >
-                      <option value="_default">اختر إصدار البوت</option>
+                      <option value="_default">{t('selectBotVersion')}</option>
                       {plan.botVersions.map((version) => (
                         <option key={version} value={version}>
                           {version}
