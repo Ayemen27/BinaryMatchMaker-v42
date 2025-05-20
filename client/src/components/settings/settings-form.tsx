@@ -69,20 +69,10 @@ export function SettingsForm() {
     isSaving 
   } = useSettings();
   
-  // إنشاء نموذج مع القيم المستلمة من الخادم عند تحميل المكون
+  // إنشاء نموذج مع القيم الافتراضية أولاً ثم سيتم تحديثها لاحقاً من الخادم
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    // استخدام القيم الفعلية من الخادم (settings) بدلاً من القيم الافتراضية
-    values: {
-      theme: settings.theme,
-      defaultAsset: settings.defaultAsset,
-      defaultTimeframe: settings.defaultTimeframe,
-      defaultPlatform: settings.defaultPlatform || "",
-      chartType: settings.chartType,
-      showTradingTips: settings.showTradingTips,
-      autoRefreshData: settings.autoRefreshData,
-      refreshInterval: settings.refreshInterval,
-    },
+    defaultValues: defaultFormValues,
     // عند تغير أي قيمة مباشرة يتم الإرسال للخادم
     mode: "onChange",
   });
@@ -262,7 +252,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={settings.defaultAsset}
+                  value={form.watch("defaultAsset") || settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -293,7 +283,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultTimeframe")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
-                  value={settings.defaultTimeframe}
+                  value={form.watch("defaultTimeframe") || settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -324,7 +314,7 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={settings.chartType}
+                  value={form.watch("chartType") || settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>
