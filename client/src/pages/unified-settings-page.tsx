@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet";
 import { Layout } from "@/components/layout/layout";
 import { SettingsTabs } from "@/components/settings/settings-tabs";
 import { AccountInfoCard } from "@/components/settings/account-info-card";
+import { StatsDashboard } from "@/components/settings/stats-dashboard";
 import { useSettings } from "@/lib/settings-manager";
 import { Loader2 } from "lucide-react";
 
@@ -59,6 +60,9 @@ export default function UnifiedSettingsPage() {
             ) : (
               <>
                 <AccountInfoCard userData={allSettings?.user} className="mb-6" />
+                
+                {/* لوحة الإحصائيات */}
+                <StatsDashboard userData={allSettings?.user} className="mb-6" />
                 
                 {/* نصائح وإرشادات */}
                 <Alert className="bg-gradient-to-r from-blue-500/10 to-blue-400/5 border-blue-200 dark:border-blue-900">
