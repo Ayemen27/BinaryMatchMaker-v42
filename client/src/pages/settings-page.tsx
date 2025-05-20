@@ -204,6 +204,33 @@ export default function SettingsPage() {
     promotionalEmails: false,
   });
   
+  // استعلام لجلب إعدادات الإشعارات
+  const { data: notificationsData } = useQuery({
+    queryKey: ['/api/user/notifications', queryUpdateKey],
+    enabled: !!user, // تفعيل الاستعلام فقط إذا كان المستخدم مسجل دخوله
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log('تم جلب إعدادات الإشعارات بنجاح:', data);
+      
+      // تحديث حالة إعدادات الإشعارات
+      if (data) {
+        setNotificationSettings({
+          emailNotifications: data.emailNotifications ?? true,
+          pushNotifications: data.pushNotifications ?? true,
+          signalAlerts: data.signalAlerts ?? true,
+          marketUpdates: data.marketUpdates ?? false,
+          accountAlerts: data.accountAlerts ?? true,
+          promotionalEmails: data.promotionalEmails ?? false,
+        });
+      }
+    },
+    onError: (error) => {
+      console.error('خطأ في جلب إعدادات الإشعارات:', error);
+    }
+  });
+  
   // API Key form
   const apiKeyForm = useForm<ApiKeyFormValues>({
     resolver: zodResolver(apiKeyFormSchema),
