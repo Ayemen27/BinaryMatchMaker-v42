@@ -192,8 +192,8 @@ export function SettingsForm() {
       document.documentElement.classList.add(value);
     }
     
-    // تتبع التغيير أولاً للتحليلات
-    trackSettingChange(name, value);
+    // تتبع التغيير أولاً للتحليلات (تعليق هذا الجزء مؤقتاً حتى يتم تنفيذ وظيفة التتبع)
+    // console.log('تتبع تغيير الإعداد:', name, value);
     
     // إرسال التغيير مباشرة إلى الخادم باستخدام updateSettings بدلاً من updateSetting
     // إنشاء كائن به الحقل المتغير فقط
