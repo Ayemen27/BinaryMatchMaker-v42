@@ -389,10 +389,21 @@ export default function SubscriptionPage() {
                     {plan.id === 'premium' && t('premiumDataFeatures')}
                   </h3>
                   
-                  {plan.extraDescription && (
-                    <p className="text-center text-sm mb-4 text-yellow-600 font-medium">
-                      {plan.extraDescription}
-                    </p>
+                  {plan.id === 'premium' && (
+                    <div className="version-info-box">
+                      <span className="version-fire-icon">🔥</span>
+                      <h4>جديد! Binar Join Analytic V.4.1 – ثورة إشارات التداول</h4>
+                      <p>إشارات دقيقة، قرارات أكثر ذكاءً! مع Binar Join Analytic V.4.1 الجديد، احصل على إشارات محدثة دقيقة بدقيقة لمساعدتك على اتخاذ قرارات استثمارية ناجحة.</p>
+                      
+                      <h4 className="mt-2">لماذا Binar Join Analytic V.4.1؟</h4>
+                      <ul className="features-highlight">
+                        <li><Check className="h-3 w-3 text-yellow-500 mr-2 mt-1" /> تصميم حديث وسهل الاستخدام - تجربة سلسة وسريعة على جميع الأجهزة</li>
+                        <li><Check className="h-3 w-3 text-yellow-500 mr-2 mt-1" /> إشارات تداول دقيقة - مبنية على تحليل في الوقت الحقيقي واتجاهات السوق</li>
+                        <li><Check className="h-3 w-3 text-yellow-500 mr-2 mt-1" /> متعدد المنصات - متوافق مع منصات التداول الرئيسية، بما في ذلك EQ Broker</li>
+                        <li><Check className="h-3 w-3 text-yellow-500 mr-2 mt-1" /> إشارات تُحدّث تلقائيًا - لا حاجة للتحديثات اليدوية!</li>
+                      </ul>
+                      <p className="text-center font-medium">جربه الآن وابدأ في تحقيق أقصى استفادة من مزايا إشارات التداول!</p>
+                    </div>
                   )}
                   
                   <ul className="features-list space-y-3 mb-4">
