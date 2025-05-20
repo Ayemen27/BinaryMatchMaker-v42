@@ -1,11 +1,13 @@
 /**
  * مدير إعدادات المستخدم - تنفيذ جديد أكثر بساطة وموثوقية
+ * مع نظام تتبع متكامل لتشخيص المشاكل
  */
 
 import { apiRequest, queryClient } from './queryClient';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
+import tracker, { TrackEventType } from './debug-tracker';
 
 // نوع بيانات إعدادات المستخدم
 export interface UserSettings {
@@ -56,12 +58,35 @@ export function useSettings() {
         const storedSettings = localStorage.getItem('userSettings');
         if (storedSettings) {
           const parsedSettings = JSON.parse(storedSettings);
+          
+          // تسجيل عملية قراءة التخزين المحلي في نظام التتبع
+          tracker.trackEvent(TrackEventType.STORAGE_READ, {
+            component: 'SettingsManager',
+            action: 'getLocalSettings',
+            data: parsedSettings,
+            metadata: {
+              source: 'localStorage',
+              timestamp: new Date().toISOString()
+            }
+          });
+          
           console.log('تم استرجاع الإعدادات من التخزين المحلي:', parsedSettings);
           return parsedSettings;
         }
       }
     } catch (error) {
       console.error('خطأ أثناء استرجاع الإعدادات من التخزين المحلي:', error);
+      
+      // تسجيل الخطأ في نظام التتبع
+      tracker.trackEvent(TrackEventType.ERROR, {
+        component: 'SettingsManager',
+        action: 'getLocalSettings',
+        data: { error: error instanceof Error ? error.message : String(error) },
+        metadata: {
+          source: 'localStorage',
+          timestamp: new Date().toISOString()
+        }
+      });
     }
     return null;
   };
@@ -85,38 +110,149 @@ export function useSettings() {
   // استخدام البيانات من الاستعلام أو الإعدادات المحلية أو القيم الافتراضية إذا كانت غير متاحة
   const settings = data || localSettings || defaultSettings;
 
+  // تعريف مرجع للإعدادات الحالية للرجوع إليها في حالة حدوث مشاكل
+  const currentSettingsRef = useRef<UserSettings | null>(null);
+  
+  // تحديث مرجع الإعدادات الحالية كلما تغيرت البيانات
+  useEffect(() => {
+    if (data) {
+      currentSettingsRef.current = data;
+      
+      // تسجيل تحميل الإعدادات في نظام التتبع
+      tracker.trackEvent(TrackEventType.SETTINGS_LOAD, {
+        component: 'SettingsManager',
+        action: 'loadServerSettings',
+        data: data,
+        metadata: {
+          source: 'server',
+          timestamp: new Date().toISOString()
+        }
+      });
+    }
+  }, [data]);
+  
   // تعريف mutation لتحديث الإعدادات
   const { mutate, isPending } = useMutation({
     mutationFn: async (newSettings: Partial<UserSettings>) => {
+      // تسجيل بدء عملية التحديث في نظام التتبع
+      const eventId = tracker.trackEvent(TrackEventType.SETTINGS_CHANGE, {
+        component: 'SettingsManager',
+        action: 'updateSettingsStart',
+        previousValue: currentSettingsRef.current || localSettings || defaultSettings,
+        newValue: newSettings,
+        metadata: {
+          changedFields: Object.keys(newSettings),
+          timestamp: new Date().toISOString()
+        }
+      });
+      
       // طباعة البيانات المرسلة للتأكد من صحتها
       console.log('إرسال إعدادات للخادم:', newSettings);
       
       // تحضير الإعدادات المكتملة بدمج الإعدادات الحالية مع التغييرات الجديدة
       // هذا يضمن أن جميع الإعدادات يتم حفظها بشكل صحيح
+      const baseSettings = data || localSettings || defaultSettings;
+      
       const completeSettings = {
-        ...(data || localSettings || defaultSettings), // استخدام البيانات الحالية أو المحلية أو القيم الافتراضية
+        ...baseSettings, // استخدام البيانات الحالية أو المحلية أو القيم الافتراضية
         ...newSettings // تطبيق التغييرات الجديدة فوق القيم الحالية
       };
       
       // طباعة الإعدادات المكتملة للتأكد من صحتها
       console.log('الإعدادات الكاملة التي سيتم إرسالها:', completeSettings);
       
+      // تسجيل تفاصيل التغييرات المكتشفة في نظام التتبع
+      const changes = tracker.detectChanges(baseSettings, completeSettings);
+      tracker.trackEvent(TrackEventType.SETTINGS_SAVE, {
+        component: 'SettingsManager',
+        action: 'prepareSettingsForSave',
+        data: changes,
+        previousValue: baseSettings,
+        newValue: completeSettings,
+        metadata: {
+          relatedEventId: eventId,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
       // حفظ الإعدادات الكاملة محليًا قبل الإرسال للخادم (احتياطي)
       try {
         if (typeof window !== 'undefined' && window.localStorage) {
           localStorage.setItem('userSettings', JSON.stringify(completeSettings));
+          
+          // تسجيل عملية كتابة التخزين المحلي في نظام التتبع
+          tracker.trackEvent(TrackEventType.STORAGE_WRITE, {
+            component: 'SettingsManager',
+            action: 'saveToLocalStorage',
+            data: completeSettings,
+            metadata: {
+              source: 'localStorage',
+              timestamp: new Date().toISOString()
+            }
+          });
+          
           console.log('تم حفظ الإعدادات الكاملة في التخزين المحلي');
         }
       } catch (error) {
         console.error('خطأ أثناء حفظ الإعدادات في التخزين المحلي:', error);
+        
+        // تسجيل الخطأ في نظام التتبع
+        tracker.trackEvent(TrackEventType.ERROR, {
+          component: 'SettingsManager',
+          action: 'saveToLocalStorage',
+          data: { error: error instanceof Error ? error.message : String(error) },
+          metadata: {
+            source: 'localStorage',
+            timestamp: new Date().toISOString()
+          }
+        });
       }
+      
+      // تسجيل بدء الطلب للخادم
+      tracker.trackEvent(TrackEventType.SERVER_REQUEST, {
+        component: 'SettingsManager',
+        action: 'sendToServer',
+        data: newSettings,
+        metadata: {
+          url: SETTINGS_KEY,
+          method: 'PATCH',
+          timestamp: new Date().toISOString()
+        }
+      });
       
       const response = await apiRequest('PATCH', SETTINGS_KEY, newSettings);
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // تسجيل خطأ الخادم في نظام التتبع
+        tracker.trackEvent(TrackEventType.ERROR, {
+          component: 'SettingsManager',
+          action: 'serverResponseError',
+          data: errorData,
+          metadata: {
+            status: response.status,
+            statusText: response.statusText,
+            timestamp: new Date().toISOString()
+          }
+        });
+        
         throw new Error(errorData.message || 'حدث خطأ أثناء حفظ الإعدادات');
       }
-      return response.json();
+      
+      const responseData = await response.json();
+      
+      // تسجيل استجابة الخادم في نظام التتبع
+      tracker.trackEvent(TrackEventType.SERVER_RESPONSE, {
+        component: 'SettingsManager',
+        action: 'serverResponseSuccess',
+        data: responseData,
+        metadata: {
+          status: response.status,
+          timestamp: new Date().toISOString()
+        }
+      });
+      
+      return responseData;
     },
     onSuccess: (data) => {
       // طباعة البيانات المستلمة للتأكد من صحتها
