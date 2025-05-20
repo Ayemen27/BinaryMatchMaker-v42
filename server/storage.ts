@@ -120,8 +120,8 @@ export class DatabaseStorage implements IStorage {
       const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
       
       if (result.length > 0) {
-        // استخدام محول الحقول لضمان توافق أسماء الحقول بين قاعدة البيانات والتطبيق
-        const user = mapDatabaseToApp<User>(result[0]);
+        // استخدام البيانات مباشرة بدون تحويل
+        const user = result[0] as User;
         return user;
       }
       return undefined;
@@ -172,17 +172,16 @@ export class DatabaseStorage implements IStorage {
   
   async updateUserProfile(id: number, data: Partial<User>): Promise<User> {
     try {
-      // تحويل البيانات من تنسيق التطبيق إلى تنسيق قاعدة البيانات
-      const dbData = mapAppToDatabase<Record<string, any>>(data);
+      // استخدام البيانات مباشرة بدون تحويل - تم التعديل كجزء من خطة التطابق
       
       // تحضير الحقول التي سيتم تحديثها
       const updateFields: Record<string, any> = {};
       
-      // تطبيق قيم الحقول بشكل ديناميكي
-      if (dbData && typeof dbData === 'object') {
-        Object.keys(dbData).forEach(key => {
-          if (dbData[key] !== undefined) {
-            updateFields[key] = dbData[key];
+      // تطبيق قيم الحقول بشكل مباشر من البيانات الأصلية
+      if (data && typeof data === 'object') {
+        Object.keys(data).forEach(key => {
+          if (data[key] !== undefined) {
+            updateFields[key] = data[key];
           }
         });
       }
@@ -245,8 +244,8 @@ export class DatabaseStorage implements IStorage {
         throw new Error('المستخدم غير موجود');
       }
       
-      // تحويل البيانات من تنسيق قاعدة البيانات إلى تنسيق التطبيق
-      const updatedUser = mapDatabaseToApp<User>(result[0]);
+      // استخدام البيانات مباشرة بدون تحويل
+      const updatedUser = result[0] as User;
       
       console.log('تم تحديث بيانات المستخدم بنجاح:', {
         userId: id,
