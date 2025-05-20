@@ -3,22 +3,34 @@ import * as SwitchPrimitives from "@radix-ui/react-switch"
 
 import { cn } from "@/lib/utils"
 
-// إعادة تعريف المكون لتجنب استخدام flushSync داخل دورة حياة المكون
+// إنشاء مكون سويتش مبسط لتجنب مشكلة flushSync
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
 >(({ className, ...props }, ref) => {
-  // إضافة تأخير صغير لتنفيذ التغييرات خارج دورة الحياة
-  const handleCheckedChange = React.useCallback((checked: boolean) => {
-    // استخدام timeout للتأكد من تنفيذ الشيفرة بعد انتهاء عملية الرندر
-    if (props.onCheckedChange) {
-      setTimeout(() => {
-        // استدعاء وظيفة onCheckedChange الأصلية
-        props.onCheckedChange?.(checked);
-      }, 0);
+  // استخدام حالة داخلية لتجنب التغييرات المباشرة
+  const [isChecked, setIsChecked] = React.useState(props.checked || false);
+  
+  // تحديث الحالة الداخلية عند تغير props.checked
+  React.useEffect(() => {
+    if (props.checked !== undefined) {
+      setIsChecked(!!props.checked);
     }
-  }, [props.onCheckedChange]);
-
+  }, [props.checked]);
+  
+  // معالجة التغييرات محلياً أولاً ثم استدعاء المعالج الخارجي
+  const handleChange = (checked: boolean) => {
+    setIsChecked(checked);
+    
+    // استدعاء معالج التغيير الخارجي لاحقاً بعد اكتمال عملية الرندر
+    if (props.onCheckedChange) {
+      // استخدام queueMicrotask بدلاً من setTimeout لتنفيذ أسرع
+      queueMicrotask(() => {
+        props.onCheckedChange?.(checked);
+      });
+    }
+  };
+  
   return (
     <SwitchPrimitives.Root
       className={cn(
@@ -26,7 +38,8 @@ const Switch = React.forwardRef<
         className
       )}
       {...props}
-      onCheckedChange={handleCheckedChange}
+      checked={isChecked}
+      onCheckedChange={handleChange}
       ref={ref}
     >
       <SwitchPrimitives.Thumb
