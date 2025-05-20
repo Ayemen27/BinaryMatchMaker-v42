@@ -161,57 +161,52 @@ export function SettingsTabs() {
   useEffect(() => {
     if (allSettings) {
       // تحديث نموذج الملف الشخصي
-      if (allSettings.user) {
-        const profileValues = {
-          username: allSettings.user.username || "",
-          email: allSettings.user.email || "",
-          fullName: allSettings.user.fullName || "",
-          language: allSettings.user.language || "ar",
-        };
-        
-        profileForm.reset(profileValues);
-      }
+      const user = allSettings.user || {};
+      const profileValues = {
+        username: user.username || "",
+        email: user.email || "",
+        fullName: user.fullName || "",
+        language: user.language || "ar",
+      };
+      
+      profileForm.reset(profileValues);
       
       // تحديث نموذج الإعدادات العامة
-      if (allSettings.general) {
-        const generalValues = {
-          theme: allSettings.general.theme || "light",
-          defaultAsset: allSettings.general.defaultAsset || "BTC/USDT",
-          defaultTimeframe: allSettings.general.defaultTimeframe || "1h",
-          defaultPlatform: allSettings.general.defaultPlatform || "",
-          chartType: allSettings.general.chartType || "candlestick",
-          showTradingTips: typeof allSettings.general.showTradingTips === 'boolean' ? allSettings.general.showTradingTips : true,
-          autoRefreshData: typeof allSettings.general.autoRefreshData === 'boolean' ? allSettings.general.autoRefreshData : true,
-          refreshInterval: allSettings.general.refreshInterval || 60,
-        };
-        
-        generalSettingsForm.reset(generalValues);
-      }
+      const general = allSettings.general || {};
+      const generalValues = {
+        theme: general.theme || "light",
+        defaultAsset: general.defaultAsset || "BTC/USDT",
+        defaultTimeframe: general.defaultTimeframe || "1h",
+        defaultPlatform: general.defaultPlatform || "",
+        chartType: general.chartType || "candlestick",
+        showTradingTips: typeof general.showTradingTips === 'boolean' ? general.showTradingTips : true,
+        autoRefreshData: typeof general.autoRefreshData === 'boolean' ? general.autoRefreshData : true,
+        refreshInterval: general.refreshInterval || 60,
+      };
+      
+      generalSettingsForm.reset(generalValues);
       
       // تحديث نموذج إعدادات الإشعارات
-      if (allSettings.notifications) {
-        const notificationValues = {
-          emailNotifications: typeof allSettings.notifications.emailNotifications === 'boolean' ? allSettings.notifications.emailNotifications : true,
-          pushNotifications: typeof allSettings.notifications.pushNotifications === 'boolean' ? allSettings.notifications.pushNotifications : true,
-          signalAlerts: typeof allSettings.notifications.signalAlerts === 'boolean' ? allSettings.notifications.signalAlerts : true,
-          marketUpdates: typeof allSettings.notifications.marketUpdates === 'boolean' ? allSettings.notifications.marketUpdates : false,
-          accountAlerts: typeof allSettings.notifications.accountAlerts === 'boolean' ? allSettings.notifications.accountAlerts : true,
-          promotionalEmails: typeof allSettings.notifications.promotionalEmails === 'boolean' ? allSettings.notifications.promotionalEmails : false,
-        };
-        
-        notificationSettingsForm.reset(notificationValues);
-      }
+      const notifications = allSettings.notifications || {};
+      const notificationValues = {
+        emailNotifications: typeof notifications.emailNotifications === 'boolean' ? notifications.emailNotifications : true,
+        pushNotifications: typeof notifications.pushNotifications === 'boolean' ? notifications.pushNotifications : true,
+        signalAlerts: typeof notifications.signalAlerts === 'boolean' ? notifications.signalAlerts : true,
+        marketUpdates: typeof notifications.marketUpdates === 'boolean' ? notifications.marketUpdates : false,
+        accountAlerts: typeof notifications.accountAlerts === 'boolean' ? notifications.accountAlerts : true,
+        promotionalEmails: typeof notifications.promotionalEmails === 'boolean' ? notifications.promotionalEmails : false,
+      };
+      
+      notificationSettingsForm.reset(notificationValues);
       
       // تحديث نموذج إعدادات API
-      if (allSettings.general) {
-        const apiValues = {
-          useAiForSignals: typeof allSettings.general.useAiForSignals === 'boolean' ? allSettings.general.useAiForSignals : true,
-          useCustomAiKey: typeof allSettings.general.useCustomAiKey === 'boolean' ? allSettings.general.useCustomAiKey : false,
-          openaiApiKey: allSettings.general.openaiApiKey || "",
-        };
-        
-        apiSettingsForm.reset(apiValues);
-      }
+      const apiValues = {
+        useAiForSignals: typeof general.useAiForSignals === 'boolean' ? general.useAiForSignals : true,
+        useCustomAiKey: typeof general.useCustomAiKey === 'boolean' ? general.useCustomAiKey : false,
+        openaiApiKey: general.openaiApiKey || "",
+      };
+      
+      apiSettingsForm.reset(apiValues);
     }
   }, [allSettings]);
   
