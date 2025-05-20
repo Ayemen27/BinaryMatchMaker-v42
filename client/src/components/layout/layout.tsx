@@ -14,13 +14,13 @@ export function Layout({ children }: LayoutProps) {
   const isRtl = i18n.dir() === 'rtl';
 
   return (
-    <div className={cn("flex h-screen overflow-hidden", isRtl ? 'rtl' : 'ltr')}>
+    <div className={cn("flex min-h-screen overflow-hidden", isRtl ? 'rtl' : 'ltr')}>
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="flex-1 flex flex-col bg-background overflow-hidden">
         <Header onSidebarToggle={() => setSidebarOpen(!sidebarOpen)} />
         
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-8">
           {children}
         </div>
       </main>
