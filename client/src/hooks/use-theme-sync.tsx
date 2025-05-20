@@ -11,15 +11,39 @@ export function useThemeSync() {
   const { setTheme, theme } = useTheme();
   
   // الوصول إلى إعدادات المستخدم من قاعدة البيانات
-  const { settings, isLoading } = useSettings();
+  const { settings, isLoading, updateSetting } = useSettings();
   
-  // مزامنة السمة من قاعدة البيانات مع next-themes عند تحميل الإعدادات أو تغييرها
+  // مزامنة ثنائية الاتجاه:
+  // 1. من قاعدة البيانات إلى واجهة المستخدم
+  // 2. في حالة عدم وجود قيمة في قاعدة البيانات، حفظ القيمة الحالية من الواجهة إلى قاعدة البيانات
   useEffect(() => {
-    if (!isLoading && settings && settings.theme && theme !== settings.theme) {
-      console.log(`[مزامنة الثيم] تطبيق الثيم من قاعدة البيانات: ${settings.theme}`);
-      setTheme(settings.theme);
+    if (isLoading) return;
+    
+    if (settings) {
+      if (settings.theme) {
+        // إذا كانت هناك قيمة في قاعدة البيانات تختلف عن الواجهة، نطبق قيمة قاعدة البيانات
+        if (theme !== settings.theme) {
+          console.log(`[مزامنة الثيم] تطبيق الثيم من قاعدة البيانات: ${settings.theme}`);
+          setTheme(settings.theme);
+        }
+      } else if (theme) {
+        // إذا لم تكن هناك قيمة في قاعدة البيانات، نحفظ القيمة الحالية من الواجهة
+        console.log(`[مزامنة الثيم] حفظ الثيم الحالي في قاعدة البيانات: ${theme}`);
+        updateSetting('theme', theme);
+      }
     }
-  }, [settings, isLoading, setTheme, theme]);
+  }, [settings, isLoading, theme, setTheme, updateSetting]);
+  
+  // عند تغيير السمة في الواجهة، نحفظها في قاعدة البيانات
+  useEffect(() => {
+    if (isLoading || !settings || !theme) return;
+    
+    // إذا تغيرت السمة في الواجهة وكانت مختلفة عن قاعدة البيانات
+    if (theme !== settings.theme) {
+      console.log(`[مزامنة الثيم] حفظ الثيم المحدث في قاعدة البيانات: ${theme}`);
+      updateSetting('theme', theme);
+    }
+  }, [theme, settings, isLoading, updateSetting]);
   
   return { currentTheme: theme };
 }
