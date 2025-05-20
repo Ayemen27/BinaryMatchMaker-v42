@@ -224,7 +224,7 @@ export function SettingsForm() {
                 <FormLabel>{t("theme")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("theme", value)}
-                  value={settings.theme} // استخدام القيمة مباشرة من مدير الإعدادات
+                  value={form.watch("theme") || settings.theme}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -251,7 +251,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={settings.defaultAsset}
+                  value={form.watch("defaultAsset") || settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -282,7 +282,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultTimeframe")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
-                  value={settings.defaultTimeframe}
+                  value={form.watch("defaultTimeframe") || settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -313,7 +313,7 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={settings.chartType}
+                  value={form.watch("chartType") || settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>
