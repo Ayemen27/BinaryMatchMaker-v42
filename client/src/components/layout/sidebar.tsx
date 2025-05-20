@@ -51,6 +51,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       current: location === '/signal-history' 
     },
     { 
+      name: t('subscriptionPlans'), 
+      href: '/subscriptions', 
+      icon: Crown, 
+      current: location === '/subscriptions' 
+    },
+    { 
       name: t('settings'), 
       href: '/settings', 
       icon: Settings, 
@@ -123,7 +129,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <p className="text-xs text-muted-foreground">{t('remainingSignals', { count: 3 })}</p>
               </div>
             </div>
-            <Button className="w-full" size="sm">
+            <Button 
+              className="w-full" 
+              size="sm" 
+              onClick={() => {
+                window.location.href = '/subscriptions';
+                onClose();
+              }}
+            >
               {t('upgradePlan')}
             </Button>
           </div>

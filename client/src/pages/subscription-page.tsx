@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
-import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { Helmet } from 'react-helmet';
 import { Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2 } from 'lucide-react';
@@ -27,7 +26,18 @@ export default function SubscriptionPage() {
   // تنفيذ طلب ترقية الاشتراك
   const upgradeMutation = useMutation({
     mutationFn: async (planType: string) => {
-      return apiRequest('/api/user/subscription/upgrade', 'POST', { planType });
+      const response = await fetch('/api/user/subscription/upgrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planType }),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('فشل في ترقية الاشتراك');
+      }
+      
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user/subscription'] });
