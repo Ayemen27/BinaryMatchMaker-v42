@@ -11,9 +11,11 @@ import { useAuth } from '@/hooks/use-auth';
 import { Helmet } from 'react-helmet';
 import { 
   Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2, 
-  RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award
+  RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award, ChevronDown
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+// استيراد ملف الأنماط الخاص بصفحة الاشتراك
+import '../styles/subscription.css';
 
 export default function SubscriptionPage() {
   const { t, i18n } = useTranslation();
@@ -350,24 +352,25 @@ export default function SubscriptionPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="plan-currency-toggle text-xs py-1"
+                    className={`plan-currency-toggle text-xs py-1 ${currency === 'STARS' ? 'stars-active' : ''}`}
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
-                      : <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToUSD')}</>
+                      ? <><Star className="h-4 w-4 mr-1" /> {t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
+                      : <><DollarSign className="h-4 w-4 mr-1" /> {t('switchToUSD')}</>
                     }
                   </Button>
                   
                   <div className="plan-description mt-2 text-sm">{plan.description}</div>
                   
-                  <div className="bot-version-container mt-2">
+                  <div className="bot-version-container mt-3">
                     <Select
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="bot-version-select h-9">
+                      <SelectTrigger className="bot-version-select h-10 px-4">
                         <SelectValue placeholder={t('selectBotVersion')} />
+                        <ChevronDown className="h-4 w-4 ml-auto text-gray-500" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="_default">{t('selectBotVersion')}</SelectItem>
