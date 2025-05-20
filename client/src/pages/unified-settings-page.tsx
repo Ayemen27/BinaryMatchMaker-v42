@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Redirect } from "wouter";
 import { Helmet } from "react-helmet";
+import { AllSettings, GeneralSettings, NotificationSettings, UserProfile } from "@/types/settings";
 import { Layout } from "@/components/layout/layout";
 
 // المكونات
