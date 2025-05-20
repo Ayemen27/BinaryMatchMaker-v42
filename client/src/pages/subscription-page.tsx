@@ -159,23 +159,24 @@ export default function SubscriptionPage() {
       label: t('premiumAnnualPlan'),
       price: currency === 'USD' ? `$${planPrices.premium.USD}` : `${planPrices.premium.STARS}`,
       period: t('yearly'),
-      description: t('advancedDataDrivenAnalysis'),
+      description: "BinarJoinAnalytic V.4.1 - ثورة إشارات التداول 🔥",
       color: 'from-amber-500 to-yellow-600',
       icon: <Medal className="h-5 w-5" />,
       botVersions: ['BinarJoinAnalytic V.4.1'],
       features: [
-        { text: t('advancedMarketDataAnalysis'), available: true },
-        { text: t('robotPoweredTradingSignals'), available: true },
-        { text: t('ultraFastMarketInsights'), available: true },
-        { text: t('exclusivePremiumStrategies'), available: true },
-        { text: t('dedicatedAccountManager'), available: true },
-        { text: t('prioritySignalDelivery'), available: true },
+        { text: 'تصميم حديث وسهل الاستخدام - تجربة سلسة وسريعة', available: true },
+        { text: 'إشارات تداول دقيقة مبنية على تحليل في الوقت الحقيقي', available: true },
+        { text: 'متعدد المنصات - متوافق مع منصات التداول الرئيسية', available: true },
+        { text: 'إشارات تُحدّث تلقائيًا - لا حاجة للتحديثات اليدوية', available: true },
+        { text: 'دعم فني متميز على مدار الساعة', available: true },
+        { text: 'الوصول الحصري لآخر تحديثات وتحسينات المنصة', available: true },
       ],
-      idealFor: t('forProfessionalTradersPrecision'),
+      idealFor: "مخصص للاصدار V.4.1 - ثورة في إشارات التداول ودقة التوقعات!",
       isPopular: false,
       callToAction: t('getPremiumDataAccess'),
       disabled: false,
-      isNew: true
+      isNew: true,
+      extraDescription: 'إشارات دقيقة، قرارات أكثر ذكاءً! مع Binar Join Analytic V.4.1 الجديد، احصل على إشارات محدثة دقيقة بدقيقة لمساعدتك على اتخاذ قرارات استثمارية ناجحة.'
     }
   ];
   
@@ -387,6 +388,12 @@ export default function SubscriptionPage() {
                     {plan.id === 'annual' && t('exclusiveProfessionalFeatures')}
                     {plan.id === 'premium' && t('premiumDataFeatures')}
                   </h3>
+                  
+                  {plan.extraDescription && (
+                    <p className="text-center text-sm mb-4 text-yellow-600 font-medium">
+                      {plan.extraDescription}
+                    </p>
+                  )}
                   
                   <ul className="features-list space-y-3 mb-4">
                     {plan.features.map((feature, idx) => (
