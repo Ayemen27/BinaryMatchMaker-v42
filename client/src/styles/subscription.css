@@ -1,0 +1,204 @@
+/* تحسينات خاصة بصفحة الاشتراك */
+
+/* تنسيق البطاقات */
+.plan-card {
+  border-radius: 16px;
+  margin: 0 12px;
+  overflow: hidden;
+  background-color: #fefefe;
+  border: 1px solid #eaeaea;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.plan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* تحسين عرض البطاقات على الأجهزة الصغيرة */
+@media (max-width: 768px) {
+  .plan-card {
+    margin: 0.5rem auto;
+    width: 90%;
+  }
+}
+
+/* رأس البطاقة */
+.plan-header {
+  background-color: #fefdf7;
+  padding: 1.5rem 1.2rem 1rem;
+  position: relative;
+}
+
+/* وصف الخطة */
+.plan-description {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0.5rem 0;
+  line-height: 1.3;
+}
+
+/* سعر الخطة */
+.price {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0.8rem 0;
+  line-height: 1;
+  position: relative;
+  display: inline-block;
+  font-family: Arial, sans-serif;
+}
+
+.price:before {
+  content: '$';
+  font-size: 1.5rem;
+  vertical-align: super;
+  margin-right: 2px;
+  color: #ffcc00;
+}
+
+.price-usd:before {
+  content: '$';
+}
+
+/* تنسيق مربع اختيار إصدار الروبوت */
+.bot-version-container {
+  margin: 0.8rem 0;
+  position: relative;
+}
+
+.bot-version-select {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-size: 0.9rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  height: 2.5rem;
+  padding: 0 1rem;
+}
+
+.bot-version-select:hover {
+  border-color: #ccc;
+  background-color: #f5f5f5;
+}
+
+.bot-version-select:focus, 
+.bot-version-select:active {
+  border-color: #ffd83d;
+  box-shadow: 0 0 0 2px rgba(255, 216, 61, 0.2);
+  outline: none;
+}
+
+/* تنسيق زر تبديل العملة */
+.plan-currency-toggle {
+  background: #f0f0f0;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  color: #555;
+  padding: 0.6rem 1rem;
+  margin: 0.5rem 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.plan-currency-toggle::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgba(255, 221, 61, 0.2);
+  transition: width 0.3s ease;
+  z-index: 0;
+}
+
+.plan-currency-toggle:hover::before {
+  width: 100%;
+}
+
+.plan-currency-toggle:hover {
+  transform: translateY(-2px);
+  border-color: #ffd83d;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+.plan-currency-toggle svg, 
+.plan-currency-toggle span {
+  position: relative;
+  z-index: 1;
+}
+
+.plan-currency-toggle.stars-active {
+  background: linear-gradient(145deg, rgba(255,221,61,0.8), rgba(255,221,61,0.6));
+  border-color: #ffd83d;
+  color: #333;
+  font-weight: bold;
+}
+
+/* حاوية الميزات */
+.features-container {
+  margin-top: 1rem;
+  padding: 0 0.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.feature-icon {
+  margin-right: 0.5rem;
+  color: #ffd83d;
+  flex-shrink: 0;
+}
+
+/* أسلوب زر الاشتراك */
+.subscribe-button {
+  width: 100%;
+  background: #ffd83d;
+  color: #333;
+  font-weight: bold;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.subscribe-button:hover {
+  background: #ffcf10;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 216, 61, 0.3);
+}
+
+/* شارة التوصية */
+.recommended-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #ffd83d;
+  color: #333;
+  font-size: 0.75rem;
+  padding: 0.25rem 1rem;
+  border-radius: 0 8px 0 8px;
+  font-weight: bold;
+  z-index: 1;
+}
