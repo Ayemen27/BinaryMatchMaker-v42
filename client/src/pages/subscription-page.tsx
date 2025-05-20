@@ -335,12 +335,12 @@ export default function SubscriptionPage() {
                   </div>
                 )}
                 
-                <CardHeader className="pb-2 text-center plan-header">
+                <CardHeader className="pb-1 pt-3 px-3 text-center plan-header">
                   <div className="plan-title">
                     {plan.label}
                   </div>
                   
-                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''}`}>
+                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''} text-3xl`}>
                     {currency === 'USD' 
                       ? planPrices[plan.id as keyof typeof planPrices].USD 
                       : planPrices[plan.id as keyof typeof planPrices].STARS
@@ -350,7 +350,7 @@ export default function SubscriptionPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="plan-currency-toggle"
+                    className="plan-currency-toggle text-xs py-1"
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
@@ -359,14 +359,14 @@ export default function SubscriptionPage() {
                     }
                   </Button>
                   
-                  <div className="plan-description mt-2">{plan.description}</div>
+                  <div className="plan-description mt-2 text-sm">{plan.description}</div>
                   
-                  <div className="bot-version-container">
+                  <div className="bot-version-container mt-2">
                     <Select
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="bot-version-select">
+                      <SelectTrigger className="bot-version-select h-8 text-xs">
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -381,8 +381,8 @@ export default function SubscriptionPage() {
                   </div>
                 </CardHeader>
                 
-                <CardContent className="pt-0 pb-0">
-                  <h3 className="feature-heading text-center">
+                <CardContent className="pt-0 pb-0 px-3">
+                  <h3 className="feature-heading text-center text-sm font-semibold mb-2">
                     {plan.id === 'weekly' && t('planHighlights')}
                     {plan.id === 'monthly' && t('advancedFeatures')}
                     {plan.id === 'annual' && t('exclusiveProfessionalFeatures')}
@@ -413,10 +413,10 @@ export default function SubscriptionPage() {
                     </div>
                   )}
                   
-                  <ul className="features-list space-y-3 mb-4">
+                  <ul className="features-list space-y-1 mb-2 text-xs">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx}>
-                        <Check className="h-4 w-4 text-yellow-500 mr-2 mt-1" />
+                      <li key={idx} className="flex items-start">
+                        <Check className="h-3 w-3 text-yellow-500 mr-1 mt-0.5 flex-shrink-0" />
                         <span className="feature-text">
                           {feature.text}
                         </span>
@@ -425,25 +425,25 @@ export default function SubscriptionPage() {
                   </ul>
                 </CardContent>
                 
-                <CardFooter className="pt-2 pb-6 flex flex-col">
-                  <div className="ideal-for mb-3">
+                <CardFooter className="pt-1 pb-3 px-3 flex flex-col">
+                  <div className="ideal-for mb-2 text-xs flex items-center justify-center text-center">
                     {plan.id === 'monthly' && (
-                      <Zap className="h-4 w-4 text-yellow-500 mr-2" />
+                      <Zap className="h-3 w-3 text-yellow-500 mr-1 flex-shrink-0" />
                     )}
                     {plan.id === 'premium' && (
-                      <Star className="h-4 w-4 text-yellow-500 mr-2" />
+                      <Star className="h-3 w-3 text-yellow-500 mr-1 flex-shrink-0" />
                     )}
-                    {plan.idealFor}
+                    <span>{plan.idealFor}</span>
                   </div>
                   
                   <Button 
-                    className="subscription-button"
+                    className="subscription-button h-8 text-xs"
                     onClick={() => !isDisabled && handleUpgrade(plan.id)}
                     disabled={isDisabled}
                   >
                     {isProcessing && selectedPlan === plan.id ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
                         {t('processing')}
                       </>
                     ) : isPlanActive ? (
