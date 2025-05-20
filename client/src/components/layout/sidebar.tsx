@@ -89,24 +89,23 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           <ul>
             {navigation.map((item) => (
               <li key={item.name} className="mb-1 px-2">
-                <Link href={item.href}>
-                  <a 
-                    className={cn(
-                      "flex items-center px-4 py-2 rounded-lg transition",
-                      item.current 
-                        ? "bg-primary text-primary-foreground" 
-                        : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                    )}
-                    onClick={() => onClose()}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span className={cn("mx-3", !item.current && "text-muted-foreground")}>{item.name}</span>
-                    {item.badge && (
-                      <span className="ml-auto bg-success px-1.5 py-0.5 rounded-full text-xs text-success-foreground">
-                        {item.badge}
-                      </span>
-                    )}
-                  </a>
+                <Link 
+                  href={item.href}
+                  onClick={() => onClose()}
+                  className={cn(
+                    "flex items-center px-4 py-2 rounded-lg transition",
+                    item.current 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className={cn("mx-3", !item.current && "text-muted-foreground")}>{item.name}</span>
+                  {item.badge && (
+                    <span className="ml-auto bg-success px-1.5 py-0.5 rounded-full text-xs text-success-foreground">
+                      {item.badge}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
