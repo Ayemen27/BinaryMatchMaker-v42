@@ -458,37 +458,6 @@ export default function SubscriptionPage() {
           })}
         </div>
         
-        {/* بانر ترويجي */}
-        <div className="promotional-banner mb-10">
-          <h3 className="text-xl font-bold mb-3 flex items-center">
-            <span className="text-red-500 mr-2">🔴</span>
-            {t('newBinarJoinVersion')}
-            <span className="text-amber-500 ml-2">🔥</span>
-          </h3>
-          <p className="mb-4">{t('preciseSignalsDescription')}</p>
-          
-          <h4 className="font-bold mb-2">{t('whyBinarJoinV41')}</h4>
-          <ul className="space-y-2 mb-4">
-            <li className="flex items-start">
-              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
-              <span>{t('modernUserFriendlyDesign')}</span>
-            </li>
-            <li className="flex items-start">
-              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
-              <span>{t('accurateTradingSignals')}</span>
-            </li>
-            <li className="flex items-start">
-              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
-              <span>{t('multiPlatform')}</span>
-            </li>
-            <li className="flex items-start">
-              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
-              <span>{t('automaticallyUpdatedSignals')}</span>
-            </li>
-          </ul>
-          <p className="font-medium">{t('tryItNow')}</p>
-        </div>
-        
         {/* ميزات إضافية */}
         <div className="mb-10">
           <Card>
