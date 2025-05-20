@@ -54,10 +54,14 @@ router.get("/", async (req: Request, res: Response) => {
     // 2. إزالة الحقول الحساسة (مثل مفتاح API)
     const convertedSettings = prepareResponseData(settings, ['openai_api_key']);
     
+    // نحتاج للتعامل مع كائن settings كملف عادي (أي كائن) وليس كنوع TypeScript
+    // لأن الاستعلام المباشر من قاعدة البيانات سيعيد الأسماء بصيغة snake_case
+    const rawSettings = settings as Record<string, any>;
+    
     // إضافة معلومات إضافية مثل وجود مفتاح API
     const responseData = {
       ...convertedSettings,
-      hasCustomApiKey: !!settings.openai_api_key // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
+      hasCustomApiKey: !!(rawSettings.openai_api_key) // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
     };
     
     console.log('[تصحيح] البيانات المرسلة إلى العميل:', JSON.stringify(responseData, null, 2));
@@ -138,27 +142,8 @@ router.put("/api", async (req: Request, res: Response) => {
     // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
     const { openaiApiKey: _, ...safeSettings } = userSettings;
     
-    // تحويل أسماء الحقول من snake_case إلى camelCase
-    function snakeToCamel(obj: any): any {
-      if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
-      
-      if (Array.isArray(obj)) {
-        return obj.map(item => snakeToCamel(item));
-      }
-      
-      const transformed: Record<string, any> = {};
-      for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          // تحويل اسم الحقل من snake_case إلى camelCase
-          const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-          transformed[camelKey] = snakeToCamel(obj[key]);
-        }
-      }
-      return transformed;
-    }
-    
-    // تحويل البيانات
-    const convertedSettings = snakeToCamel(safeSettings);
+    // تحويل البيانات باستخدام الوظيفة المساعدة
+    const convertedSettings = prepareResponseData(safeSettings);
     
     return res.status(200).json({
       ...convertedSettings,
@@ -273,6 +258,9 @@ router.put("/", async (req: Request, res: Response) => {
     // استخراج البيانات للتحديث (حذف حقل _updated إذا كان موجوداً)
     const { _updated, ...settingsData } = result.data;
     
+    // تحويل أسماء الحقول من camelCase إلى snake_case لقاعدة البيانات
+    const dbFormattedSettings = prepareRequestData(settingsData);
+    
     // سجل عملية تحديث الإعدادات
     logger.info("UserSettings", "بدء عملية تحديث كامل للإعدادات", { 
       userId, 
@@ -285,7 +273,8 @@ router.put("/", async (req: Request, res: Response) => {
     
     if (!userSettings) {
       // إنشاء إعدادات جديدة مع الحفاظ على القيم الافتراضية للحقول الغير موجودة
-      const defaultSettings = {
+      // استخدام القيم المحولة بصيغة snake_case عند التخزين في قاعدة البيانات
+      const defaultSettings = prepareRequestData({
         theme: 'dark',
         defaultAsset: 'BTC/USDT',
         defaultTimeframe: '1h',
@@ -295,7 +284,7 @@ router.put("/", async (req: Request, res: Response) => {
         autoRefreshData: true,
         refreshInterval: 60,
         ...settingsData
-      };
+      });
       
       userSettings = await storage.createUserSettings({
         userId,
