@@ -366,7 +366,7 @@ export default function SubscriptionPage() {
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="bot-version-select">
+                      <SelectTrigger className="bot-version-select h-9">
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
