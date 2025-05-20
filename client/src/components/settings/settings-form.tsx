@@ -82,37 +82,28 @@ export function SettingsForm() {
     refreshInterval: settings.refreshInterval || defaultFormValues.refreshInterval,
   };
 
-  // إنشاء نموذج مع القيم الحالية
+  // إنشاء نموذج بطريقة أكثر بساطة
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    values: currentValues,
-    // عند تغير أي قيمة مباشرة يتم الإرسال للخادم
-    mode: "onChange",
+    defaultValues: defaultFormValues,
+    // عدم إرسال النموذج آلياً
+    mode: "onSubmit",
   });
   
-  // تحديث النموذج عند تغير القيم في الخادم
+  // تحديث النموذج عند تغير القيم
   useEffect(() => {
-    if (!isLoading && settings) {
-      console.log("[تحديث النموذج] تم تلقي إعدادات جديدة من الخادم:", settings);
-      
-      // استخدام طريقة reset بطريقة بسيطة للتأكد من التحديث الصحيح
-      const newValues = {
-        theme: settings.theme || defaultFormValues.theme,
-        defaultAsset: settings.defaultAsset || defaultFormValues.defaultAsset,
-        defaultTimeframe: settings.defaultTimeframe || defaultFormValues.defaultTimeframe,
-        defaultPlatform: settings.defaultPlatform || defaultFormValues.defaultPlatform,
-        chartType: settings.chartType || defaultFormValues.chartType,
-        showTradingTips: settings.showTradingTips ?? defaultFormValues.showTradingTips,
-        autoRefreshData: settings.autoRefreshData ?? defaultFormValues.autoRefreshData,
-        refreshInterval: settings.refreshInterval || defaultFormValues.refreshInterval,
-      };
-      
-      console.log("[تحديث النموذج] القيم الجديدة المُعدة:", newValues);
-      
-      // استخدام طريقة reset دون خيارات للحصول على سلوك افتراضي آمن
-      form.reset(newValues);
+    if (settings && !isLoading) {
+      // حل المشكلة بطريقة مباشرة - التعيين المباشر لقيم الإعدادات
+      form.setValue('theme', settings.theme);
+      form.setValue('defaultAsset', settings.defaultAsset);
+      form.setValue('defaultTimeframe', settings.defaultTimeframe);
+      form.setValue('chartType', settings.chartType);
+      form.setValue('defaultPlatform', settings.defaultPlatform || '');
+      form.setValue('showTradingTips', settings.showTradingTips || true);
+      form.setValue('autoRefreshData', settings.autoRefreshData || true);
+      form.setValue('refreshInterval', settings.refreshInterval || 60);
     }
-  }, [settings, isLoading, form, defaultFormValues]);
+  }, [settings, isLoading, form]);
   
   // إرسال النموذج
   // متغير لتخزين التغييرات المعلقة قبل الحفظ النهائي
@@ -251,7 +242,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={form.watch("defaultAsset") || settings.defaultAsset}
+                  value={settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
