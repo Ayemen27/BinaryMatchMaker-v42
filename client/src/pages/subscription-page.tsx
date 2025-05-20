@@ -338,7 +338,7 @@ export default function SubscriptionPage() {
                 )}
                 
                 <CardHeader className="pb-2 pt-3 px-3 text-center plan-header">
-                  <div className="plan-title font-semibold">
+                  <div className="plan-title text-xl font-bold mb-1">
                     {plan.label}
                   </div>
                   
@@ -349,40 +349,37 @@ export default function SubscriptionPage() {
                     }
                   </div>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className={`plan-currency-toggle text-xs py-1 ${currency === 'STARS' ? 'stars-active' : ''}`}
+                  <button
                     onClick={toggleCurrency}
+                    className="w-full bg-gray-200 hover:bg-gray-300 text-center py-2 rounded-3xl my-2 text-sm font-normal flex items-center justify-center space-x-1 px-4 rtl:space-x-reverse"
                     dir="rtl"
                   >
+                    <RefreshCw className="h-4 w-4 ml-1" />
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-4 w-4 ml-1" /> {`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</>
-                      : <><RefreshCw className="h-4 w-4 ml-1" /> {`التبديل إلى الدولار`}</>
+                      ? <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span>
+                      : <span>{`التبديل إلى الدولار`}</span>
                     }
-                  </Button>
+                  </button>
                   
-                  <div className="plan-description mt-2 text-sm">{plan.description}</div>
+                  <div className="plan-description mt-2 mb-4 text-sm text-center">{plan.description}</div>
                   
-                  <div className="bot-version-container mt-3">
-                    <Select
-                      value={selectedBotVersions[plan.id] || ''}
-                      onValueChange={(value) => handleBotVersionChange(plan.id, value)}
-                    >
-                      <SelectTrigger className="bot-version-select h-10 px-4">
-                        <SelectValue placeholder="حدد إصدار البوت" />
-                        <ChevronDown className="h-4 w-4" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="_default">اختر إصدار البوت</SelectItem>
-                        {plan.botVersions.map((version) => (
-                          <SelectItem key={version} value={version}>
-                            {version}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Select
+                    value={selectedBotVersions[plan.id] || ''}
+                    onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+                  >
+                    <SelectTrigger className="text-right bg-white border border-gray-200 rounded-lg px-4 py-2.5 w-full h-11 flex items-center justify-between">
+                      <SelectValue placeholder="اختر إصدار البوت" />
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_default">اختر إصدار البوت</SelectItem>
+                      {plan.botVersions.map((version) => (
+                        <SelectItem key={version} value={version}>
+                          {version}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </CardHeader>
                 
                 <CardContent className="pt-0 pb-0 px-3">
