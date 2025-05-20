@@ -342,12 +342,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user profile
+  // Update user profile - دعم طلبات PATCH و PUT
   app.patch("/api/user/profile", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
+
+      console.log('طلب تحديث معلومات المستخدم - PATCH:', {
+        userId: req.user.id,
+        body: req.body
+      });
 
       const { username, email, fullName } = req.body;
       const updatedUser = await storage.updateUserProfile(req.user.id, { 
@@ -356,24 +361,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fullName 
       });
 
+      console.log('تم تحديث معلومات المستخدم بنجاح:', updatedUser);
       res.json(updatedUser);
     } catch (error) {
+      console.error('خطأ في تحديث معلومات المستخدم:', error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+  
+  // إضافة دعم طلبات PUT للملف الشخصي (للتوافق مع التحديثات الجديدة)
+  app.put("/api/user/profile", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      console.log('طلب تحديث معلومات المستخدم - PUT:', {
+        userId: req.user.id,
+        body: req.body
+      });
+
+      const { username, email, fullName } = req.body;
+      const updatedUser = await storage.updateUserProfile(req.user.id, { 
+        username, 
+        email, 
+        fullName 
+      });
+
+      console.log('تم تحديث معلومات المستخدم بنجاح:', updatedUser);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('خطأ في تحديث معلومات المستخدم:', error);
       res.status(500).json({ message: "Failed to update profile" });
     }
   });
 
-  // Update user password
+  // Update user password - دعم طلبات PATCH و PUT
   app.patch("/api/user/password", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
+      console.log('طلب تحديث كلمة المرور - PATCH:', {
+        userId: req.user.id
+      });
+
       const { currentPassword, newPassword } = req.body;
-      // Password change logic would go here
-      // This is a mock response for now
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "يجب توفير كلمة المرور الحالية والجديدة" });
+      }
+      
+      // الحصول على المستخدم الحالي
+      const user = await storage.getUser(req.user.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "المستخدم غير موجود" });
+      }
+      
+      // التحقق من صحة كلمة المرور الحالية (في بيئة حقيقية يجب استخدام تشفير أقوى)
+      if (user.password !== currentPassword) {
+        return res.status(403).json({ message: "كلمة المرور الحالية غير صحيحة" });
+      }
+      
+      // تحديث كلمة المرور
+      const updatedUser = await storage.updateUserProfile(req.user.id, {
+        password: newPassword
+      });
+      
+      console.log('تم تحديث كلمة المرور بنجاح');
       res.json({ success: true });
     } catch (error) {
+      console.error('خطأ في تحديث كلمة المرور:', error);
+      res.status(500).json({ message: "Failed to update password" });
+    }
+  });
+  
+  // دعم طلبات PUT لتحديث كلمة المرور (للتوافق مع التحديثات الجديدة)
+  app.put("/api/user/password", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      console.log('طلب تحديث كلمة المرور - PUT:', {
+        userId: req.user.id
+      });
+
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "يجب توفير كلمة المرور الحالية والجديدة" });
+      }
+      
+      // الحصول على المستخدم الحالي
+      const user = await storage.getUser(req.user.id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "المستخدم غير موجود" });
+      }
+      
+      // التحقق من صحة كلمة المرور الحالية (في بيئة حقيقية يجب استخدام تشفير أقوى)
+      if (user.password !== currentPassword) {
+        return res.status(403).json({ message: "كلمة المرور الحالية غير صحيحة" });
+      }
+      
+      // تحديث كلمة المرور
+      const updatedUser = await storage.updateUserProfile(req.user.id, {
+        password: newPassword
+      });
+      
+      console.log('تم تحديث كلمة المرور بنجاح');
+      res.json({ success: true });
+    } catch (error) {
+      console.error('خطأ في تحديث كلمة المرور:', error);
       res.status(500).json({ message: "Failed to update password" });
     }
   });

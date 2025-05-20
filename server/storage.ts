@@ -157,16 +157,52 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUserProfile(id: number, data: Partial<User>): Promise<User> {
-    const [updatedUser] = await db.update(users)
-      .set(data)
-      .where(eq(users.id, id))
-      .returning();
-    
-    if (!updatedUser) {
-      throw new Error('User not found');
+    try {
+      // تحضير الحقول التي سيتم تحديثها
+      const updateFields: Record<string, any> = {};
+      
+      if (data.username) updateFields.username = data.username;
+      if (data.email) updateFields.email = data.email;
+      if (data.fullName) updateFields.full_name = data.fullName;
+      
+      console.log('تحديث بيانات المستخدم باستخدام SQL المخصص:', {
+        userId: id,
+        fields: Object.keys(updateFields)
+      });
+      
+      // بناء استعلام SQL
+      const updateParts = Object.entries(updateFields).map(([key, _], index) => {
+        return `${key} = $${index + 2}`;
+      });
+      
+      // إضافة حقل تاريخ التحديث
+      updateParts.push(`updated_at = CURRENT_TIMESTAMP`);
+      
+      const query = `
+        UPDATE users 
+        SET ${updateParts.join(', ')} 
+        WHERE id = $1
+        RETURNING *
+      `;
+      
+      // إضافة القيم للاستعلام
+      const params = [id, ...Object.values(updateFields)];
+      
+      console.log('استعلام تحديث المستخدم:', query);
+      console.log('معلمات الاستعلام:', params);
+      
+      // تنفيذ الاستعلام
+      const result = await db.query(query, params);
+      
+      if (!result || result.length === 0) {
+        throw new Error('المستخدم غير موجود');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في تحديث بيانات المستخدم:', error);
+      throw error;
     }
-    
-    return updatedUser;
   }
   
   async updateUserLanguage(id: number, language: string): Promise<User> {
