@@ -378,36 +378,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update user language preference
-  app.patch("/api/user/language", async (req, res) => {
+  // تحديث لغة المستخدم المفضلة (دعم طلبات PUT أيضًا للتوافق مع التحديثات الجديدة)
+  app.put("/api/user/language", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
       }
+
+      console.log('طلب تحديث لغة المستخدم - PUT:', {
+        userId: req.user.id,
+        body: req.body
+      });
 
       const { language } = req.body;
       if (language !== 'ar' && language !== 'en') {
-        return res.status(400).json({ message: "Invalid language" });
+        return res.status(400).json({ message: "لغة غير صالحة" });
+      }
+
+      const updatedUser = await storage.updateUserLanguage(req.user.id, language);
+      res.json({
+        ...updatedUser,
+        language,
+        _serverTime: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث تفضيلات اللغة:", error);
+      res.status(500).json({ message: "فشل تحديث تفضيلات اللغة" });
+    }
+  });
+  
+  // دعم PATCH للتوافق الخلفي
+  app.patch("/api/user/language", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
+      }
+
+      console.log('طلب تحديث لغة المستخدم - PATCH:', {
+        userId: req.user.id,
+        body: req.body
+      });
+
+      const { language } = req.body;
+      if (language !== 'ar' && language !== 'en') {
+        return res.status(400).json({ message: "لغة غير صالحة" });
       }
 
       const updatedUser = await storage.updateUserLanguage(req.user.id, language);
       res.json(updatedUser);
     } catch (error) {
-      res.status(500).json({ message: "Failed to update language preference" });
+      console.error("خطأ في تحديث تفضيلات اللغة:", error);
+      res.status(500).json({ message: "فشل تحديث تفضيلات اللغة" });
     }
   });
 
-  // Update notification settings
+  // تحديث إعدادات الإشعارات (دعم PUT للتوافق مع التحديثات الجديدة)
+  app.put("/api/user/notifications", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
+      }
+      
+      console.log('طلب تحديث إعدادات الإشعارات - PUT:', {
+        userId: req.user.id,
+        body: req.body
+      });
+      
+      // التحقق من صحة البيانات المرسلة
+      const notificationSettingsSchema = z.object({
+        receiveSignalAlerts: z.boolean().optional(),
+        receiveMarketUpdates: z.boolean().optional(),
+        receiveNewFeatures: z.boolean().optional(),
+        allowEmailNotifications: z.boolean().optional(),
+        allowPushNotifications: z.boolean().optional(),
+      });
+      
+      // تحقق من صحة البيانات
+      const result = notificationSettingsSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "بيانات إشعارات غير صالحة", 
+          details: result.error.errors 
+        });
+      }
+      
+      const userId = req.user.id;
+      
+      // في التطبيق الحقيقي، نقوم بحفظ هذه الإعدادات في قاعدة البيانات
+      // للتبسيط، سنفترض أنها تم حفظها
+      const updatedSettings = {
+        ...req.body,
+        userId,
+        updatedAt: new Date().toISOString()
+      };
+      
+      res.json({
+        ...updatedSettings,
+        _serverTime: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("خطأ في تحديث إعدادات الإشعارات:", error);
+      res.status(500).json({ message: "فشل تحديث إعدادات الإشعارات" });
+    }
+  });
+  
+  // دعم PATCH للتوافق الخلفي
   app.patch("/api/user/notifications", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Unauthorized" });
+        return res.status(401).json({ message: "غير مصرح. يرجى تسجيل الدخول." });
       }
-
-      // In a real app, validate and save notification settings
-      res.json({ success: true });
+      
+      console.log('طلب تحديث إعدادات الإشعارات - PATCH:', {
+        userId: req.user.id,
+        body: req.body
+      });
+      
+      // في التطبيق الحقيقي، نقوم بحفظ هذه الإعدادات في قاعدة البيانات
+      const updatedSettings = {
+        ...req.body,
+        userId: req.user.id
+      };
+      
+      res.json({
+        success: true,
+        ...updatedSettings
+      });
     } catch (error) {
-      res.status(500).json({ message: "Failed to update notification settings" });
+      console.error("خطأ في تحديث إعدادات الإشعارات:", error);
+      res.status(500).json({ message: "فشل تحديث إعدادات الإشعارات" });
     }
   });
 

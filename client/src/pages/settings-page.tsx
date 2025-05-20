@@ -40,7 +40,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { NotificationSettings } from '@/types';
+// تعريف واجهة الإشعارات للاستخدام المحلي
+interface NotificationSettings {
+  receiveSignalAlerts: boolean;
+  receiveMarketUpdates: boolean;
+  receiveNewFeatures: boolean;
+  allowEmailNotifications: boolean;
+  allowPushNotifications: boolean;
+}
 
 import { Helmet } from 'react-helmet';
 
