@@ -131,12 +131,16 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>("profile");
   const [showApiKey, setShowApiKey] = useState(false);
   
+  // إضافة مفتاح تحديث للاستعلام ليتم تحديثه مع تغيير التبويب
+  const [queryUpdateKey, setQueryUpdateKey] = useState<number>(Date.now());
+  
   // استعلام لجلب إعدادات المستخدم من الخادم
-  const { data: userSettingsData, isLoading: isLoadingSettings } = useQuery<UserSettings>({
-    queryKey: ['/api/user/settings'],
+  const { data: userSettingsData, isLoading: isLoadingSettings, refetch: refetchSettings } = useQuery<UserSettings>({
+    queryKey: ['/api/user/settings', queryUpdateKey],
     enabled: !!user, // تفعيل الاستعلام فقط إذا كان المستخدم مسجل دخوله
     staleTime: 0, // عدم استخدام البيانات المخزنة مؤقتًا
     gcTime: 0, // عدم تخزين البيانات بشكل مؤقت (استبدلنا cacheTime بـ gcTime في الإصدار الجديد)
+    refetchOnWindowFocus: false, // لا تعيد التحميل عند التركيز على النافذة
     onSuccess: (data) => {
       console.log('تم جلب إعدادات المستخدم بنجاح:', data);
       
@@ -527,7 +531,13 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-4" onValueChange={(value) => setActiveTab(value)}>
+        <Tabs defaultValue="profile" className="space-y-4" onValueChange={(value) => {
+          // تحديث التبويب النشط
+          setActiveTab(value);
+          // إعادة تحميل البيانات عند تغيير التبويب
+          setQueryUpdateKey(Date.now());
+          refetchSettings();
+        }}>
           {/* تصميم جديد متوافق مع جميع أحجام الشاشات */}
           <div className="overflow-x-auto pb-2 mb-4">
             <div className="min-w-max">
