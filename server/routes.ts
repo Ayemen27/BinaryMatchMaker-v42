@@ -7,6 +7,7 @@ import { z } from "zod";
 import signalGeneratorRoutes from "./routes/signal-generator";
 import userSettingsRoutes from "./routes/user-settings";
 import userNotificationsRoutes from "./routes/user-notifications";
+import userRoutes from "./routes/user";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -14,6 +15,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Signal generator routes with AI
   app.use('/api/signal-generator', signalGeneratorRoutes);
+  
+  // User routes for profile and user data
+  app.use('/api/user', userRoutes);
   
   // User settings routes
   app.use('/api/user/settings', userSettingsRoutes);
