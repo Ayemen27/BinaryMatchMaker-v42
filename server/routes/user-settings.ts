@@ -143,8 +143,72 @@ router.put("/api", async (req: Request, res: Response) => {
 
 // دعم PATCH للتوافق الخلفي
 router.patch("/api", async (req: Request, res: Response) => {
-  // توجيه المعالج السابق للحفاظ على دعم التوافق مع الإصدارات السابقة
-  return router.handle(req, res);
+  // استخدام نفس الوظيفة كما في PUT ولكن مع طريقة PATCH
+  try {
+    // التحقق من أن المستخدم مسجل دخوله
+    if (!req.isAuthenticated()) {
+      logger.warn("UserSettings", "محاولة تحديث إعدادات API غير مصرح بها", { ip: req.ip });
+      return res.status(401).json({ error: "غير مصرح. يرجى تسجيل الدخول." });
+    }
+
+    // التحقق من صحة البيانات المرسلة
+    const result = apiSettingsSchema.safeParse(req.body);
+    if (!result.success) {
+      logger.warn("UserSettings", "بيانات API غير صالحة", { 
+        errors: result.error.errors,
+        userId: req.user!.id 
+      });
+      return res.status(400).json({ 
+        error: "بيانات غير صالحة", 
+        details: result.error.errors 
+      });
+    }
+
+    const { useCustomAiKey, useAiForSignals, openaiApiKey } = result.data;
+    const userId = req.user!.id;
+
+    // التحقق من وجود إعدادات للمستخدم، وإنشاؤها إذا لم تكن موجودة
+    let userSettings = await storage.getUserSettings(userId);
+    
+    if (!userSettings) {
+      // إنشاء إعدادات جديدة للمستخدم
+      userSettings = await storage.createUserSettings({
+        userId,
+        useCustomAiKey,
+        useAiForSignals,
+        openaiApiKey: useCustomAiKey ? openaiApiKey : null
+      });
+    } else {
+      // تحديث الإعدادات الحالية
+      const updatedSettings = {
+        useCustomAiKey,
+        useAiForSignals,
+        openaiApiKey: useCustomAiKey ? openaiApiKey : null // حذف المفتاح إذا تم إيقاف استخدام المفتاح المخصص
+      };
+      
+      userSettings = await storage.updateUserSettings(userId, updatedSettings);
+    }
+
+    logger.info("UserSettings", "تم تحديث إعدادات API", { 
+      userId,
+      useCustomApiKey: useCustomAiKey,
+      useAiForSignals
+    });
+
+    // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
+    const { openaiApiKey: _, ...safeSettings } = userSettings;
+    
+    return res.status(200).json({
+      ...safeSettings,
+      hasCustomApiKey: !!openaiApiKey && useCustomAiKey
+    });
+  } catch (error) {
+    logger.error("UserSettings", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
+    return res.status(500).json({ 
+      error: "حدث خطأ أثناء تحديث إعدادات API", 
+      message: error instanceof Error ? error.message : "خطأ غير معروف" 
+    });
+  }
 });
 
 // تمت إزالة المعالج المكرر الأول هنا - وتركنا فقط المعالج الثاني الأكثر تفصيلاً أدناه
