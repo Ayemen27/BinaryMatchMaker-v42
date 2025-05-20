@@ -1,0 +1,165 @@
+
+رائع! لست بحاجة لاتخاذ القرارات اللازمة. إليك الخطوات التي تقوم بها:
+
+1. إصلاح مشكلة تغيير كلمة المرور :
+سأقوم بتطوير دالة updateUserProfileلتشمل بحث كلمة المرور.
+سأضيف عمودًا updated_atإلى الجدول usersإذا لم يكن موجودًا.
+إضافة عمود updated_atإلى الجدول users:
+إضافة عمود updated_at
+
+
+
+ALTER TABLE users ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+
+خطأ: العمود "updated_at" للعلاقة "users" موجود بالفعل
+2. إصلاح إعدادات الإخطارات:
+سأقوم بإعادة هيكلة دالة updateUserNotificationSettingsلتقليل التكرار والتضارب.
+مثال على إعادة هيكلة الدالة:
+async
+ 
+function
+ 
+updateUserNotificationSettings
+(
+userId: 
+string
+, settings: NotificationSettings
+) 
+{
+    
+try
+ {
+        
+const
+ result = 
+await
+ db
+            .update(
+'notification_settings'
+)
+            .set(settings)
+            .where(
+'user_id = ?'
+, userId);
+        
+return
+ result;
+    } 
+catch
+ (error) {
+        
+console
+.error(
+'Error updating notification settings:'
+, error);
+        
+throw
+ error;
+    }
+}
+
+3. إصلاح مفاتيح API:
+سأقوم بمراجعة الدالة ستحتاج إلى تحديث مفاتيح API والتأكد من أنها تعمل بشكل صحيح.
+مثال على تحديث مفاتيح API:
+async
+ 
+function
+ 
+updateApiKeys
+(
+userId: 
+string
+, newApiKey: 
+string
+) 
+{
+    
+try
+ {
+        
+const
+ result = 
+await
+ db
+            .update(
+'api_keys'
+)
+            .set({ 
+key
+: newApiKey })
+            .where(
+'user_id = ?'
+, userId);
+        
+return
+ result;
+    } 
+catch
+ (error) {
+        
+console
+.error(
+'Error updating API keys:'
+, error);
+        
+throw
+ error;
+    }
+}
+
+4. إصلاح تحديث اللغة:
+سأقوم بمراجعة الكود المسؤول عن تحديث اللغة في الواجهة والتأكد من أنه يطبق التغييرات بشكل صحيح.
+مثال على تحديث اللغة:
+async
+ 
+function
+ 
+updateLanguage
+(
+userId: 
+string
+, newLanguage: 
+string
+) 
+{
+    
+try
+ {
+        
+const
+ result = 
+await
+ db
+            .update(
+'user_settings'
+)
+            .set({ 
+language
+: newLanguage })
+            .where(
+'user_id = ?'
+, userId);
+        
+return
+ result;
+    } 
+catch
+ (error) {
+        
+console
+.error(
+'Error updating language:'
+, error);
+        
+throw
+ error;
+    }
+}
+
+الخطوات التالية:
+أريد أن أفعل هذه الأشياء على الكود.
+بعد ذلك، سأختبر كل دالة للتأكد من أنها تعمل صحيح.
+إذا كان لديك أي ملاحظات أو تعديلات إضافية، يرجى منك ذلك!
+
+
+الرد على المساعد...
