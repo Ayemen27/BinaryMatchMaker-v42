@@ -70,9 +70,22 @@ export function SettingsForm() {
   } = useSettings();
   
   // إنشاء نموذج مع القيم الافتراضية أولاً ثم سيتم تحديثها لاحقاً من الخادم
+  // استخدام القيم المحفوظة في الإعدادات أو القيم الافتراضية
+  const currentValues = {
+    theme: settings.theme || defaultFormValues.theme,
+    defaultAsset: settings.defaultAsset || defaultFormValues.defaultAsset,
+    defaultTimeframe: settings.defaultTimeframe || defaultFormValues.defaultTimeframe,
+    defaultPlatform: settings.defaultPlatform || defaultFormValues.defaultPlatform,
+    chartType: settings.chartType || defaultFormValues.chartType,
+    showTradingTips: settings.showTradingTips || defaultFormValues.showTradingTips,
+    autoRefreshData: settings.autoRefreshData || defaultFormValues.autoRefreshData,
+    refreshInterval: settings.refreshInterval || defaultFormValues.refreshInterval,
+  };
+
+  // إنشاء نموذج مع القيم الحالية
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: defaultFormValues,
+    values: currentValues,
     // عند تغير أي قيمة مباشرة يتم الإرسال للخادم
     mode: "onChange",
   });
@@ -80,40 +93,26 @@ export function SettingsForm() {
   // تحديث النموذج عند تغير القيم في الخادم
   useEffect(() => {
     if (!isLoading && settings) {
-      console.log("[تحديث النموذج] إعادة تعيين القيم من الخادم:", settings);
+      console.log("[تحديث النموذج] تم تلقي إعدادات جديدة من الخادم:", settings);
       
-      // تنفيذ إعادة تعيين كاملة بتجاهل القيم الافتراضية
-      form.reset({
-        theme: settings.theme,
-        defaultAsset: settings.defaultAsset,
-        defaultTimeframe: settings.defaultTimeframe,
-        defaultPlatform: settings.defaultPlatform || "",
-        chartType: settings.chartType,
-        showTradingTips: settings.showTradingTips,
-        autoRefreshData: settings.autoRefreshData,
-        refreshInterval: settings.refreshInterval,
-      }, { 
-        keepDefaultValues: false,
-        keepDirty: false, // إلغاء أي تغييرات معلقة
-        keepValues: false, // إلغاء القيم القديمة
-        keepErrors: false, // إلغاء أي أخطاء
-        keepTouched: false, // إلغاء حالة اللمس
-        keepDirtyValues: false, // إلغاء القيم المتغيرة
-        keepIsSubmitted: false, // إلغاء حالة إرسال النموذج
-        keepIsValid: false, // إلغاء حالة صحة النموذج
-      });
+      // استخدام طريقة reset بطريقة بسيطة للتأكد من التحديث الصحيح
+      const newValues = {
+        theme: settings.theme || defaultFormValues.theme,
+        defaultAsset: settings.defaultAsset || defaultFormValues.defaultAsset,
+        defaultTimeframe: settings.defaultTimeframe || defaultFormValues.defaultTimeframe,
+        defaultPlatform: settings.defaultPlatform || defaultFormValues.defaultPlatform,
+        chartType: settings.chartType || defaultFormValues.chartType,
+        showTradingTips: settings.showTradingTips ?? defaultFormValues.showTradingTips,
+        autoRefreshData: settings.autoRefreshData ?? defaultFormValues.autoRefreshData,
+        refreshInterval: settings.refreshInterval || defaultFormValues.refreshInterval,
+      };
       
-      // تنفيذ تعيين يدوي لكل حقل لضمان التحديث
-      Object.keys(settings).forEach((key) => {
-        const fieldName = key as keyof SettingsFormValues;
-        if (fieldName in settings && settings[fieldName] !== undefined) {
-          const value = settings[fieldName];
-          console.log(`[تحديث النموذج] تعيين قيمة الحقل ${fieldName}:`, value);
-          form.setValue(fieldName, value);
-        }
-      });
+      console.log("[تحديث النموذج] القيم الجديدة المُعدة:", newValues);
+      
+      // استخدام طريقة reset دون خيارات للحصول على سلوك افتراضي آمن
+      form.reset(newValues);
     }
-  }, [settings, isLoading, form.reset, form.setValue]);
+  }, [settings, isLoading, form, defaultFormValues]);
   
   // إرسال النموذج
   // متغير لتخزين التغييرات المعلقة قبل الحفظ النهائي
@@ -225,7 +224,7 @@ export function SettingsForm() {
                 <FormLabel>{t("theme")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("theme", value)}
-                  value={settings.theme} // استخدام القيمة مباشرة من مدير الإعدادات
+                  value={form.watch("theme") || settings.theme}
                 >
                   <FormControl>
                     <SelectTrigger>
