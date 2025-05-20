@@ -27,7 +27,7 @@ export interface UserSettings {
 
 // القيم الافتراضية للإعدادات
 export const defaultSettings: UserSettings = {
-  theme: 'dark',
+  theme: 'light',
   defaultAsset: 'BTC/USDT',
   defaultTimeframe: '1h',
   defaultPlatform: '',
