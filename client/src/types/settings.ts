@@ -10,6 +10,9 @@ export interface UserProfile {
   fullName?: string;
   language: string;
   subscriptionLevel?: string;
+  subscriptionExpiry?: string | Date;
+  avatar?: string;
+  lastLogin?: string | Date;
 }
 
 // الإعدادات العامة
