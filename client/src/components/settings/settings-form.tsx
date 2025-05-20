@@ -313,7 +313,7 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={form.watch("chartType") || settings.chartType}
+                  value={settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>
