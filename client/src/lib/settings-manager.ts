@@ -227,7 +227,10 @@ export function useSettings() {
       console.log('🚀 [إعدادات] جاري إرسال الإعدادات الكاملة إلى الخادم...');
       
       // إستخدام طلب PUT لضمان تحديث جميع الإعدادات (بدلاً من PATCH الذي يحدث جزئياً)
-      const response = await apiRequest('PUT', SETTINGS_KEY, completeSettings);
+      // إضافة علامة وقت لتجنب مشكلة الذاكرة المؤقتة في المتصفح أو الخادم
+      const timestampedUrl = `${SETTINGS_KEY}?ts=${Date.now()}`;
+      console.log('🔄 [إعدادات] إرسال طلب تحديث إلى:', timestampedUrl);
+      const response = await apiRequest('PUT', timestampedUrl, completeSettings);
       
       if (!response.ok) {
         let errorMessage = 'حدث خطأ أثناء حفظ الإعدادات';
@@ -254,9 +257,33 @@ export function useSettings() {
       // إعادة تأكيد الإعدادات المحدثة في التخزين المحلي بعد نجاح الخادم
       try {
         if (typeof window !== 'undefined' && window.localStorage) {
+          // حفظ الإعدادات المحدثة
           localStorage.setItem('userSettings', JSON.stringify(responseData));
           localStorage.setItem('userSettings_serverConfirmed', 'true');
+          localStorage.setItem('userSettings_lastUpdateStatus', 'success');
+          localStorage.setItem('userSettings_lastUpdateTime', new Date().toISOString());
           console.log('✓ [إعدادات] تم تأكيد الإعدادات من الخادم وحفظها محلياً');
+          
+          // حفظ سجل تاريخي للإعدادات للتمكن من استعادتها إذا لزم الأمر
+          try {
+            const historyKey = `userSettings_history_${Date.now()}`;
+            const settingsHistory = JSON.parse(localStorage.getItem('userSettings_history') || '[]');
+            
+            // إضافة السجل الجديد مع علامة زمنية
+            settingsHistory.push({
+              timestamp: new Date().toISOString(),
+              settings: responseData
+            });
+            
+            // الاحتفاظ بآخر 5 سجلات فقط
+            if (settingsHistory.length > 5) {
+              settingsHistory.shift();
+            }
+            
+            localStorage.setItem('userSettings_history', JSON.stringify(settingsHistory));
+          } catch (historyError) {
+            console.error('⚠️ [إعدادات] خطأ في حفظ تاريخ الإعدادات:', historyError);
+          }
         }
       } catch (error) {
         console.error('❌ [إعدادات] خطأ في تحديث التخزين المحلي بعد استجابة الخادم:', error);
@@ -267,17 +294,23 @@ export function useSettings() {
     },
     onSuccess: (data) => {
       // طباعة البيانات المستلمة للتأكد من صحتها
-      console.log('تم استلام إعدادات محدثة من الخادم:', data);
+      console.log('✨ [إعدادات] تم استلام إعدادات محدثة من الخادم:', data);
+      
+      // إلغاء الذاكرة المؤقتة أولاً لضمان تحميل البيانات الجديدة
+      queryClient.removeQueries({
+        queryKey: [SETTINGS_KEY],
+      });
       
       // تحديث بيانات الاستعلام في الذاكرة المؤقتة مع القيم الكاملة
       queryClient.setQueryData<UserSettings>([SETTINGS_KEY], (oldData) => {
         // نسخة احتياطية من البيانات القديمة
         const prevData = oldData || defaultSettings;
         
-        // إنشاء كائن جديد يجمع بين البيانات السابقة والبيانات الجديدة
-        const mergedData = { 
-          ...prevData, // استخدام البيانات القديمة أولاً كأساس
-          ...data,     // ثم تطبيق البيانات الجديدة من الخادم
+        // إنشاء كائن جديد يحتوي على البيانات الجديدة فقط من الخادم
+        // هذا يمنع المشكلات المحتملة من تراكم البيانات القديمة
+        const mergedData = {
+          ...data, // استخدام البيانات الجديدة فقط من الخادم
+          _updated: new Date().toISOString() // علامة تحديث جديدة
         };
         
         // حفظ البيانات في محرك تخزين مرتبط بالمتصفح إذا كان متاحاً
