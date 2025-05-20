@@ -301,7 +301,7 @@ export default function SubscriptionPage() {
         )}
         
         {/* قسم الباقات */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-6">
           {plans.map((plan) => {
             const isPlanActive = currentPlan === plan.id;
             const isDisabled = isPlanActive || isProcessing;
@@ -335,12 +335,12 @@ export default function SubscriptionPage() {
                   </div>
                 )}
                 
-                <CardHeader className="pb-1 pt-3 px-3 text-center plan-header">
-                  <div className="plan-title">
+                <CardHeader className="pb-1 pt-2 px-2 text-center plan-header">
+                  <div className="plan-title text-xs font-semibold">
                     {plan.label}
                   </div>
                   
-                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''} text-3xl`}>
+                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''} text-2xl font-bold`}>
                     {currency === 'USD' 
                       ? planPrices[plan.id as keyof typeof planPrices].USD 
                       : planPrices[plan.id as keyof typeof planPrices].STARS
@@ -350,29 +350,29 @@ export default function SubscriptionPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="plan-currency-toggle text-xs py-1"
+                    className="plan-currency-toggle text-xs py-0 h-6 text-[10px]"
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-3 w-3 ml-1 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
-                      : <><RefreshCw className="h-3 w-3 ml-1 mr-1" />{t('switchToUSD')}</>
+                      ? <><RefreshCw className="h-2.5 w-2.5 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
+                      : <><RefreshCw className="h-2.5 w-2.5 mr-1" />{t('switchToUSD')}</>
                     }
                   </Button>
                   
-                  <div className="plan-description mt-2 text-sm">{plan.description}</div>
+                  <div className="plan-description mt-1 text-[10px]">{plan.description}</div>
                   
-                  <div className="bot-version-container mt-2">
+                  <div className="bot-version-container mt-1">
                     <Select
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="bot-version-select h-8 text-xs">
+                      <SelectTrigger className="bot-version-select h-7 text-[10px]">
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="_default">{t('selectBotVersion')}</SelectItem>
                         {plan.botVersions.map((version) => (
-                          <SelectItem key={version} value={version}>
+                          <SelectItem key={version} value={version} className="text-[10px]">
                             {version}
                           </SelectItem>
                         ))}
