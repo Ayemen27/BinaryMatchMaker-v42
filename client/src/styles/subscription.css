@@ -3,7 +3,7 @@
 /* تنسيق البطاقات */
 .plan-card {
   border-radius: 16px;
-  margin: 0 12px;
+  margin: 0 15px 20px;
   overflow: hidden;
   background-color: #fffef3;
   border: 1px solid #ffe786;
@@ -11,11 +11,34 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   direction: rtl;
   text-align: right;
+  position: relative;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .plan-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(255, 214, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(255, 214, 0, 0.2);
+}
+
+.plan-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 214, 0, 0.15);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plan-card.selected {
+  border: 2px solid #ffcc00;
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
 }
 
 /* تحسين عرض البطاقات على الأجهزة الصغيرة */
@@ -72,7 +95,8 @@
   position: relative;
 }
 
-.bot-version-select {
+.bot-version-select,
+select {
   width: 100%;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -90,25 +114,49 @@
   direction: rtl;
 }
 
-.bot-version-select:hover {
-  border-color: #d0d0d0;
-  background-color: #fafafa;
+.bot-version-select:hover,
+select:hover {
+  border-color: #ffcc00;
+  background-color: #fefefe;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .bot-version-select:focus, 
-.bot-version-select:active {
+.bot-version-select:active,
+select:focus,
+select:active {
   border-color: #ffcc00;
   box-shadow: 0 0 0 2px rgba(255, 204, 0, 0.1);
   outline: none;
 }
 
 /* تنسيق أيقونة السهم لأسفل */
-.bot-version-select svg {
+.bot-version-select svg,
+.relative .absolute svg {
   color: #666;
   position: absolute;
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+.bot-version-select:hover svg,
+.relative:hover .absolute svg {
+  color: #ffcc00;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* تأثير متحرك عند إظهار خيارات مربع الاختيار */
+select option {
+  padding: 8px;
+  transition: background 0.2s ease;
+}
+
+select option:hover,
+select option:focus {
+  background-color: rgba(255, 204, 0, 0.1);
 }
 
 /* أسلوب مخصص للقائمة المنسدلة */
@@ -134,7 +182,8 @@ div[role="listbox"] [data-radix-select-item]:hover {
 }
 
 /* تنسيق زر تبديل العملة */
-.plan-currency-toggle {
+.plan-currency-toggle,
+.currency-toggle-btn {
   background: #f0f0f0;
   border: 1px solid #dddddd;
   border-radius: 25px;
@@ -152,6 +201,35 @@ div[role="listbox"] [data-radix-select-item]:hover {
   overflow: hidden;
   font-weight: 400;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.currency-toggle-btn:hover {
+  background-color: #e8e8e8;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.currency-toggle-btn:active {
+  transform: translateY(0);
+  background-color: #e0e0e0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+@keyframes rotateIcon {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.icon-rotate {
+  animation: rotateIcon 0.5s ease;
+}
+
+.currency-toggle-btn:hover .icon-rotate {
+  animation: rotateIcon 1s ease infinite;
 }
 
 .plan-currency-toggle::before {

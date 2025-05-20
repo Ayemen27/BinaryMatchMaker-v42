@@ -313,7 +313,7 @@ export default function SubscriptionPage() {
                 key={plan.id} 
                 className={`plan-card ${plan.id}-plan overflow-hidden transition-all ${
                   isPlanActive 
-                    ? 'shadow-md' 
+                    ? 'shadow-md selected' 
                     : plan.isPopular 
                       ? 'shadow-lg' 
                       : 'hover:shadow-sm'
@@ -351,12 +351,12 @@ export default function SubscriptionPage() {
                   
                   <button
                     onClick={toggleCurrency}
-                    className="w-92 mx-auto bg-gray-200 hover:bg-gray-300 text-center py-2 rounded-3xl my-2 text-sm font-normal flex items-center justify-center px-4"
+                    className="currency-toggle-btn w-92 mx-auto bg-gray-200 hover:bg-gray-300 text-center py-2 rounded-3xl my-2 text-sm font-normal flex items-center justify-center px-4"
                     dir="rtl"
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-4 w-4 ml-1" /> <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span></>
-                      : <><RefreshCw className="h-4 w-4 ml-1" /> <span>{`التبديل إلى الدولار`}</span></>
+                      ? <><RefreshCw className="h-4 w-4 ml-1 icon-rotate" /> <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span></>
+                      : <><RefreshCw className="h-4 w-4 ml-1 icon-rotate" /> <span>{`التبديل إلى الدولار`}</span></>
                     }
                   </button>
                   
