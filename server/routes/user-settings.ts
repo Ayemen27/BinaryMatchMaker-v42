@@ -46,15 +46,18 @@ router.get("/", async (req: Request, res: Response) => {
     }
 
     // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
-    const { openaiApiKey, ...safeSettings } = settings;
+    const { openai_api_key, ...safeSettings } = settings;
     
-    // طباعة البيانات الأصلية من قاعدة البيانات للتصحيح
-    console.log('[تصحيح] البيانات المستلمة من قاعدة البيانات:', JSON.stringify(settings, null, 2));
+    // طباعة البيانات الأصلية من قاعدة البيانات للتصحيح (مع إخفاء المفتاح)
+    console.log('[تصحيح] البيانات المستلمة من قاعدة البيانات:', JSON.stringify({
+      ...settings,
+      openai_api_key: settings.openai_api_key ? '***المفتاح مخفي***' : null
+    }, null, 2));
     
     // البيانات التي سيتم إرسالها إلى العميل
     const responseData = {
       ...safeSettings,
-      hasCustomApiKey: !!openaiApiKey // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
+      hasCustomApiKey: !!openai_api_key // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
     };
     
     console.log('[تصحيح] البيانات المرسلة إلى العميل:', JSON.stringify(responseData, null, 2));
