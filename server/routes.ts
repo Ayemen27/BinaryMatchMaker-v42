@@ -509,41 +509,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/user/password", async (req, res) => {
     try {
       if (!req.isAuthenticated()) {
+        console.warn('[تحديث كلمة المرور] محاولة وصول غير مصرح بها:', { ip: req.ip });
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      console.log('طلب تحديث كلمة المرور - PUT:', {
-        userId: req.user.id
+      console.log('[تحديث كلمة المرور] طلب تحديث كلمة المرور - PUT:', {
+        userId: req.user.id,
+        timestamp: new Date().toISOString()
       });
 
       const { currentPassword, newPassword } = req.body;
       
       if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "يجب توفير كلمة المرور الحالية والجديدة" });
+        console.warn('[تحديث كلمة المرور] طلب غير مكتمل - بيانات مفقودة:', { 
+          userId: req.user.id,
+          hasCurrentPassword: !!currentPassword,
+          hasNewPassword: !!newPassword
+        });
+        return res.status(400).json({ 
+          message: "يجب توفير كلمة المرور الحالية والجديدة",
+          success: false
+        });
       }
       
       // الحصول على المستخدم الحالي
       const user = await storage.getUser(req.user.id);
       
       if (!user) {
-        return res.status(404).json({ message: "المستخدم غير موجود" });
+        console.error('[تحديث كلمة المرور] المستخدم غير موجود:', { userId: req.user.id });
+        return res.status(404).json({ 
+          message: "المستخدم غير موجود",
+          success: false 
+        });
       }
       
-      // التحقق من صحة كلمة المرور الحالية (في بيئة حقيقية يجب استخدام تشفير أقوى)
-      if (user.password !== currentPassword) {
-        return res.status(403).json({ message: "كلمة المرور الحالية غير صحيحة" });
+      // استخدام دالة التحقق من كلمة المرور من ملف auth.ts
+      // تضمين الدالة في هذا الملف مؤقتاً للإصلاح
+      const comparePasswords = async (supplied: string, stored: string) => {
+        try {
+          const [hashed, salt] = stored.split(".");
+          
+          // التحقق من وجود السولت (يجب أن تكون كلمة المرور مخزنة بتنسيق "hash.salt")
+          if (!salt) {
+            // في حالة كلمة المرور المخزنة غير مشفرة (أثناء الانتقال للنظام الجديد)
+            return supplied === stored;
+          }
+          
+          // استخدام scrypt للتحقق من كلمة المرور المشفرة
+          const hashedBuf = Buffer.from(hashed, "hex");
+          const scryptAsync = (await import('util')).promisify((await import('crypto')).scrypt);
+          const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+          return (await import('crypto')).timingSafeEqual(hashedBuf, suppliedBuf);
+        } catch (error) {
+          console.error('[تحديث كلمة المرور] خطأ في التحقق من كلمة المرور:', error);
+          // في حالة حدوث خطأ في التحقق، نفترض أن كلمة المرور غير صحيحة
+          return false;
+        }
+      };
+      
+      const isValid = await comparePasswords(currentPassword, user.password);
+      
+      if (!isValid) {
+        console.warn('[تحديث كلمة المرور] فشل التحقق من كلمة المرور الحالية:', {
+          userId: req.user.id
+        });
+        return res.status(403).json({ 
+          message: "كلمة المرور الحالية غير صحيحة",
+          success: false
+        });
       }
       
-      // تحديث كلمة المرور
+      // تشفير كلمة المرور الجديدة
+      const hashPassword = async (password: string) => {
+        const randomBytes = (await import('crypto')).randomBytes;
+        const scryptAsync = (await import('util')).promisify((await import('crypto')).scrypt);
+        const salt = randomBytes(16).toString("hex");
+        const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+        return `${buf.toString("hex")}.${salt}`;
+      };
+      
+      const hashedNewPassword = await hashPassword(newPassword);
+      
+      // تحديث كلمة المرور باستخدام النسخة المشفرة
       const updatedUser = await storage.updateUserProfile(req.user.id, {
-        password: newPassword
+        password: hashedNewPassword
       });
       
-      console.log('تم تحديث كلمة المرور بنجاح');
-      res.json({ success: true });
+      console.log('[تحديث كلمة المرور] تم تحديث كلمة المرور بنجاح:', {
+        userId: req.user.id,
+        timestamp: new Date().toISOString()
+      });
+      
+      res.json({ 
+        success: true,
+        message: "تم تحديث كلمة المرور بنجاح",
+        timestamp: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('خطأ في تحديث كلمة المرور:', error);
-      res.status(500).json({ message: "Failed to update password" });
+      console.error('[تحديث كلمة المرور] خطأ في تحديث كلمة المرور:', error);
+      res.status(500).json({ 
+        message: "فشل تحديث كلمة المرور", 
+        error: error instanceof Error ? error.message : "خطأ غير معروف",
+        success: false 
+      });
     }
   });
 
