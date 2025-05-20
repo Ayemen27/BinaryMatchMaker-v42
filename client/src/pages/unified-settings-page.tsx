@@ -19,9 +19,9 @@ import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function UnifiedSettingsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
-  const { allSettings, isLoading, updateProfile } = useSettings();
+  const { allSettings, isLoading } = useSettings();
   
   // إذا لم يكن المستخدم مسجل دخوله، قم بتوجيهه إلى صفحة تسجيل الدخول
   if (!user) {
@@ -69,13 +69,9 @@ export default function UnifiedSettingsPage() {
                 <LanguageSwitcher 
                   className="mb-6" 
                   onLanguageChange={(lng) => {
-                    // تحديث لغة المستخدم في قاعدة البيانات إذا كان مسجل دخوله
-                    if (user && allSettings?.user) {
-                      updateProfile({
-                        ...allSettings.user,
-                        language: lng
-                      });
-                    }
+                    // تحديث اللغة في التخزين المحلي فقط دون محاولة تحديث البيانات
+                    console.log("تم تغيير اللغة إلى:", lng);
+                    // سيتم حفظ اللغة في وظيفة handleLanguageChange داخل مكون LanguageSwitcher
                   }}
                 />
                 
