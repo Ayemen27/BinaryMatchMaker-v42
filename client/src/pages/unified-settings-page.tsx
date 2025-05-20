@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 export default function UnifiedSettingsPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { allSettings, isLoading } = useSettings();
+  const { allSettings, isLoading, updateProfile } = useSettings();
   
   // إذا لم يكن المستخدم مسجل دخوله، قم بتوجيهه إلى صفحة تسجيل الدخول
   if (!user) {
