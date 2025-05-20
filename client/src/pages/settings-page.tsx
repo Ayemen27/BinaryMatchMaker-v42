@@ -235,20 +235,51 @@ export default function SettingsPage() {
   
   // لا نحتاج إلى نموذج إضافي للإعدادات العامة، نستخدم فقط النموذج الأساسي settingsForm
 
-  // إتاحة تعديلات الإعدادات - هذا الدالة تُستخدم لحفظ التغييرات عند تعديل أي حقل
+  // إتاحة تعديلات الإعدادات - تم تغيير الطريقة من PATCH إلى PUT لتتوافق مع الخلفية
   const settingsMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("PATCH", "/api/user/settings", data)
-        .then(res => res.json());
+      console.log('إرسال إعدادات للخادم باستخدام PUT:', data);
+      
+      // إضافة علامة وقت للتأكد من عدم استخدام الذاكرة المؤقتة
+      const timestampedUrl = `/api/user/settings?ts=${Date.now()}`;
+      const response = await apiRequest("PUT", timestampedUrl, data);
+      
+      // التحقق من الاستجابة
+      if (!response.ok) {
+        // محاولة الحصول على رسالة الخطأ من الاستجابة
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'فشل تحديث الإعدادات';
+        } catch (e) {
+          errorMessage = 'فشل تحديث الإعدادات: خطأ غير معروف';
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('تم استلام استجابة ناجحة من الخادم:', data);
+      
+      // حفظ الإعدادات في التخزين المحلي للاستخدام في حالة الاتصال غير المتوفر
+      try {
+        localStorage.setItem('userSettings', JSON.stringify(data));
+        console.log('تم حفظ الإعدادات المحدثة في التخزين المحلي');
+      } catch (error) {
+        console.error('خطأ في حفظ الإعدادات في التخزين المحلي:', error);
+      }
+      
+      // إلغاء الذاكرة المؤقتة وإعادة تحميل البيانات
       queryClient.invalidateQueries({ queryKey: ['/api/user/settings'] });
+      
       toast({
         title: t('settingsUpdated') || 'تم تحديث الإعدادات',
         description: t('settingsUpdateSuccess') || 'تم حفظ الإعدادات بنجاح',
       });
     },
     onError: (error: Error) => {
+      console.error('خطأ في تحديث الإعدادات:', error);
       toast({
         title: t('updateFailed') || 'فشل التحديث',
         description: error.message,
