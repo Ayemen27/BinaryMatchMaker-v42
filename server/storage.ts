@@ -14,6 +14,7 @@ import { eq, and, gte, lt, desc, count, isNull, sql } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { pool } from "./db";
+import { mapDatabaseToApp, mapAppToDatabase } from "./utils/field-mapper";
 
 export interface IStorage {
   // User methods
@@ -101,16 +102,9 @@ export class DatabaseStorage implements IStorage {
       const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
       
       if (result.length > 0) {
-        // تحويل اسم الحقل من full_name إلى fullName
-        const user = result[0];
-        if (user.full_name) {
-          user.fullName = user.full_name;
-        }
-        console.log('تم استرجاع بيانات المستخدم مع تحويل الحقول:', {
-          id: user.id,
-          fullName: user.fullName,
-          full_name: user.full_name
-        });
+        // استخدام محول الحقول لضمان توافق أسماء الحقول بين قاعدة البيانات والتطبيق
+        const user = mapDatabaseToApp<User>(result[0]);
+        console.log('تم استرجاع بيانات المستخدم مع تحويل الحقول:', { id: user.id, fullName: user.fullName });
         return user;
       }
       return undefined;
@@ -126,11 +120,8 @@ export class DatabaseStorage implements IStorage {
       const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
       
       if (result.length > 0) {
-        // تحويل اسم الحقل من full_name إلى fullName
-        const user = result[0];
-        if (user.full_name) {
-          user.fullName = user.full_name;
-        }
+        // استخدام محول الحقول لضمان توافق أسماء الحقول بين قاعدة البيانات والتطبيق
+        const user = mapDatabaseToApp<User>(result[0]);
         return user;
       }
       return undefined;
@@ -181,13 +172,23 @@ export class DatabaseStorage implements IStorage {
   
   async updateUserProfile(id: number, data: Partial<User>): Promise<User> {
     try {
+      // تحويل البيانات من تنسيق التطبيق إلى تنسيق قاعدة البيانات
+      const dbData = mapAppToDatabase<Record<string, any>>(data);
+      
       // تحضير الحقول التي سيتم تحديثها
       const updateFields: Record<string, any> = {};
       
-      if (data.username) updateFields.username = data.username;
-      if (data.email) updateFields.email = data.email;
-      if (data.fullName) updateFields.full_name = data.fullName;
-      if (data.password) updateFields.password = data.password; // إضافة معالجة كلمة المرور
+      // تطبيق قيم الحقول بشكل ديناميكي
+      if (dbData && typeof dbData === 'object') {
+        Object.keys(dbData).forEach(key => {
+          if (dbData[key] !== undefined) {
+            updateFields[key] = dbData[key];
+          }
+        });
+      }
+      
+      // إضافة معالجة خاصة لكلمة المرور إذا تم تقديمها
+      if (data.password) updateFields.password = data.password;
       
       // في حالة عدم وجود حقول للتحديث، نقوم بالخروج
       if (Object.keys(updateFields).length === 0) {
@@ -200,7 +201,7 @@ export class DatabaseStorage implements IStorage {
         return currentUser;
       }
       
-      console.log('تحديث بيانات المستخدم باستخدام SQL المخصص:', {
+      console.log('تحديث بيانات المستخدم باستخدام نظام تحويل الحقول:', {
         userId: id,
         fields: Object.keys(updateFields),
         containsPassword: !!data.password // مراقبة وجهة لتتبع تحديث كلمة المرور
@@ -244,12 +245,16 @@ export class DatabaseStorage implements IStorage {
         throw new Error('المستخدم غير موجود');
       }
       
+      // تحويل البيانات من تنسيق قاعدة البيانات إلى تنسيق التطبيق
+      const updatedUser = mapDatabaseToApp<User>(result[0]);
+      
       console.log('تم تحديث بيانات المستخدم بنجاح:', {
         userId: id,
-        updatedFields: Object.keys(updateFields)
+        updatedFields: Object.keys(updateFields),
+        fullName: updatedUser.fullName
       });
       
-      return result[0];
+      return updatedUser;
     } catch (error) {
       console.error('خطأ في تحديث بيانات المستخدم:', error);
       throw error;
