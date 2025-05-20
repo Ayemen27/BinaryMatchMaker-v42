@@ -35,9 +35,9 @@ export default function UnifiedSettingsPage() {
         <meta name="description" content={t('settingsDescription')} />
       </Helmet>
       
-      <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <div className="p-3 md:p-6 max-w-7xl mx-auto">
         {/* رأس الصفحة */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 bg-gradient-to-r from-primary/10 to-primary/5 p-4 md:p-6 rounded-lg shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 bg-gradient-to-r from-primary/10 to-primary/5 p-4 md:p-6 rounded-lg shadow-sm">
           <div>
             <h1 className="text-2xl font-bold">{t('settings')}</h1>
             <p className="text-muted-foreground">{t('settingsDescription')}</p>
@@ -51,9 +51,9 @@ export default function UnifiedSettingsPage() {
         </div>
         
         {/* محتوى الصفحة */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* معلومات الحساب في الجانب */}
-          <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+          <div className="lg:col-span-4 xl:col-span-3 space-y-4">
             {isLoading ? (
               <div className="flex items-center justify-center h-40 border rounded-lg bg-background">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
