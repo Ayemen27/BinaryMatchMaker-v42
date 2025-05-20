@@ -124,6 +124,7 @@
   "apiSettingsUpdateSuccess": "Your API settings have been updated successfully",
   
   "saving": "Saving...",
+  "savingChanges": "Saving Changes...",
   "updateFailed": "Update Failed",
   "genericError": "An error occurred while processing your request",
   
@@ -131,6 +132,7 @@
   "confirmRestoreDefaults": "Are you sure you want to restore all settings to default values?",
   
   "loading": "Loading...",
+  "loadingSettings": "Loading settings...",
   "error": "Error",
   "success": "Success",
   "warning": "Warning",
