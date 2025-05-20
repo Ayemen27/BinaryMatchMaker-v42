@@ -69,7 +69,7 @@ export function LanguageSwitcher({ className, onLanguageChange }: LanguageSwitch
               value={i18n.language}
               onValueChange={handleLanguageChange}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("selectLanguage")} />
               </SelectTrigger>
               <SelectContent>
@@ -82,14 +82,14 @@ export function LanguageSwitcher({ className, onLanguageChange }: LanguageSwitch
             </Select>
           </div>
           
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 mt-2">
             {supportedLanguages.map((lang) => (
               <Button
                 key={lang.code}
                 variant={i18n.language === lang.code ? "default" : "outline"}
                 size="sm"
                 onClick={() => handleLanguageChange(lang.code)}
-                className="flex-1"
+                className="w-full flex items-center justify-center"
               >
                 {lang.name}
               </Button>

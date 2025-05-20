@@ -260,22 +260,22 @@ export function SettingsTabs() {
   
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid grid-cols-4 w-full mb-4">
-        <TabsTrigger value="profile" className="flex items-center space-x-2">
+      <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full mb-4 gap-1">
+        <TabsTrigger value="profile" className="flex items-center justify-center space-x-1 px-2">
           <User className="h-4 w-4 ml-1" />
-          <span>{t('profile')}</span>
+          <span className="text-xs md:text-sm">{t('profile')}</span>
         </TabsTrigger>
-        <TabsTrigger value="general" className="flex items-center space-x-2">
+        <TabsTrigger value="general" className="flex items-center justify-center space-x-1 px-2">
           <Settings className="h-4 w-4 ml-1" />
-          <span>{t('general')}</span>
+          <span className="text-xs md:text-sm">{t('general')}</span>
         </TabsTrigger>
-        <TabsTrigger value="notifications" className="flex items-center space-x-2">
+        <TabsTrigger value="notifications" className="flex items-center justify-center space-x-1 px-2">
           <Bell className="h-4 w-4 ml-1" />
-          <span>{t('notifications')}</span>
+          <span className="text-xs md:text-sm">{t('notifications')}</span>
         </TabsTrigger>
-        <TabsTrigger value="api" className="flex items-center space-x-2">
+        <TabsTrigger value="api" className="flex items-center justify-center space-x-1 px-2">
           <Key className="h-4 w-4 ml-1" />
-          <span>{t('apiSettings')}</span>
+          <span className="text-xs md:text-sm">{t('apiSettings')}</span>
         </TabsTrigger>
       </TabsList>
       
