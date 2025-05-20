@@ -132,12 +132,18 @@ export function SettingsForm() {
   
   // تغيير قيمة فردية على الفور
   function handleSettingChange(name: keyof SettingsFormValues, value: any) {
-    // تحديث قيمة الحقل في النموذج فوراً
-    form.setValue(name, value);
+    console.log(`[تغيير الإعدادات] بدء تغيير إعداد ${name} إلى:`, value);
     
-    // حفظ القيمة في المتغير المحلي حتى لا تضيع عند تغيير التبويب
+    // تحديث قيمة الحقل في النموذج فوراً
+    form.setValue(name, value, { 
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true
+    });
+    
+    // حفظ جميع القيم في المتغير المحلي
     const formValues = form.getValues();
-    console.log(`تغيير إعداد ${name} إلى:`, value);
+    console.log(`[تغيير الإعدادات] قيم النموذج الحالية:`, formValues);
     
     // تطبيق تغيير الثيم فوراً إذا كان الإعداد هو الثيم
     if (name === 'theme' && window && document) {
@@ -146,8 +152,23 @@ export function SettingsForm() {
       document.documentElement.classList.add(value);
     }
     
-    // إرسال القيمة الجديدة إلى الخادم
-    updateSettings({ [name]: value });
+    // إعداد التأخير لتجنب تنفيذ عمليات متزامنة متعددة
+    setTimeout(() => {
+      try {
+        // إنشاء نسخة احتياطية من إعدادات المستخدم الحالية
+        const updatedSettings = { ...settings };
+        
+        // تحديث القيمة المتغيرة في النسخة الاحتياطية
+        updatedSettings[name] = value;
+        
+        console.log(`[تغيير الإعدادات] إرسال التحديث للخادم:`, { [name]: value });
+        
+        // إرسال التحديث للخادم
+        updateSettings({ [name]: value });
+      } catch (error) {
+        console.error(`[تغيير الإعدادات] خطأ أثناء تحديث الإعداد ${name}:`, error);
+      }
+    }, 100);
   }
   
   return (
