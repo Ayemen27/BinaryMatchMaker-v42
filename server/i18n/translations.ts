@@ -112,6 +112,143 @@ const ui: TranslationDictionary = {
   'welcome_message': {
     ar: 'مرحبًا بك في منصة إشارات التداول',
     en: 'Welcome to the Trading Signals Platform'
+  },
+  // إضافة ترجمات جديدة لصفحة الإعدادات
+  'languageSettingsDescription': {
+    ar: 'اختر لغة واجهة المستخدم والإشعارات',
+    en: 'Choose your interface and notification language'
+  },
+  'languageInfoMessage': {
+    ar: 'اختيار اللغة سيؤثر على واجهة المستخدم والإشعارات والرسائل.',
+    en: 'Language selection will affect the user interface, notifications, and messages.'
+  },
+  'currentLanguage': {
+    ar: 'اللغة الحالية',
+    en: 'Current Language'
+  },
+  'active': {
+    ar: 'نشط',
+    en: 'Active'
+  },
+  'profileSettings': {
+    ar: 'إعدادات الملف الشخصي',
+    en: 'Profile Settings'
+  },
+  'profileSettingsDescription': {
+    ar: 'إدارة معلومات الملف الشخصي والحساب',
+    en: 'Manage your profile and account information'
+  },
+  'fullName': {
+    ar: 'الاسم الكامل',
+    en: 'Full Name'
+  },
+  'username': {
+    ar: 'اسم المستخدم',
+    en: 'Username'
+  },
+  'email': {
+    ar: 'البريد الإلكتروني',
+    en: 'Email'
+  },
+  'changePassword': {
+    ar: 'تغيير كلمة المرور',
+    en: 'Change Password'
+  },
+  'currentPassword': {
+    ar: 'كلمة المرور الحالية',
+    en: 'Current Password'
+  },
+  'newPassword': {
+    ar: 'كلمة المرور الجديدة',
+    en: 'New Password'
+  },
+  'confirmPassword': {
+    ar: 'تأكيد كلمة المرور',
+    en: 'Confirm Password'
+  },
+  'phoneNumber': {
+    ar: 'رقم الهاتف',
+    en: 'Phone Number'
+  },
+  'country': {
+    ar: 'الدولة',
+    en: 'Country'
+  },
+  'notificationSettings': {
+    ar: 'إعدادات الإشعارات',
+    en: 'Notification Settings'
+  },
+  'notificationSettingsDescription': {
+    ar: 'تخصيص طريقة استلام الإشعارات والتنبيهات',
+    en: 'Customize how you receive notifications and alerts'
+  },
+  'emailNotifications': {
+    ar: 'إشعارات البريد الإلكتروني',
+    en: 'Email Notifications'
+  },
+  'pushNotifications': {
+    ar: 'الإشعارات الفورية',
+    en: 'Push Notifications'
+  },
+  'signalAlerts': {
+    ar: 'تنبيهات الإشارات',
+    en: 'Signal Alerts'
+  },
+  'marketUpdates': {
+    ar: 'تحديثات السوق',
+    en: 'Market Updates'
+  },
+  'accountAlerts': {
+    ar: 'تنبيهات الحساب',
+    en: 'Account Alerts'
+  },
+  'tradePerformance': {
+    ar: 'أداء التداول',
+    en: 'Trade Performance'
+  },
+  'subscriptionTab': {
+    ar: 'الاشتراك',
+    en: 'Subscription'
+  },
+  'currentPlan': {
+    ar: 'الخطة الحالية',
+    en: 'Current Plan'
+  },
+  'freeSubscription': {
+    ar: 'اشتراك مجاني',
+    en: 'Free Subscription'
+  },
+  'remainingSignals': {
+    ar: 'الإشارات المتبقية: {{count}}',
+    en: 'Remaining Signals: {{count}}'
+  },
+  'limitedSignals': {
+    ar: 'إشارات محدودة ({{count}} شهرياً)',
+    en: 'Limited Signals ({{count}} monthly)'
+  },
+  'basicMarketAnalysis': {
+    ar: 'تحليل سوق أساسي',
+    en: 'Basic Market Analysis'
+  },
+  'upgradePlan': {
+    ar: 'ترقية الخطة',
+    en: 'Upgrade Plan'
+  },
+  'billingInformation': {
+    ar: 'معلومات الفواتير',
+    en: 'Billing Information'
+  },
+  'noBillingInformation': {
+    ar: 'لا توجد معلومات فواتير مسجلة',
+    en: 'No billing information on record'
+  },
+  'paymentHistory': {
+    ar: 'سجل المدفوعات',
+    en: 'Payment History'
+  },
+  'noPaymentHistory': {
+    ar: 'لا يوجد سجل مدفوعات',
+    en: 'No payment history'
   }
 };
 
@@ -172,6 +309,42 @@ const buttons: TranslationDictionary = {
   'use_algorithms': {
     ar: 'استخدام الخوارزميات التقليدية',
     en: 'Use Traditional Algorithms'
+  },
+  'update_profile': {
+    ar: 'تحديث الملف الشخصي',
+    en: 'Update Profile'
+  },
+  'change_password': {
+    ar: 'تغيير كلمة المرور',
+    en: 'Change Password'
+  },
+  'save_changes': {
+    ar: 'حفظ التغييرات',
+    en: 'Save Changes'
+  },
+  'update_settings': {
+    ar: 'تحديث الإعدادات',
+    en: 'Update Settings'
+  },
+  'update_notifications': {
+    ar: 'تحديث الإشعارات',
+    en: 'Update Notifications'
+  },
+  'update_ai_settings': {
+    ar: 'تحديث إعدادات الذكاء الاصطناعي',
+    en: 'Update AI Settings'
+  },
+  'update_language': {
+    ar: 'تحديث اللغة',
+    en: 'Update Language'
+  },
+  'apply': {
+    ar: 'تطبيق',
+    en: 'Apply'
+  },
+  'reset': {
+    ar: 'إعادة ضبط',
+    en: 'Reset'
   }
 };
 
