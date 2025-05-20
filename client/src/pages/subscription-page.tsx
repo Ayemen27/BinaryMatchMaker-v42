@@ -94,7 +94,7 @@ export default function SubscriptionPage() {
       period: t('weekly'),
       description: t('realTimeAnalysis'),
       color: 'from-amber-400 to-yellow-500',
-      icon: <Shield className="h-5 w-5" />,
+      icon: <Shield className="h-4 w-4" />,
       botVersions: botVersions.weekly,
       features: [
         { text: t('realTimeFundamentalAnalysis'), available: true },
@@ -117,7 +117,7 @@ export default function SubscriptionPage() {
       period: t('monthly'),
       description: t('advancedTechnicalAnalysis'),
       color: 'from-amber-400 to-yellow-500',
-      icon: <Star className="h-5 w-5" />,
+      icon: <Star className="h-4 w-4" />,
       botVersions: botVersions.monthly,
       features: [
         { text: t('professionalTechnicalAnalysis'), available: true },
@@ -140,7 +140,7 @@ export default function SubscriptionPage() {
       period: t('yearly'),
       description: t('aiPoweredAnalysis'),
       color: 'from-amber-400 to-yellow-500',
-      icon: <Award className="h-5 w-5" />,
+      icon: <Award className="h-4 w-4" />,
       botVersions: botVersions.annual,
       features: [
         { text: t('aiPoweredTrendPrediction'), available: true },
@@ -163,7 +163,7 @@ export default function SubscriptionPage() {
       period: t('yearly'),
       description: "BinarJoinAnalytic V.4.1 - ثورة إشارات التداول 🔥",
       color: 'from-amber-400 to-yellow-500',
-      icon: <Medal className="h-5 w-5" />,
+      icon: <Medal className="h-4 w-4" />,
       botVersions: ['BinarJoinAnalytic V.4.1'],
       features: [
         { text: 'تحليل بيانات السوق المتقدمة', available: true },
@@ -270,7 +270,7 @@ export default function SubscriptionPage() {
             onClick={toggleCurrency}
             className="flex items-center gap-2"
           >
-            {currency === 'USD' ? <Star className="h-4 w-4" /> : <DollarSign className="h-4 w-4" />}
+            {currency === 'USD' ? <Star className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
             {currency === 'USD' ? t('switchToStars') : t('switchToUSD')}
             <RefreshCw className="h-4 w-4 mr-1" />
           </Button>
