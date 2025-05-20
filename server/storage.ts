@@ -99,7 +99,21 @@ export class DatabaseStorage implements IStorage {
     try {
       // استخدام طريقة الاستعلام المخصصة في كائن db
       const result = await db.query('SELECT * FROM users WHERE id = $1', [id]);
-      return result.length > 0 ? result[0] : undefined;
+      
+      if (result.length > 0) {
+        // تحويل اسم الحقل من full_name إلى fullName
+        const user = result[0];
+        if (user.full_name) {
+          user.fullName = user.full_name;
+        }
+        console.log('تم استرجاع بيانات المستخدم مع تحويل الحقول:', {
+          id: user.id,
+          fullName: user.fullName,
+          full_name: user.full_name
+        });
+        return user;
+      }
+      return undefined;
     } catch (error) {
       console.error('خطأ في البحث عن المستخدم بواسطة المعرف:', error);
       return undefined;
@@ -110,7 +124,16 @@ export class DatabaseStorage implements IStorage {
     try {
       // استخدام طريقة الاستعلام المخصصة في كائن db
       const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
-      return result.length > 0 ? result[0] : undefined;
+      
+      if (result.length > 0) {
+        // تحويل اسم الحقل من full_name إلى fullName
+        const user = result[0];
+        if (user.full_name) {
+          user.fullName = user.full_name;
+        }
+        return user;
+      }
+      return undefined;
     } catch (error) {
       console.error('خطأ في البحث عن المستخدم بواسطة اسم المستخدم:', error);
       return undefined;
