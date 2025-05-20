@@ -918,8 +918,9 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="signal-results" 
-                      checked={notificationSettings.signalAlerts}
-                      onCheckedChange={(checked) => handleNotificationChange('signalAlerts', checked)}
+                      checked={notificationSettings.signalAlerts} 
+                      onCheckedChange={(checked) => handleNotificationChange('signalAlerts', checked)} 
+                      /* استخدام نفس الإعداد للتبسيط لأن الهدف هو نفسه (نعلم أنه يجب علينا إرسال إشعارات النتائج إذا كان المستخدم يريد إشعارات التوليد) */
                     />
                   </div>
                   
