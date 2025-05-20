@@ -3,7 +3,22 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, value, defaultValue, ...props }, ref) => {
+    // إضافة حالة داخلية لضمان أن القيم الابتدائية متسقة
+    const [internalValue, setInternalValue] = React.useState<string | number | readonly string[] | undefined>(
+      value !== undefined ? value : defaultValue !== undefined ? defaultValue : ""
+    );
+
+    // تحديث القيمة الداخلية عند تغير القيمة الخارجية
+    React.useEffect(() => {
+      if (value !== undefined) {
+        setInternalValue(value);
+      }
+    }, [value]);
+
+    // استخدام القيمة الداخلية عندما لا تتوفر القيمة الخارجية
+    const inputValue = value !== undefined ? value : internalValue;
+
     return (
       <input
         type={type}
@@ -12,6 +27,13 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
           className
         )}
         ref={ref}
+        value={inputValue}
+        onChange={(e) => {
+          setInternalValue(e.target.value);
+          if (props.onChange) {
+            props.onChange(e);
+          }
+        }}
         {...props}
       />
     )
