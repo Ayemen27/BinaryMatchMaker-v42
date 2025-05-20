@@ -25,6 +25,8 @@ export interface UserSettings {
   useCustomAiKey?: boolean;
   hasCustomApiKey?: boolean;
   openaiApiKey?: string;
+  _updated?: string;  // حقل لتتبع وقت آخر تحديث (غير مخزن في قاعدة البيانات)
+  _serverTime?: string; // وقت استجابة الخادم
 }
 
 // القيم الافتراضية للإعدادات
@@ -134,124 +136,133 @@ export function useSettings() {
   // تعريف mutation لتحديث الإعدادات
   const { mutate, isPending } = useMutation({
     mutationFn: async (newSettings: Partial<UserSettings>) => {
-      // تسجيل بدء عملية التحديث في نظام التتبع
-      const eventId = tracker.trackEvent(TrackEventType.SETTINGS_CHANGE, {
-        component: 'SettingsManager',
-        action: 'updateSettingsStart',
-        previousValue: currentSettingsRef.current || localSettings || defaultSettings,
-        newValue: newSettings,
-        metadata: {
-          changedFields: Object.keys(newSettings),
-          timestamp: new Date().toISOString()
-        }
-      });
-      
       // طباعة البيانات المرسلة للتأكد من صحتها
-      console.log('إرسال إعدادات للخادم:', newSettings);
+      console.log('⚙️ [إعدادات] إرسال إعدادات للخادم:', newSettings);
+      
+      // تجهيز قيمة فريدة لتوقيت التحديث
+      const updateTimestamp = new Date().toISOString();
       
       // تحضير الإعدادات المكتملة بدمج الإعدادات الحالية مع التغييرات الجديدة
-      // هذا يضمن أن جميع الإعدادات يتم حفظها بشكل صحيح
-      const baseSettings = data || localSettings || defaultSettings;
-      
-      const completeSettings = {
-        ...baseSettings, // استخدام البيانات الحالية أو المحلية أو القيم الافتراضية
-        ...newSettings // تطبيق التغييرات الجديدة فوق القيم الحالية
-      };
-      
-      // طباعة الإعدادات المكتملة للتأكد من صحتها
-      console.log('الإعدادات الكاملة التي سيتم إرسالها:', completeSettings);
-      
-      // تسجيل تفاصيل التغييرات المكتشفة في نظام التتبع
-      const changes = tracker.detectChanges(baseSettings, completeSettings);
-      tracker.trackEvent(TrackEventType.SETTINGS_SAVE, {
-        component: 'SettingsManager',
-        action: 'prepareSettingsForSave',
-        data: changes,
-        previousValue: baseSettings,
-        newValue: completeSettings,
-        metadata: {
-          relatedEventId: eventId,
-          timestamp: new Date().toISOString()
-        }
-      });
-      
-      // حفظ الإعدادات الكاملة محليًا قبل الإرسال للخادم (احتياطي)
+      // استخدام القيم الافتراضية فقط إذا لم تكن هناك بيانات مخزنة
+      let baseSettings: UserSettings;
+
+      // محاولة استرجاع البيانات بترتيب الأولوية:
+      // 1. الإعدادات المخزنة محليًا (لضمان وجود آخر تحديثات المستخدم)
+      // 2. الإعدادات المستردة من الخادم
+      // 3. القيم الافتراضية كملجأ أخير
       try {
         if (typeof window !== 'undefined' && window.localStorage) {
-          localStorage.setItem('userSettings', JSON.stringify(completeSettings));
-          
-          // تسجيل عملية كتابة التخزين المحلي في نظام التتبع
-          tracker.trackEvent(TrackEventType.STORAGE_WRITE, {
-            component: 'SettingsManager',
-            action: 'saveToLocalStorage',
-            data: completeSettings,
-            metadata: {
-              source: 'localStorage',
-              timestamp: new Date().toISOString()
-            }
-          });
-          
-          console.log('تم حفظ الإعدادات الكاملة في التخزين المحلي');
+          const storedSettings = localStorage.getItem('userSettings');
+          if (storedSettings) {
+            const parsedSettings = JSON.parse(storedSettings);
+            console.log('📋 [إعدادات] تم استخدام إعدادات التخزين المحلي:', parsedSettings);
+            baseSettings = parsedSettings;
+          } else if (data) {
+            console.log('📋 [إعدادات] تم استخدام إعدادات الخادم:', data);
+            baseSettings = { ...data };
+          } else {
+            console.log('📋 [إعدادات] تم استخدام الإعدادات الافتراضية:', defaultSettings);
+            baseSettings = { ...defaultSettings };
+          }
+        } else if (data) {
+          console.log('📋 [إعدادات] تم استخدام إعدادات الخادم:', data);
+          baseSettings = { ...data };
+        } else {
+          console.log('📋 [إعدادات] تم استخدام الإعدادات الافتراضية:', defaultSettings);
+          baseSettings = { ...defaultSettings };
         }
       } catch (error) {
-        console.error('خطأ أثناء حفظ الإعدادات في التخزين المحلي:', error);
-        
-        // تسجيل الخطأ في نظام التتبع
-        tracker.trackEvent(TrackEventType.ERROR, {
-          component: 'SettingsManager',
-          action: 'saveToLocalStorage',
-          data: { error: error instanceof Error ? error.message : String(error) },
-          metadata: {
-            source: 'localStorage',
-            timestamp: new Date().toISOString()
-          }
-        });
+        console.error('❌ [إعدادات] خطأ في استرجاع الإعدادات الأساسية:', error);
+        // في حالة حدوث خطأ، استخدم البيانات المتاحة
+        baseSettings = data || { ...defaultSettings };
       }
       
-      // تسجيل بدء الطلب للخادم
-      tracker.trackEvent(TrackEventType.SERVER_REQUEST, {
-        component: 'SettingsManager',
-        action: 'sendToServer',
-        data: newSettings,
-        metadata: {
-          url: SETTINGS_KEY,
-          method: 'PATCH',
-          timestamp: new Date().toISOString()
-        }
-      });
+      // اعتماد نهج مختلف: بدلاً من إرسال الحقل المتغير فقط، نرسل جميع الإعدادات المكتملة للخادم
+      // هذا يحل مشكلة فقدان الإعدادات الأخرى عند التحديث
+      const completeSettings = {
+        ...baseSettings,
+        ...newSettings,
+        // إضافة علامة وقت للتحديث لتمييز هذا التحديث عن غيره
+        _updated: updateTimestamp
+      } as UserSettings;
       
-      const response = await apiRequest('PATCH', SETTINGS_KEY, newSettings);
+      // طباعة الإعدادات المكتملة للتأكد من صحتها
+      console.log('📑 [إعدادات] الإعدادات الكاملة المجهزة للإرسال:', completeSettings);
+      
+      // حفظ الإعدادات الكاملة محليًا فوراً قبل الإرسال للخادم (للتأكد من حفظها حتى في حالة الفشل)
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          // حفظ نسخة احتياطية من الإعدادات السابقة قبل التغيير
+          const previousSettings = localStorage.getItem('userSettings');
+          if (previousSettings) {
+            localStorage.setItem('userSettings_backup', previousSettings);
+          }
+          
+          // حفظ الإعدادات الجديدة
+          localStorage.setItem('userSettings', JSON.stringify(completeSettings));
+          localStorage.setItem('userSettings_lastUpdate', updateTimestamp);
+          
+          // حفظ سجل التغييرات للتتبع
+          const changeLog = JSON.parse(localStorage.getItem('userSettings_changeLog') || '[]');
+          changeLog.push({
+            timestamp: updateTimestamp,
+            changes: newSettings,
+            completeSettings: completeSettings
+          });
+          
+          // الاحتفاظ بآخر 10 تغييرات فقط
+          if (changeLog.length > 10) {
+            changeLog.shift();
+          }
+          
+          localStorage.setItem('userSettings_changeLog', JSON.stringify(changeLog));
+          
+          console.log('💾 [إعدادات] تم حفظ الإعدادات الكاملة في التخزين المحلي');
+        }
+      } catch (error) {
+        console.error('❌ [إعدادات] خطأ أثناء حفظ الإعدادات في التخزين المحلي:', error);
+      }
+      
+      // تغيير أسلوب الإرسال إلى الخادم: نرسل الإعدادات الكاملة بدلاً من الحقل المتغير فقط
+      console.log('🚀 [إعدادات] جاري إرسال الإعدادات الكاملة إلى الخادم...');
+      
+      // إستخدام طلب PUT لضمان تحديث جميع الإعدادات (بدلاً من PATCH الذي يحدث جزئياً)
+      const response = await apiRequest('PUT', SETTINGS_KEY, completeSettings);
+      
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorMessage = 'حدث خطأ أثناء حفظ الإعدادات';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+          console.error('❌ [إعدادات] رد خطأ من الخادم:', errorData);
+        } catch (e) {
+          console.error('❌ [إعدادات] خطأ عند معالجة استجابة الخطأ:', e);
+        }
         
-        // تسجيل خطأ الخادم في نظام التتبع
-        tracker.trackEvent(TrackEventType.ERROR, {
-          component: 'SettingsManager',
-          action: 'serverResponseError',
-          data: errorData,
-          metadata: {
-            status: response.status,
-            statusText: response.statusText,
-            timestamp: new Date().toISOString()
-          }
-        });
-        
-        throw new Error(errorData.message || 'حدث خطأ أثناء حفظ الإعدادات');
+        throw new Error(errorMessage);
       }
       
-      const responseData = await response.json();
+      let responseData;
+      try {
+        responseData = await response.json();
+        console.log('✅ [إعدادات] استجابة ناجحة من الخادم:', responseData);
+      } catch (e) {
+        console.error('❌ [إعدادات] خطأ في تحليل استجابة الخادم:', e);
+        responseData = completeSettings; // استخدام البيانات المحلية في حالة فشل تحليل الاستجابة
+      }
       
-      // تسجيل استجابة الخادم في نظام التتبع
-      tracker.trackEvent(TrackEventType.SERVER_RESPONSE, {
-        component: 'SettingsManager',
-        action: 'serverResponseSuccess',
-        data: responseData,
-        metadata: {
-          status: response.status,
-          timestamp: new Date().toISOString()
+      // إعادة تأكيد الإعدادات المحدثة في التخزين المحلي بعد نجاح الخادم
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('userSettings', JSON.stringify(responseData));
+          localStorage.setItem('userSettings_serverConfirmed', 'true');
+          console.log('✓ [إعدادات] تم تأكيد الإعدادات من الخادم وحفظها محلياً');
         }
-      });
+      } catch (error) {
+        console.error('❌ [إعدادات] خطأ في تحديث التخزين المحلي بعد استجابة الخادم:', error);
+      }
       
+      // إرجاع البيانات المستلمة من الخادم
       return responseData;
     },
     onSuccess: (data) => {

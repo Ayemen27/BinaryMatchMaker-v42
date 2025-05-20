@@ -23,6 +23,7 @@ const userSettingsSchema = z.object({
   showTradingTips: z.boolean().optional(),
   autoRefreshData: z.boolean().optional(),
   refreshInterval: z.number().optional(),
+  _updated: z.string().optional(), // حقل للتتبع فقط، غير مخزن في قاعدة البيانات
 });
 
 // الحصول على إعدادات المستخدم
@@ -208,6 +209,106 @@ router.patch("/", async (req: Request, res: Response) => {
     logger.error("UserSettings", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
     return res.status(500).json({ 
       error: "حدث خطأ أثناء تحديث إعدادات المستخدم", 
+      message: error instanceof Error ? error.message : "خطأ غير معروف" 
+    });
+  }
+});
+
+// تحديث كامل إعدادات المستخدم (استبدال كامل)
+router.put("/", async (req: Request, res: Response) => {
+  try {
+    // التحقق من أن المستخدم مسجل دخوله
+    if (!req.isAuthenticated()) {
+      logger.warn("UserSettings", "محاولة تحديث كامل لإعدادات المستخدم غير مصرح بها", { ip: req.ip });
+      return res.status(401).json({ error: "غير مصرح. يرجى تسجيل الدخول." });
+    }
+
+    // التحقق من صحة البيانات المرسلة
+    const result = userSettingsSchema.safeParse(req.body);
+    if (!result.success) {
+      logger.warn("UserSettings", "بيانات إعدادات المستخدم الكاملة غير صالحة", { 
+        errors: result.error.errors,
+        userId: req.user!.id 
+      });
+      return res.status(400).json({ 
+        error: "بيانات غير صالحة", 
+        details: result.error.errors 
+      });
+    }
+
+    const userId = req.user!.id;
+    
+    // استخراج البيانات للتحديث (حذف حقل _updated إذا كان موجوداً)
+    const { _updated, ...settingsData } = result.data;
+    
+    // سجل عملية تحديث الإعدادات
+    logger.info("UserSettings", "بدء عملية تحديث كامل للإعدادات", { 
+      userId, 
+      updateTime: _updated,
+      fieldsToUpdate: Object.keys(settingsData)
+    });
+
+    // التحقق من وجود إعدادات للمستخدم
+    let userSettings = await storage.getUserSettings(userId);
+    
+    if (!userSettings) {
+      // إنشاء إعدادات جديدة مع الحفاظ على القيم الافتراضية للحقول الغير موجودة
+      const defaultSettings = {
+        theme: 'dark',
+        defaultAsset: 'BTC/USDT',
+        defaultTimeframe: '1h',
+        defaultPlatform: '',
+        chartType: 'candlestick',
+        showTradingTips: true,
+        autoRefreshData: true,
+        refreshInterval: 60,
+        ...settingsData
+      };
+      
+      userSettings = await storage.createUserSettings({
+        userId,
+        ...defaultSettings
+      });
+      
+      logger.info("UserSettings", "تم إنشاء إعدادات جديدة للمستخدم", { userId });
+    } else {
+      // تحديث كامل للإعدادات باستخدام البيانات المرسلة
+      // مع الحفاظ على القيم الموجودة للحقول غير المحددة
+      const updatedSettings = {
+        theme: settingsData.theme ?? userSettings.theme ?? 'dark',
+        defaultAsset: settingsData.defaultAsset ?? userSettings.defaultAsset ?? 'BTC/USDT',
+        defaultTimeframe: settingsData.defaultTimeframe ?? userSettings.defaultTimeframe ?? '1h',
+        defaultPlatform: settingsData.defaultPlatform ?? userSettings.defaultPlatform ?? '',
+        chartType: settingsData.chartType ?? userSettings.chartType ?? 'candlestick',
+        showTradingTips: settingsData.showTradingTips ?? userSettings.showTradingTips ?? true,
+        autoRefreshData: settingsData.autoRefreshData ?? userSettings.autoRefreshData ?? true,
+        refreshInterval: settingsData.refreshInterval ?? userSettings.refreshInterval ?? 60,
+        // الحفاظ على إعدادات API إذا كانت موجودة
+        openaiApiKey: userSettings.openaiApiKey,
+        useCustomAiKey: userSettings.useCustomAiKey,
+        useAiForSignals: userSettings.useAiForSignals
+      };
+      
+      logger.info("UserSettings", "تحديث كامل لإعدادات المستخدم", {
+        userId,
+        fieldsUpdated: Object.keys(settingsData)
+      });
+      
+      userSettings = await storage.updateUserSettings(userId, updatedSettings);
+    }
+
+    // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
+    const { openaiApiKey, ...safeSettings } = userSettings;
+    
+    return res.status(200).json({
+      ...safeSettings,
+      hasCustomApiKey: !!openaiApiKey,
+      _serverTime: new Date().toISOString()
+    });
+  } catch (error) {
+    logger.error("UserSettings", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
+    return res.status(500).json({ 
+      error: "حدث خطأ أثناء التحديث الكامل لإعدادات المستخدم", 
       message: error instanceof Error ? error.message : "خطأ غير معروف" 
     });
   }
