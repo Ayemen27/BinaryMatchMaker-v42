@@ -8,6 +8,26 @@
     transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 2px solid #ffd900;
+  }
+  
+  .plan-card.weekly-plan {
+    background: #fffbf0;
+  }
+  
+  .plan-card.monthly-plan {
+    background: #f8f9ff;
+  }
+  
+  .plan-card.annual-plan {
+    background: #fff8ff;
+  }
+  
+  .plan-card.premium-plan {
+    background: #fffdf0;
   }
   
   .plan-card:hover {
@@ -17,24 +37,27 @@
   
   .plan-header {
     position: relative;
+    padding-top: 2rem;
   }
   
   .price {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 800;
     position: relative;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #ffd900;
   }
   
   .price-usd::before {
     content: '$';
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     position: relative;
     margin-right: 0.25rem;
-    opacity: 0.7;
+    opacity: 0.8;
+    top: -10px;
   }
   
   .features-list {
@@ -48,24 +71,120 @@
     align-items: start;
     margin-bottom: 0.75rem;
     line-height: 1.4;
+    font-size: 0.95rem;
   }
   
-  .new-badge {
+  .recommended-badge {
     position: absolute;
-    top: -10px;
-    right: -10px;
-    background: #ff5252;
-    color: white;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
+    top: 10px;
+    right: 10px;
+    background: #ffd900;
+    color: #333;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .beginner-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #e0e0e0;
+    color: #333;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+  }
+  
+  .plan-currency-toggle {
+    background-color: #f5f5f5;
+    border-radius: 30px;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .plan-currency-toggle:hover {
+    background-color: #ebebeb;
+  }
+  
+  .plan-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-align: center;
+  }
+  
+  .plan-description {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .feature-icon {
+    color: #ffd900;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
+  
+  .feature-heading {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #ffd900;
+  }
+  
+  .subscription-button {
+    width: 100%;
+    padding: 0.8rem;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 30px;
+    background-color: #ffd900;
+    color: #333;
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(255, 217, 0, 0.3);
+    margin-top: 1rem;
+  }
+  
+  .subscription-button:hover {
+    background-color: #ffcd00;
+    transform: translateY(-2px);
+  }
+  
+  .bot-version-container {
+    margin: 1rem 0;
+  }
+  
+  .bot-version-select {
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    background-color: white;
+    color: #333;
+    font-size: 0.9rem;
+  }
+  
+  .ideal-for {
+    font-size: 0.85rem;
+    color: #666;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
-    transform: rotate(15deg);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    z-index: 2;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background-color: rgba(255, 217, 0, 0.1);
+    border-radius: 10px;
   }
   
   .social-links {
@@ -97,16 +216,24 @@
   }
   
   .promotional-banner {
-    background-color: #f8f9fa;
-    border-radius: 8px;
+    background-color: #fffbf0;
+    border-radius: 15px;
     padding: 1.5rem;
     margin-top: 2rem;
-    border-left: 4px solid #ffdd3d;
+    border: 2px solid #ffd900;
   }
   
   @media (max-width: 768px) {
     .price {
-      font-size: 2rem;
+      font-size: 2.5rem;
+    }
+    
+    .plan-title {
+      font-size: 1.3rem;
+    }
+    
+    .feature-heading {
+      font-size: 1rem;
     }
   }
 
