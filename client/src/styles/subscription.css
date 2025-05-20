@@ -65,7 +65,7 @@
 
 /* تنسيق مربع اختيار إصدار الروبوت */
 .bot-version-container {
-  margin: 0.8rem 0;
+  margin: 1rem 0;
   position: relative;
 }
 
@@ -80,7 +80,7 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  height: 2.5rem;
+  height: 2.8rem;
   padding: 0 1rem;
 }
 
@@ -96,10 +96,24 @@
   outline: none;
 }
 
+/* أسلوب مخصص للقائمة المنسدلة مثل الصورة */
+:where(.css-dev-only-do-not-override-3mqfnx).ant-select-dropdown .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+div[role="listbox"] [data-radix-select-item],
+.select-content [data-state] {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+div[role="listbox"] [data-radix-select-item]:hover {
+  background-color: rgba(255, 216, 61, 0.1);
+}
+
 /* تنسيق زر تبديل العملة */
 .plan-currency-toggle {
-  background: #f0f0f0;
-  border: 2px solid #ddd;
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
   border-radius: 25px;
   color: #555;
   padding: 0.6rem 1rem;
@@ -113,6 +127,7 @@
   width: 100%;
   position: relative;
   overflow: hidden;
+  font-weight: 500;
 }
 
 .plan-currency-toggle::before {
@@ -148,6 +163,11 @@
   border-color: #ffd83d;
   color: #333;
   font-weight: bold;
+}
+
+.plan-currency-toggle svg {
+  color: #ffcc00;
+  margin-right: 4px;
 }
 
 /* حاوية الميزات */

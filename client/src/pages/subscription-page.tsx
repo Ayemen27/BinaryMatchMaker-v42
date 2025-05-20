@@ -303,7 +303,7 @@ export default function SubscriptionPage() {
         )}
         
         {/* قسم الباقات */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 md:px-5 mb-6">
           {plans.map((plan) => {
             const isPlanActive = currentPlan === plan.id;
             const isDisabled = isPlanActive || isProcessing;
@@ -356,8 +356,8 @@ export default function SubscriptionPage() {
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
-                      ? <><Star className="h-4 w-4 mr-1" /> {t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
-                      : <><DollarSign className="h-4 w-4 mr-1" /> {t('switchToUSD')}</>
+                      ? <><Star className="h-4 w-4" /> {t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
+                      : <><DollarSign className="h-4 w-4" /> {t('switchToUSD')}</>
                     }
                   </Button>
                   
@@ -369,7 +369,7 @@ export default function SubscriptionPage() {
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
                       <SelectTrigger className="bot-version-select h-10 px-4">
-                        <SelectValue placeholder={t('selectBotVersion')} />
+                        <SelectValue placeholder={t('حدد إصدار البوت')} />
                         <ChevronDown className="h-4 w-4 ml-auto text-gray-500" />
                       </SelectTrigger>
                       <SelectContent>
