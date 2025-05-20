@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { Signal, insertSignalSchema } from "@shared/schema";
+import { Signal, insertSignalSchema, UserNotificationSettings } from "@shared/schema";
 import { z } from "zod";
 import signalGeneratorRoutes from "./routes/signal-generator";
 import userSettingsRoutes from "./routes/user-settings";
@@ -553,6 +553,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         receiveNewFeatures: z.boolean().optional(),
         allowEmailNotifications: z.boolean().optional(),
         allowPushNotifications: z.boolean().optional(),
+        emailNotifications: z.boolean().optional(),
+        pushNotifications: z.boolean().optional(),
+        signalAlerts: z.boolean().optional(),
+        marketUpdates: z.boolean().optional(),
+        accountAlerts: z.boolean().optional(),
+        promotionalEmails: z.boolean().optional(),
       });
       
       // تحقق من صحة البيانات
@@ -566,13 +572,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userId = req.user.id;
       
-      // في التطبيق الحقيقي، نقوم بحفظ هذه الإعدادات في قاعدة البيانات
-      // للتبسيط، سنفترض أنها تم حفظها
-      const updatedSettings = {
-        ...req.body,
-        userId,
-        updatedAt: new Date().toISOString()
+      // تحويل البيانات إلى التنسيق المناسب لقاعدة البيانات
+      const notificationSettings: Partial<UserNotificationSettings> = {
+        emailNotifications: req.body.emailNotifications || req.body.allowEmailNotifications,
+        pushNotifications: req.body.pushNotifications || req.body.allowPushNotifications,
+        signalAlerts: req.body.signalAlerts || req.body.receiveSignalAlerts,
+        marketUpdates: req.body.marketUpdates || req.body.receiveMarketUpdates,
+        accountAlerts: req.body.accountAlerts,
+        promotionalEmails: req.body.promotionalEmails || req.body.receiveNewFeatures,
       };
+      
+      console.log('تحديث إعدادات الإشعارات لقاعدة البيانات:', {
+        userId,
+        settings: notificationSettings
+      });
+      
+      // تحديث الإعدادات في قاعدة البيانات
+      const updatedSettings = await storage.updateUserNotificationSettings(userId, notificationSettings);
+      
+      // إضافة مراقبة وجهة
+      console.log('تم تحديث إعدادات الإشعارات بنجاح:', updatedSettings);
       
       res.json({
         ...updatedSettings,
@@ -596,11 +615,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         body: req.body
       });
       
-      // في التطبيق الحقيقي، نقوم بحفظ هذه الإعدادات في قاعدة البيانات
-      const updatedSettings = {
-        ...req.body,
-        userId: req.user.id
+      const userId = req.user.id;
+      
+      // تحويل البيانات إلى التنسيق المناسب لقاعدة البيانات
+      const notificationSettings: Partial<UserNotificationSettings> = {
+        emailNotifications: req.body.emailNotifications || req.body.allowEmailNotifications,
+        pushNotifications: req.body.pushNotifications || req.body.allowPushNotifications,
+        signalAlerts: req.body.signalAlerts || req.body.receiveSignalAlerts,
+        marketUpdates: req.body.marketUpdates || req.body.receiveMarketUpdates,
+        accountAlerts: req.body.accountAlerts,
+        promotionalEmails: req.body.promotionalEmails || req.body.receiveNewFeatures,
       };
+      
+      console.log('تحديث إعدادات الإشعارات لقاعدة البيانات:', {
+        userId,
+        settings: notificationSettings
+      });
+      
+      // تحديث الإعدادات في قاعدة البيانات
+      const updatedSettings = await storage.updateUserNotificationSettings(userId, notificationSettings);
+      
+      // إضافة مراقبة وجهة
+      console.log('تم تحديث إعدادات الإشعارات بنجاح:', updatedSettings);
       
       res.json({
         success: true,
