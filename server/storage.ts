@@ -945,58 +945,89 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getUserUnreadNotifications(userId: number): Promise<Notification[]> {
-    return db
-      .select()
-      .from(notifications)
-      .where(
-        and(
-          eq(notifications.userId, userId),
-          eq(notifications.isRead, false)
-        )
-      )
-      .orderBy(desc(notifications.createdAt));
+    try {
+      const result = await db.query(
+        'SELECT * FROM notifications WHERE user_id = $1 AND is_read = FALSE ORDER BY created_at DESC',
+        [userId]
+      );
+      return result || [];
+    } catch (error) {
+      console.error('خطأ في الحصول على الإشعارات غير المقروءة:', error);
+      return [];
+    }
   }
   
   async createNotification(notification: InsertNotification): Promise<Notification> {
-    const [createdNotification] = await db
-      .insert(notifications)
-      .values({
-        ...notification,
-        createdAt: new Date(),
-      })
-      .returning();
-    
-    return createdNotification;
+    try {
+      const query = `
+        INSERT INTO notifications (
+          user_id, 
+          type, 
+          title, 
+          message, 
+          is_read, 
+          created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *
+      `;
+      
+      const params = [
+        notification.userId,
+        notification.type,
+        notification.title,
+        notification.message,
+        notification.isRead || false,
+        new Date()
+      ];
+      
+      const result = await db.query(query, params);
+      
+      if (!result || result.length === 0) {
+        throw new Error('فشل في إنشاء الإشعار');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في إنشاء الإشعار:', error);
+      throw error;
+    }
   }
   
   async markNotificationAsRead(id: number): Promise<Notification> {
-    const [updatedNotification] = await db
-      .update(notifications)
-      .set({
-        isRead: true,
-      })
-      .where(eq(notifications.id, id))
-      .returning();
-    
-    if (!updatedNotification) {
-      throw new Error('Notification not found');
+    try {
+      const query = `
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE id = $1
+        RETURNING *
+      `;
+      
+      const result = await db.query(query, [id]);
+      
+      if (!result || result.length === 0) {
+        throw new Error('الإشعار غير موجود');
+      }
+      
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في تعيين الإشعار كمقروء:', error);
+      throw error;
     }
-    
-    return updatedNotification;
   }
   
   async markAllNotificationsAsRead(userId: number): Promise<void> {
-    await db
-      .update(notifications)
-      .set({
-        isRead: true,
-      })
-      .where(
-        and(
-          eq(notifications.userId, userId),
-          eq(notifications.isRead, false)
-        )
-      );
+    try {
+      const query = `
+        UPDATE notifications
+        SET is_read = TRUE
+        WHERE user_id = $1 AND is_read = FALSE
+      `;
+      
+      await db.query(query, [userId]);
+    } catch (error) {
+      console.error('خطأ في تعيين جميع الإشعارات كمقروءة:', error);
+      throw error;
+    }
   }
   
   // Market data methods
