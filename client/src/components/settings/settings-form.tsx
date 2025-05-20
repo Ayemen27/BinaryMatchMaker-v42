@@ -168,7 +168,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultAsset")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
-                  value={field.value}
+                  value={field.value || settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -199,7 +199,7 @@ export function SettingsForm() {
                 <FormLabel>{t("defaultTimeframe")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
-                  value={field.value}
+                  value={field.value || settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -230,7 +230,7 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={field.value}
+                  value={field.value || settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>
