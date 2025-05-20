@@ -141,7 +141,7 @@ export function SettingsForm() {
                 <FormLabel>{t("theme")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("theme", value)}
-                  value={field.value}
+                  value={field.value !== undefined ? field.value : settings.theme}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -292,7 +292,7 @@ export function SettingsForm() {
                 </div>
                 <FormControl>
                   <Switch
-                    checked={field.value}
+                    checked={field.value !== undefined ? field.value : settings.showTradingTips}
                     onCheckedChange={(value) => {
                       field.onChange(value);
                       handleSettingChange("showTradingTips", value);
@@ -316,7 +316,7 @@ export function SettingsForm() {
                 </div>
                 <FormControl>
                   <Switch
-                    checked={field.value}
+                    checked={field.value !== undefined ? field.value : settings.autoRefreshData}
                     onCheckedChange={(value) => {
                       field.onChange(value);
                       handleSettingChange("autoRefreshData", value);
