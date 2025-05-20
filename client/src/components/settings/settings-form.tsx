@@ -130,9 +130,32 @@ export function SettingsForm() {
     updateSettings(data);
   }
   
+  // قاموس لتخزين قيم الإعدادات الأصلية وقت التحميل
+  const [originalSettings, setOriginalSettings] = useState<Record<string, any>>({});
+  
+  // حفظ نسخة من الإعدادات الأصلية عند تحميل المكون
+  useEffect(() => {
+    if (!isLoading && settings) {
+      // إنشاء نسخة عميقة من الإعدادات الأصلية
+      const initialValues = JSON.parse(JSON.stringify(settings));
+      setOriginalSettings(initialValues);
+      
+      // سجل الإعدادات الأصلية في وحدة التحكم مع علامة خاصة للتتبع
+      console.log('🔍 [تتبع-الإعدادات] القيم الأصلية عند التحميل:', initialValues);
+    }
+  }, [isLoading, settings]);
+  
   // تغيير قيمة فردية على الفور
   function handleSettingChange(name: keyof SettingsFormValues, value: any) {
-    console.log(`[تغيير الإعدادات] بدء تغيير إعداد ${name} إلى:`, value);
+    // سجل كامل تفاصيل عملية التغيير
+    console.log(`🔄 [تتبع-الإعدادات] بدء تغيير إعداد ${name}:`, {
+      من: settings[name],
+      إلى: value,
+      وقت_التغيير: new Date().toISOString(),
+      معرف_العنصر: name,
+      القيمة_الأصلية: originalSettings[name],
+      نوع_البيانات: typeof value
+    });
     
     // تحديث قيمة الحقل في النموذج فوراً
     form.setValue(name, value, { 
@@ -140,6 +163,12 @@ export function SettingsForm() {
       shouldDirty: true,
       shouldTouch: true
     });
+    
+    // حفظ نسخة احتياطية من إعدادات المستخدم الحالية (قبل التعديل)
+    const settingsBeforeChange = JSON.parse(JSON.stringify(settings));
+    
+    // طباعة الإعدادات قبل التغيير للتتبع
+    console.log('📊 [تتبع-الإعدادات] الإعدادات قبل التغيير:', settingsBeforeChange);
     
     // حفظ الإعداد المحدث في التخزين المحلي فوراً لتجنب خسارة التغييرات
     try {
@@ -151,17 +180,36 @@ export function SettingsForm() {
         // تحديث الإعداد المتغير
         currentSettings[name] = value;
         
+        // تفعيل علامة تتبع خاصة لمعرفة متى تم آخر تحديث
+        currentSettings._lastUpdated = {
+          field: name,
+          value: value,
+          timestamp: new Date().toISOString(),
+          previousValue: settings[name]
+        };
+        
         // حفظ الإعدادات المحدثة في التخزين المحلي
-        localStorage.setItem('userSettings', JSON.stringify(currentSettings));
-        console.log(`[تخزين محلي] تم حفظ التغيير في ${name} إلى:`, value);
+        const settingsJson = JSON.stringify(currentSettings);
+        localStorage.setItem('userSettings', settingsJson);
+        localStorage.setItem(`setting_${name}_${Date.now()}`, JSON.stringify({
+          value: value,
+          previousValue: settings[name],
+          timestamp: new Date().toISOString()
+        }));
+        
+        console.log(`💾 [تتبع-الإعدادات] تم حفظ التغيير في التخزين المحلي:`, {
+          حقل: name,
+          قيمة_جديدة: value,
+          حجم_البيانات: settingsJson.length
+        });
       }
     } catch (error) {
-      console.error(`[تخزين محلي] خطأ أثناء حفظ التغيير:`, error);
+      console.error(`❌ [تتبع-الإعدادات] خطأ أثناء حفظ التغيير في التخزين المحلي:`, error);
     }
     
     // حفظ جميع القيم في المتغير المحلي
     const formValues = form.getValues();
-    console.log(`[تغيير الإعدادات] قيم النموذج الحالية:`, formValues);
+    console.log(`📝 [تتبع-الإعدادات] قيم النموذج الحالية:`, formValues);
     
     // تطبيق تغيير الثيم فوراً إذا كان الإعداد هو الثيم
     if (name === 'theme' && window && document) {
@@ -178,12 +226,28 @@ export function SettingsForm() {
         [name]: value // تطبيق التغيير الجديد
       };
       
-      console.log(`[تغيير الإعدادات] الإعدادات الكاملة المحدثة:`, completeSettings);
+      console.log(`📤 [تتبع-الإعدادات] ما سيتم إرساله للخادم:`, {
+        حقل_فقط: { [name]: value },
+        كل_الإعدادات: completeSettings
+      });
+      
+      // حفظ كل إرسال للخادم مع وقته في التخزين المؤقت للمتصفح
+      if (window.sessionStorage) {
+        const apiRequests = JSON.parse(sessionStorage.getItem('settings_api_requests') || '[]');
+        apiRequests.push({
+          timestamp: new Date().toISOString(),
+          field: name,
+          value: value,
+          settingsBeforeChange: settingsBeforeChange
+        });
+        sessionStorage.setItem('settings_api_requests', JSON.stringify(apiRequests));
+      }
       
       // إرسال التحديث للخادم
+      console.log(`🚀 [تتبع-الإعدادات] جاري إرسال التحديث للخادم...`);
       updateSettings({ [name]: value });
     } catch (error) {
-      console.error(`[تغيير الإعدادات] خطأ أثناء تحديث الإعداد ${name}:`, error);
+      console.error(`❌ [تتبع-الإعدادات] خطأ أثناء تحديث الإعداد ${name}:`, error);
     }
   }
   
