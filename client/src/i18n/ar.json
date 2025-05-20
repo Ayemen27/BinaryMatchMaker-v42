@@ -124,6 +124,7 @@
   "apiSettingsUpdateSuccess": "تم تحديث إعدادات API بنجاح",
   
   "saving": "جاري الحفظ...",
+  "savingChanges": "جاري حفظ التغييرات...",
   "updateFailed": "فشل التحديث",
   "genericError": "حدث خطأ أثناء معالجة طلبك",
   
@@ -131,6 +132,9 @@
   "confirmRestoreDefaults": "هل أنت متأكد من رغبتك في استعادة جميع الإعدادات إلى القيم الافتراضية؟",
   
   "loading": "جاري التحميل...",
+  "loadingSettings": "جاري تحميل الإعدادات...",
+  "profileSettingsDescription": "تحديث معلومات حسابك الشخصية",
+  "apiSettingsDescription": "إدارة مفاتيح API والتكامل مع الخدمات الخارجية",
   "error": "خطأ",
   "success": "نجاح",
   "warning": "تحذير",
