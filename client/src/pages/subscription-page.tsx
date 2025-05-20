@@ -351,35 +351,35 @@ export default function SubscriptionPage() {
                   
                   <button
                     onClick={toggleCurrency}
-                    className="w-full bg-gray-200 hover:bg-gray-300 text-center py-2 rounded-3xl my-2 text-sm font-normal flex items-center justify-center space-x-1 px-4 rtl:space-x-reverse"
+                    className="w-92 mx-auto bg-gray-200 hover:bg-gray-300 text-center py-2 rounded-3xl my-2 text-sm font-normal flex items-center justify-center px-4"
                     dir="rtl"
                   >
-                    <RefreshCw className="h-4 w-4 ml-1" />
                     {currency === 'USD' 
-                      ? <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span>
-                      : <span>{`التبديل إلى الدولار`}</span>
+                      ? <><RefreshCw className="h-4 w-4 ml-1" /> <span>{`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</span></>
+                      : <><RefreshCw className="h-4 w-4 ml-1" /> <span>{`التبديل إلى الدولار`}</span></>
                     }
                   </button>
                   
                   <div className="plan-description mt-2 mb-4 text-sm text-center">{plan.description}</div>
                   
-                  <Select
-                    value={selectedBotVersions[plan.id] || ''}
-                    onValueChange={(value) => handleBotVersionChange(plan.id, value)}
-                  >
-                    <SelectTrigger className="text-right bg-white border border-gray-200 rounded-lg px-4 py-2.5 w-full h-11 flex items-center justify-between">
-                      <SelectValue placeholder="اختر إصدار البوت" />
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_default">اختر إصدار البوت</SelectItem>
+                  <div className="relative w-full">
+                    <select 
+                      value={selectedBotVersions[plan.id] || '_default'}
+                      onChange={(e) => handleBotVersionChange(plan.id, e.target.value)}
+                      className="w-full text-right appearance-none bg-white border border-gray-200 rounded-lg px-4 py-2.5 h-11 pr-4 pl-8 outline-none"
+                      dir="rtl"
+                    >
+                      <option value="_default">اختر إصدار البوت</option>
                       {plan.botVersions.map((version) => (
-                        <SelectItem key={version} value={version}>
+                        <option key={version} value={version}>
                           {version}
-                        </SelectItem>
+                        </option>
                       ))}
-                    </SelectContent>
-                  </Select>
+                    </select>
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    </div>
+                  </div>
                 </CardHeader>
                 
                 <CardContent className="pt-0 pb-0 px-3">

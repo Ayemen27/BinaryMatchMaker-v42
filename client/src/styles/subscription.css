@@ -54,7 +54,7 @@
   font-family: Arial, sans-serif;
 }
 
-.price:before {
+.price:after {
   content: '$';
   font-size: 1.5rem;
   vertical-align: super;
@@ -62,7 +62,7 @@
   color: #ffcd00;
 }
 
-.price-usd:before {
+.price-usd:after {
   content: '$';
 }
 
