@@ -539,8 +539,9 @@ export default function SettingsPage() {
     // تسجيل التغيير في وحدة التحكم للتتبع
     console.log(`تغيير إعداد الإشعارات: ${key} = ${value}`, updatedSettings);
     
-    // إرسال التحديث إلى الخادم
-    notificationsMutation.mutate(updatedSettings);
+    // نقوم بتحديث حالة الإعدادات محلياً فقط دون إرسال إلى الخادم مباشرة
+    // سيتم إرسال التحديثات إلى الخادم عند الضغط على زر الحفظ
+    console.log("تحديث إعدادات الإشعارات:", updatedSettings);
   };
   
   return (
