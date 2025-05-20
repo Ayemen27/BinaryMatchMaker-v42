@@ -141,7 +141,7 @@ export function SettingsForm() {
                 <FormLabel>{t("theme")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("theme", value)}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
