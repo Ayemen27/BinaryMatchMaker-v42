@@ -162,7 +162,7 @@ export default function SubscriptionPage() {
       description: t('advancedDataDrivenAnalysis'),
       color: 'from-amber-500 to-yellow-600',
       icon: <Medal className="h-5 w-5" />,
-      botVersions: botVersions.premium,
+      botVersions: ['BinarJoinAnalytic V.4.1'],
       features: [
         { text: t('advancedMarketDataAnalysis'), available: true },
         { text: t('robotPoweredTradingSignals'), available: true },
