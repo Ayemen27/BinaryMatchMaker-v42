@@ -273,16 +273,35 @@ export class DatabaseStorage implements IStorage {
       const updateValues: any[] = [];
       let paramIndex = 1;
       
+      // قاموس لتحويل أسماء الحقول من camelCase إلى snake_case بشكل صحيح
+      const fieldMapping: Record<string, string> = {
+        'theme': 'theme',
+        'defaultAsset': 'default_asset',
+        'defaultTimeframe': 'default_timeframe',
+        'defaultPlatform': 'default_platform',
+        'chartType': 'chart_type',
+        'showTradingTips': 'show_trading_tips',
+        'autoRefreshData': 'auto_refresh_data',
+        'refreshInterval': 'refresh_interval',
+        'useAiForSignals': 'use_ai_for_signals',
+        'useCustomAiKey': 'use_custom_ai_key',
+        'openaiApiKey': 'openai_api_key'
+      };
+      
       // إضافة الحقول المراد تحديثها
       for (const [key, value] of Object.entries(settings)) {
         if (value !== undefined) {
-          // تحويل اسم الحقل من camelCase إلى snake_case
-          const fieldName = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+          // استخدام اسم الحقل من القاموس إذا كان موجودًا، وإلا نقوم بتحويله تلقائيًا
+          const fieldName = fieldMapping[key] || key.replace(/([A-Z])/g, '_$1').toLowerCase();
+          
+          console.log(`تحديث الحقل [${key}] إلى [${fieldName}] بالقيمة:`, value);
           
           // معالجة خاصة للحقول البولينية
-          if (typeof value === 'boolean' || key === 'showTradingTips' || key === 'autoRefreshData') {
-            // استخدام تعبير SQL مباشر للقيم البولينية
-            updateFields.push(`${fieldName} = ${value === true ? 'TRUE' : 'FALSE'}`);
+          if (typeof value === 'boolean') {
+            // استخدام معلمات آمنة حتى للقيم البولينية
+            updateFields.push(`${fieldName} = $${paramIndex}`);
+            updateValues.push(value);
+            paramIndex++;
           } else {
             // معالجة الحقول العادية
             updateFields.push(`${fieldName} = $${paramIndex}`);

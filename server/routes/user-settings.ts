@@ -272,26 +272,107 @@ router.put("/", async (req: Request, res: Response) => {
       
       logger.info("UserSettings", "تم إنشاء إعدادات جديدة للمستخدم", { userId });
     } else {
-      // تحديث كامل للإعدادات باستخدام البيانات المرسلة
-      // مع الحفاظ على القيم الموجودة للحقول غير المحددة
-      // استخدم تعريفات دقيقة للتحقق من القيم الفارغة أو غير المعرفة
-      const updatedSettings = {
-        theme: typeof settingsData.theme === 'string' ? settingsData.theme : (userSettings.theme || 'dark'),
-        defaultAsset: typeof settingsData.defaultAsset === 'string' ? settingsData.defaultAsset : (userSettings.defaultAsset || 'BTC/USDT'),
-        defaultTimeframe: typeof settingsData.defaultTimeframe === 'string' ? settingsData.defaultTimeframe : (userSettings.defaultTimeframe || '1h'),
-        defaultPlatform: typeof settingsData.defaultPlatform === 'string' ? settingsData.defaultPlatform : (userSettings.defaultPlatform || ''),
-        chartType: typeof settingsData.chartType === 'string' ? settingsData.chartType : (userSettings.chartType || 'candlestick'),
-        showTradingTips: typeof settingsData.showTradingTips === 'boolean' ? settingsData.showTradingTips : (userSettings.showTradingTips ?? true),
-        autoRefreshData: typeof settingsData.autoRefreshData === 'boolean' ? settingsData.autoRefreshData : (userSettings.autoRefreshData ?? true),
-        refreshInterval: typeof settingsData.refreshInterval === 'number' ? settingsData.refreshInterval : (userSettings.refreshInterval || 60),
-        // الحفاظ على إعدادات API إذا كانت موجودة
-        openaiApiKey: userSettings.openaiApiKey,
-        useCustomAiKey: userSettings.useCustomAiKey,
-        useAiForSignals: userSettings.useAiForSignals
+      // تجميع الإعدادات الحالية والجديدة للتأكد من تحديث جميع الحقول المطلوبة
+      // استخدام معالجة أكثر دقة للقيم البولينية والعددية تجنبًا لمشكلات التحويل
+      
+      // 1. الإعدادات الافتراضية كحماية
+      const defaultValues = {
+        theme: 'dark',
+        defaultAsset: 'BTC/USDT',
+        defaultTimeframe: '1h',
+        defaultPlatform: '',
+        chartType: 'candlestick',
+        showTradingTips: true,
+        autoRefreshData: true,
+        refreshInterval: 60,
       };
       
-      // سجل البيانات الكاملة المستخدمة للتحديث للتأكد من صحتها
-      logger.info("UserSettings", "تفاصيل تحديث الإعدادات", {
+      // 2. البيانات القادمة من العميل (بعد التحقق منها)
+      const clientData = {
+        theme: settingsData.theme,
+        defaultAsset: settingsData.defaultAsset,
+        defaultTimeframe: settingsData.defaultTimeframe,
+        defaultPlatform: settingsData.defaultPlatform,
+        chartType: settingsData.chartType,
+        showTradingTips: settingsData.showTradingTips,
+        autoRefreshData: settingsData.autoRefreshData,
+        refreshInterval: settingsData.refreshInterval,
+      };
+      
+      // 3. سجل البيانات الواردة للتشخيص
+      logger.info("UserSettings", "البيانات الواردة من العميل", {
+        userId,
+        clientData: JSON.stringify(clientData)
+      });
+      
+      // 4. البيانات الحالية من قاعدة البيانات
+      const currentData = {
+        theme: userSettings.theme,
+        defaultAsset: userSettings.defaultAsset,
+        defaultTimeframe: userSettings.defaultTimeframe,
+        defaultPlatform: userSettings.defaultPlatform,
+        chartType: userSettings.chartType,
+        showTradingTips: userSettings.showTradingTips,
+        autoRefreshData: userSettings.autoRefreshData,
+        refreshInterval: userSettings.refreshInterval,
+        openaiApiKey: userSettings.openaiApiKey,
+        useCustomAiKey: userSettings.useCustomAiKey,
+        useAiForSignals: userSettings.useAiForSignals,
+      };
+      
+      // 5. سجل البيانات الحالية للتشخيص
+      logger.info("UserSettings", "البيانات الحالية في قاعدة البيانات", {
+        userId,
+        currentData: JSON.stringify(currentData)
+      });
+      
+      // 6. الدمج في إعدادات محدثة مع معالجة دقيقة لكل نوع بيانات
+      const updatedSettings = {
+        // نصوص - استخدام أولاً قيمة العميل إذا كانت موجودة ثم الحالية ثم الافتراضية
+        theme: (typeof clientData.theme === 'string' && clientData.theme)
+          ? clientData.theme 
+          : (currentData.theme || defaultValues.theme),
+          
+        defaultAsset: (typeof clientData.defaultAsset === 'string' && clientData.defaultAsset)
+          ? clientData.defaultAsset 
+          : (currentData.defaultAsset || defaultValues.defaultAsset),
+          
+        defaultTimeframe: (typeof clientData.defaultTimeframe === 'string' && clientData.defaultTimeframe)
+          ? clientData.defaultTimeframe 
+          : (currentData.defaultTimeframe || defaultValues.defaultTimeframe),
+          
+        defaultPlatform: (typeof clientData.defaultPlatform === 'string')
+          ? clientData.defaultPlatform 
+          : (currentData.defaultPlatform || defaultValues.defaultPlatform),
+          
+        chartType: (typeof clientData.chartType === 'string' && clientData.chartType)
+          ? clientData.chartType 
+          : (currentData.chartType || defaultValues.chartType),
+        
+        // بولينية - التعامل مع قيم undefined و null بحذر
+        showTradingTips: (typeof clientData.showTradingTips === 'boolean')
+          ? clientData.showTradingTips 
+          : (typeof currentData.showTradingTips === 'boolean' ? currentData.showTradingTips : defaultValues.showTradingTips),
+          
+        autoRefreshData: (typeof clientData.autoRefreshData === 'boolean')
+          ? clientData.autoRefreshData 
+          : (typeof currentData.autoRefreshData === 'boolean' ? currentData.autoRefreshData : defaultValues.autoRefreshData),
+        
+        // أرقام - التحقق من القيم الرقمية بشكل صحيح
+        refreshInterval: (typeof clientData.refreshInterval === 'number' && !isNaN(clientData.refreshInterval))
+          ? clientData.refreshInterval 
+          : (typeof currentData.refreshInterval === 'number' && !isNaN(currentData.refreshInterval) 
+              ? currentData.refreshInterval 
+              : defaultValues.refreshInterval),
+        
+        // الحفاظ على إعدادات API المخزنة سابقًا
+        openaiApiKey: currentData.openaiApiKey,
+        useCustomAiKey: currentData.useCustomAiKey,
+        useAiForSignals: currentData.useAiForSignals
+      };
+      
+      // 7. سجل البيانات النهائية التي سيتم تحديثها
+      logger.info("UserSettings", "البيانات النهائية للتحديث", {
         userId,
         updatedValues: JSON.stringify(updatedSettings)
       });
