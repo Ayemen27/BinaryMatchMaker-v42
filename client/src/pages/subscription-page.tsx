@@ -393,23 +393,23 @@ export default function SubscriptionPage() {
                   {plan.id === 'premium' && (
                     <div className="version-info-box">
                       <div className="new-badge-inline">
-                        <span className="new-badge-text">NEW!</span>
+                        <span className="new-badge-text">جديد!</span>
                       </div>
-                      <h4 className="premium-title">🔴 NEW! Binar Join Analytic V.4.1 – Trading Signals Revolution <span className="fire-icon">🔥</span></h4>
-                      <p className="premium-description">🚀 إشارات دقيقة، قرارات أكثر ذكاءً! مع Binar Join Analytic V.4.1 الجديد، احصل على إشارات محدثة دقيقة بدقيقة لمساعدتك على اتخاذ قرارات استثمارية ناجحة.</p>
+                      <h4 className="premium-title">🔴 {t('newBinarJoinVersion')} <span className="fire-icon">🔥</span></h4>
+                      <p className="premium-description">🚀 {t('preciseSignalsDescription')}</p>
                       
-                      <h4 className="mt-3 premium-subtitle">لماذا Binar Join Analytic V.4.1؟</h4>
+                      <h4 className="mt-3 premium-subtitle">{t('whyBinarJoinV41')}</h4>
                       <ul className="features-highlight premium-features">
-                        <li><span className="check-icon">✅</span> تصميم حديث وسهل الاستخدام – تجربة سلسة وسريعة على جميع الأجهزة 📱💻</li>
-                        <li><span className="check-icon">✅</span> إشارات تداول دقيقة – مبنية على تحليل في الوقت الحقيقي واتجاهات السوق 📊</li>
-                        <li><span className="check-icon">✅</span> متعدد المنصات – متوافق مع منصات التداول الرئيسية، بما في ذلك EQ Broker 🔄</li>
-                        <li><span className="check-icon">✅</span> إشارات تُحدّث تلقائيًا – لا حاجة للتحديثات اليدوية!</li>
+                        <li><span className="check-icon">✅</span> {t('modernUserFriendlyDesign')} 📱💻</li>
+                        <li><span className="check-icon">✅</span> {t('accurateTradingSignals')} 📊</li>
+                        <li><span className="check-icon">✅</span> {t('multiPlatform')} 🔄</li>
+                        <li><span className="check-icon">✅</span> {t('automaticallyUpdatedSignals')}</li>
                       </ul>
-                      <p className="premium-cta font-medium">📌 جربه الآن وابدأ في تحقيق أقصى استفادة من مزايا إشارات التداول!</p>
+                      <p className="premium-cta font-medium">📌 {t('tryItNow')}</p>
                       
                       <div className="premium-footer">
                         <Star className="h-4 w-4 text-yellow-500 mr-2" />
-                        <span>للمتداولين المحترفين الذين يتطلبون الدقة</span>
+                        <span>{t('forProfessionalTradersPrecision')}</span>
                       </div>
                     </div>
                   )}
