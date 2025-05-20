@@ -30,6 +30,15 @@
   "entryPoint": "نقطة الدخول",
   "exitPoint": "نقطة الخروج",
   
+  "activeSignals": "الإشارات النشطة",
+  "accuracyRate": "معدل الدقة",
+  "successfulSignals": "الإشارات الناجحة",
+  "failedSignals": "الإشارات الفاشلة",
+  "latestSignals": "أحدث الإشارات",
+  "viewAll": "عرض الكل",
+  "price": "السعر",
+  "change": "التغيير",
+  
   "settings": "الإعدادات",
   "settingsDescription": "تخصيص إعدادات حسابك وتفضيلاتك",
   "settingsTip": "يمكنك تخصيص جميع جوانب تجربتك في منصة Binarjoin Analytics. تأكد من حفظ التغييرات بعد الانتهاء.",

@@ -30,6 +30,15 @@
   "entryPoint": "Entry Point",
   "exitPoint": "Exit Point",
   
+  "activeSignals": "Active Signals",
+  "accuracyRate": "Accuracy Rate",
+  "successfulSignals": "Successful Signals",
+  "failedSignals": "Failed Signals",
+  "latestSignals": "Latest Signals",
+  "viewAll": "View All",
+  "price": "Price",
+  "change": "Change",
+  
   "settings": "Settings",
   "settingsDescription": "Customize your account settings and preferences",
   "settingsTip": "You can customize all aspects of your experience in Binarjoin Analytics. Make sure to save changes when you're done.",
