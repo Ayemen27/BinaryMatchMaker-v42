@@ -303,7 +303,7 @@ export default function SubscriptionPage() {
         )}
         
         {/* قسم الباقات */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-3 sm:px-4 md:px-5 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 px-5 sm:px-6 md:px-8 mb-8">
           {plans.map((plan) => {
             const isPlanActive = currentPlan === plan.id;
             const isDisabled = isPlanActive || isProcessing;
