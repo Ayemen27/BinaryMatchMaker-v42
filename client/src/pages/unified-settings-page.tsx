@@ -22,7 +22,7 @@ export default function UnifiedSettingsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { allSettings, isLoading } = useSettings();
-  const defaultUserData = { id: 0, username: "", language: "ar", subscriptionLevel: "free" };
+  const defaultUserData = { id: 0, username: "", language: "ar", subscriptionLevel: "free" } as const;
   
   // إذا لم يكن المستخدم مسجل دخوله، قم بتوجيهه إلى صفحة تسجيل الدخول
   if (!user) {
