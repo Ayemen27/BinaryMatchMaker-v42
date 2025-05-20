@@ -274,20 +274,27 @@ router.put("/", async (req: Request, res: Response) => {
     } else {
       // تحديث كامل للإعدادات باستخدام البيانات المرسلة
       // مع الحفاظ على القيم الموجودة للحقول غير المحددة
+      // استخدم تعريفات دقيقة للتحقق من القيم الفارغة أو غير المعرفة
       const updatedSettings = {
-        theme: settingsData.theme ?? userSettings.theme ?? 'dark',
-        defaultAsset: settingsData.defaultAsset ?? userSettings.defaultAsset ?? 'BTC/USDT',
-        defaultTimeframe: settingsData.defaultTimeframe ?? userSettings.defaultTimeframe ?? '1h',
-        defaultPlatform: settingsData.defaultPlatform ?? userSettings.defaultPlatform ?? '',
-        chartType: settingsData.chartType ?? userSettings.chartType ?? 'candlestick',
-        showTradingTips: settingsData.showTradingTips ?? userSettings.showTradingTips ?? true,
-        autoRefreshData: settingsData.autoRefreshData ?? userSettings.autoRefreshData ?? true,
-        refreshInterval: settingsData.refreshInterval ?? userSettings.refreshInterval ?? 60,
+        theme: typeof settingsData.theme === 'string' ? settingsData.theme : (userSettings.theme || 'dark'),
+        defaultAsset: typeof settingsData.defaultAsset === 'string' ? settingsData.defaultAsset : (userSettings.defaultAsset || 'BTC/USDT'),
+        defaultTimeframe: typeof settingsData.defaultTimeframe === 'string' ? settingsData.defaultTimeframe : (userSettings.defaultTimeframe || '1h'),
+        defaultPlatform: typeof settingsData.defaultPlatform === 'string' ? settingsData.defaultPlatform : (userSettings.defaultPlatform || ''),
+        chartType: typeof settingsData.chartType === 'string' ? settingsData.chartType : (userSettings.chartType || 'candlestick'),
+        showTradingTips: typeof settingsData.showTradingTips === 'boolean' ? settingsData.showTradingTips : (userSettings.showTradingTips ?? true),
+        autoRefreshData: typeof settingsData.autoRefreshData === 'boolean' ? settingsData.autoRefreshData : (userSettings.autoRefreshData ?? true),
+        refreshInterval: typeof settingsData.refreshInterval === 'number' ? settingsData.refreshInterval : (userSettings.refreshInterval || 60),
         // الحفاظ على إعدادات API إذا كانت موجودة
         openaiApiKey: userSettings.openaiApiKey,
         useCustomAiKey: userSettings.useCustomAiKey,
         useAiForSignals: userSettings.useAiForSignals
       };
+      
+      // سجل البيانات الكاملة المستخدمة للتحديث للتأكد من صحتها
+      logger.info("UserSettings", "تفاصيل تحديث الإعدادات", {
+        userId,
+        updatedValues: JSON.stringify(updatedSettings)
+      });
       
       logger.info("UserSettings", "تحديث كامل لإعدادات المستخدم", {
         userId,
