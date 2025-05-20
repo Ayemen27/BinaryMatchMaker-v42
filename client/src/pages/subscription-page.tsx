@@ -308,12 +308,12 @@ export default function SubscriptionPage() {
             return (
               <Card 
                 key={plan.id} 
-                className={`plan-card overflow-hidden border-2 transition-all ${
+                className={`plan-card ${plan.id}-plan overflow-hidden transition-all ${
                   isPlanActive 
-                    ? 'border-primary shadow-md' 
+                    ? 'shadow-md' 
                     : plan.isPopular 
-                      ? 'border-primary/50 shadow-lg' 
-                      : 'border-border hover:border-border/80 hover:shadow-sm'
+                      ? 'shadow-lg' 
+                      : 'hover:shadow-sm'
                 } ${plan.isPopular ? 'lg:-mt-2 lg:mb-2' : ''}`}
               >
                 {plan.isNew && (
@@ -323,38 +323,49 @@ export default function SubscriptionPage() {
                 )}
                 
                 {plan.isPopular && (
-                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-medium">
+                  <div className="recommended-badge">
                     {t('recommended')}
                   </div>
                 )}
                 
-                <CardHeader className={`${(plan.isPopular || plan.isNew) ? 'pt-4' : 'pt-6'} pb-2 text-center plan-header`}>
-                  <Badge className="mb-2" variant="outline">{plan.name}</Badge>
-                  <CardTitle className="text-xl mb-1">{plan.label}</CardTitle>
+                {plan.id === 'weekly' && (
+                  <div className="beginner-badge">
+                    {t('beginner')}
+                  </div>
+                )}
+                
+                <CardHeader className="pb-2 text-center plan-header">
+                  <div className="plan-title">
+                    {plan.label}
+                  </div>
+                  
                   <div className={`price ${currency === 'USD' ? 'price-usd' : ''}`}>
-                    {plan.price}
+                    {currency === 'USD' 
+                      ? planPrices[plan.id as keyof typeof planPrices].USD 
+                      : planPrices[plan.id as keyof typeof planPrices].STARS
+                    }
                   </div>
                   
                   <Button
                     variant="outline"
                     size="sm"
-                    className="plan-currency-toggle w-full text-xs"
+                    className="plan-currency-toggle"
                     onClick={toggleCurrency}
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToStars', {count: currency === 'USD' ? planPrices[plan.id as keyof typeof planPrices].STARS : planPrices[plan.id as keyof typeof planPrices].USD})}</>
-                      : <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToUSD')}</>
+                      ? <><RefreshCw className="h-3 w-3 ml-1 mr-1" />{t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
+                      : <><RefreshCw className="h-3 w-3 ml-1 mr-1" />{t('switchToUSD')}</>
                     }
                   </Button>
                   
-                  <CardDescription className="mt-2">{plan.description}</CardDescription>
+                  <div className="plan-description mt-2">{plan.description}</div>
                   
                   <div className="bot-version-container">
                     <Select
                       value={selectedBotVersions[plan.id] || ''}
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger className="bot-version-select">
                         <SelectValue placeholder={t('selectBotVersion')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -370,17 +381,17 @@ export default function SubscriptionPage() {
                 </CardHeader>
                 
                 <CardContent className="pt-0 pb-0">
-                  <h3 className="font-medium text-center mb-3">
+                  <h3 className="feature-heading text-center">
                     {plan.id === 'weekly' && t('planHighlights')}
                     {plan.id === 'monthly' && t('advancedFeatures')}
                     {plan.id === 'annual' && t('exclusiveProfessionalFeatures')}
                     {plan.id === 'premium' && t('premiumDataFeatures')}
                   </h3>
                   
-                  <ul className="features-list space-y-2 mb-4">
+                  <ul className="features-list space-y-3 mb-4">
                     {plan.features.map((feature, idx) => (
                       <li key={idx}>
-                        <Check className="h-4 w-4 text-green-500 mr-2 mt-1 feature-icon" />
+                        <Check className="h-4 w-4 text-yellow-500 mr-2 mt-1 feature-icon" />
                         <span className="feature-text">
                           {feature.text}
                         </span>
@@ -390,14 +401,18 @@ export default function SubscriptionPage() {
                 </CardContent>
                 
                 <CardFooter className="pt-2 pb-6 flex flex-col">
-                  <div className="ideal-for text-muted-foreground mb-3">
-                    <LifeBuoy className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <div className="ideal-for mb-3">
+                    {plan.id === 'monthly' && (
+                      <Zap className="h-4 w-4 text-yellow-500 mr-2" />
+                    )}
+                    {plan.id === 'premium' && (
+                      <Star className="h-4 w-4 text-yellow-500 mr-2" />
+                    )}
                     {plan.idealFor}
                   </div>
                   
                   <Button 
-                    variant={isPlanActive ? "secondary" : plan.isPopular ? "default" : "outline"}
-                    className={`w-full ${plan.isPopular ? 'bg-gradient-to-r from-primary to-primary-foreground/80 text-white hover:from-primary/90 hover:to-primary-foreground/70' : ''}`}
+                    className="subscription-button"
                     onClick={() => !isDisabled && handleUpgrade(plan.id)}
                     disabled={isDisabled}
                   >
@@ -409,14 +424,7 @@ export default function SubscriptionPage() {
                     ) : isPlanActive ? (
                       t('currentPlan')
                     ) : (
-                      <>
-                        {plan.id === 'premium' ? (
-                          <Medal className="mr-2 h-4 w-4" />
-                        ) : (
-                          <CreditCard className="mr-2 h-4 w-4" />
-                        )}
-                        {plan.callToAction}
-                      </>
+                      plan.callToAction
                     )}
                   </Button>
                 </CardFooter>
