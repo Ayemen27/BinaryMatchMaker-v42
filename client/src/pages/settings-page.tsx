@@ -508,6 +508,11 @@ export default function SettingsPage() {
   const handleNotificationChange = (key: keyof NotificationSettings, value: boolean) => {
     const updatedSettings = { ...notificationSettings, [key]: value };
     setNotificationSettings(updatedSettings);
+    
+    // تسجيل التغيير في وحدة التحكم للتتبع
+    console.log(`تغيير إعداد الإشعارات: ${key} = ${value}`, updatedSettings);
+    
+    // إرسال التحديث إلى الخادم
     notificationsMutation.mutate(updatedSettings);
   };
   
@@ -873,8 +878,8 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="signal-generation" 
-                      checked={notificationSettings.signalGeneration}
-                      onCheckedChange={(checked) => handleNotificationChange('signalGeneration', checked)}
+                      checked={notificationSettings.signalAlerts}
+                      onCheckedChange={(checked) => handleNotificationChange('signalAlerts', checked)}
                     />
                   </div>
                   
@@ -885,8 +890,8 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="signal-results" 
-                      checked={notificationSettings.signalResults}
-                      onCheckedChange={(checked) => handleNotificationChange('signalResults', checked)}
+                      checked={notificationSettings.signalAlerts}
+                      onCheckedChange={(checked) => handleNotificationChange('signalAlerts', checked)}
                     />
                   </div>
                   
@@ -897,8 +902,8 @@ export default function SettingsPage() {
                     </div>
                     <Switch 
                       id="market-alerts" 
-                      checked={notificationSettings.marketAlerts}
-                      onCheckedChange={(checked) => handleNotificationChange('marketAlerts', checked)}
+                      checked={notificationSettings.marketUpdates}
+                      onCheckedChange={(checked) => handleNotificationChange('marketUpdates', checked)}
                     />
                   </div>
                   
@@ -911,6 +916,18 @@ export default function SettingsPage() {
                       id="account-alerts" 
                       checked={notificationSettings.accountAlerts}
                       onCheckedChange={(checked) => handleNotificationChange('accountAlerts', checked)}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{t('promotionalEmails') || 'الرسائل الترويجية'}</p>
+                      <p className="text-sm text-muted-foreground">{t('promotionalEmailsDescription') || 'استلام تحديثات عن الميزات الجديدة والعروض'}</p>
+                    </div>
+                    <Switch 
+                      id="promotional-emails" 
+                      checked={notificationSettings.promotionalEmails}
+                      onCheckedChange={(checked) => handleNotificationChange('promotionalEmails', checked)}
                     />
                   </div>
                   
