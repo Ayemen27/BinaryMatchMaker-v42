@@ -25,10 +25,16 @@ export function snakeToCamel(obj: any): any {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       // تحويل اسم الحقل من snake_case إلى camelCase
+      // مثال: default_asset -> defaultAsset
       const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
       
       // تطبيق التحويل بشكل متكرر على القيم الفرعية
       transformed[camelKey] = snakeToCamel(obj[key]);
+      
+      // سجل تحويل اسم الحقل للتصحيح
+      if (key !== camelKey) {
+        console.log(`تحويل حقل: ${key} -> ${camelKey}`);
+      }
     }
   }
   
