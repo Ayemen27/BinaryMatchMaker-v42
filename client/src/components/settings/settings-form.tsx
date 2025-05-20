@@ -263,7 +263,6 @@ export function SettingsForm() {
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
                   value={settings.defaultAsset}
-                  defaultValue={settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -295,7 +294,6 @@ export function SettingsForm() {
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
                   value={settings.defaultTimeframe}
-                  defaultValue={settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -327,7 +325,6 @@ export function SettingsForm() {
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
                   value={settings.chartType}
-                  defaultValue={settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>
