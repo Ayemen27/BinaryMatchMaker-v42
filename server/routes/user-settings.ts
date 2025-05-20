@@ -130,8 +130,8 @@ router.patch("/api", async (req: Request, res: Response) => {
   }
 });
 
-// تحديث إعدادات المستخدم العامة
-router.patch("/", async (req: Request, res: Response) => {
+// تحديث إعدادات المستخدم العامة (تم تغيير الطريقة من PATCH إلى PUT للسماح بالتحديث الكامل)
+router.put("/", async (req: Request, res: Response) => {
   try {
     // التحقق من أن المستخدم مسجل دخوله
     if (!req.isAuthenticated()) {

@@ -315,10 +315,8 @@ export class DatabaseStorage implements IStorage {
       updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
       // لا نضيف قيمة لـ updateValues لأننا نستخدم CURRENT_TIMESTAMP مباشرة في الاستعلام
       
-      // إذا لم تكن هناك حقول للتحديث، أعد الإعدادات الحالية
-      if (updateFields.length === 1) { // فقط updated_at
-        return currentSettings;
-      }
+      // دائماً سنقوم بالتحديث حتى لو كان فقط updated_at
+      // ستتم دائمًا إضافة updated_at للتحديث
       
       // 3. تنفيذ الاستعلام
       const query = `
