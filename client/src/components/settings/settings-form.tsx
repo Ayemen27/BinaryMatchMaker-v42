@@ -90,7 +90,9 @@ export function SettingsForm() {
   // تحديث النموذج عند تغير القيم في الخادم
   useEffect(() => {
     if (!isLoading && settings) {
-      // استخدام كل القيم من الإعدادات المستلمة
+      console.log("[تحديث النموذج] إعادة تعيين القيم من الخادم:", settings);
+      
+      // تنفيذ إعادة تعيين كاملة بتجاهل القيم الافتراضية
       form.reset({
         theme: settings.theme,
         defaultAsset: settings.defaultAsset,
@@ -100,9 +102,28 @@ export function SettingsForm() {
         showTradingTips: settings.showTradingTips,
         autoRefreshData: settings.autoRefreshData,
         refreshInterval: settings.refreshInterval,
-      }, { keepDefaultValues: false });
+      }, { 
+        keepDefaultValues: false,
+        keepDirty: false, // إلغاء أي تغييرات معلقة
+        keepValues: false, // إلغاء القيم القديمة
+        keepErrors: false, // إلغاء أي أخطاء
+        keepTouched: false, // إلغاء حالة اللمس
+        keepDirtyValues: false, // إلغاء القيم المتغيرة
+        keepIsSubmitted: false, // إلغاء حالة إرسال النموذج
+        keepIsValid: false, // إلغاء حالة صحة النموذج
+      });
+      
+      // تنفيذ تعيين يدوي لكل حقل لضمان التحديث
+      Object.keys(settings).forEach((key) => {
+        const fieldName = key as keyof SettingsFormValues;
+        if (fieldName in settings && settings[fieldName] !== undefined) {
+          const value = settings[fieldName];
+          console.log(`[تحديث النموذج] تعيين قيمة الحقل ${fieldName}:`, value);
+          form.setValue(fieldName, value);
+        }
+      });
     }
-  }, [settings, isLoading, form.reset]);
+  }, [settings, isLoading, form.reset, form.setValue]);
   
   // إرسال النموذج
   function onSubmit(data: SettingsFormValues) {
