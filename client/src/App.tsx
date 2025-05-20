@@ -10,7 +10,7 @@ import SignalsPage from "@/pages/signals-page";
 import MarketAnalysisPage from "@/pages/market-analysis-page";
 import SignalHistoryPage from "@/pages/signal-history-page";
 import SignalGeneratorPage from "@/pages/signal-generator-page";
-import SettingsPage from "@/pages/settings-page"; // استخدام صفحة الإعدادات 
+import UnifiedSettingsPage from "@/pages/unified-settings-page"; // استخدام صفحة الإعدادات الموحدة الجديدة
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
@@ -24,7 +24,7 @@ function Router() {
       <ProtectedRoute path="/signal-generator" component={SignalGeneratorPage} />
       <ProtectedRoute path="/market-analysis" component={MarketAnalysisPage} />
       <ProtectedRoute path="/signal-history" component={SignalHistoryPage} />
-      <ProtectedRoute path="/settings" component={SettingsPage} />
+      <ProtectedRoute path="/settings" component={UnifiedSettingsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
