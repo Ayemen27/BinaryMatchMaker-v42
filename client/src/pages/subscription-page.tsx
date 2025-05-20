@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { Helmet } from 'react-helmet';
-import { Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2 } from 'lucide-react';
+import { 
+  Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2, 
+  RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award
+} from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export default function SubscriptionPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currency, setCurrency] = useState<'USD' | 'STARS'>('USD');
+  const [selectedBotVersions, setSelectedBotVersions] = useState<{[key: string]: string}>({});
   
   // استعلام لجلب بيانات الاشتراك الحالي للمستخدم
   const { data: subscription, isLoading: isLoadingSubscription } = useQuery({
@@ -25,11 +31,11 @@ export default function SubscriptionPage() {
   
   // تنفيذ طلب ترقية الاشتراك
   const upgradeMutation = useMutation({
-    mutationFn: async (planType: string) => {
+    mutationFn: async (data: { planType: string, botVersion: string, paymentMethod?: string }) => {
       const response = await fetch('/api/user/subscription/upgrade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planType }),
+        body: JSON.stringify(data),
         credentials: 'include'
       });
       
@@ -60,96 +66,153 @@ export default function SubscriptionPage() {
     }
   });
   
+  // أسعار الخطط المختلفة
+  const planPrices = {
+    weekly: { USD: 9.99, STARS: 750 },
+    monthly: { USD: 29.99, STARS: 2300 },
+    annual: { USD: 149.99, STARS: 10000 },
+    premium: { USD: 300, STARS: 18500 }
+  };
+  
+  // إصدارات الروبوت المتاحة لكل خطة
+  const botVersions = {
+    weekly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0'],
+    monthly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0'],
+    annual: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic Pro v3.5'],
+    premium: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic Pro v3.5', 'BinarJoinAnalytic V.4.1']
+  };
+  
   // بنية خطط الاشتراك مع مزيد من التفاصيل والميزات
   const plans = [
     {
-      id: 'free',
-      name: t('freePlan'),
-      price: t('free'),
-      period: '',
-      description: t('basicFeatures'),
-      color: 'from-neutral-500 to-gray-600',
+      id: 'weekly',
+      name: t('beginner'),
+      label: t('weeklyPlan'),
+      price: currency === 'USD' ? `$${planPrices.weekly.USD}` : `${planPrices.weekly.STARS}`,
+      period: t('weekly'),
+      description: t('realTimeAnalysis'),
+      color: 'from-green-500 to-teal-600',
       icon: <Shield className="h-5 w-5" />,
+      botVersions: botVersions.weekly,
       features: [
-        { text: t('limitedSignals', { count: 3 }), available: true },
-        { text: t('basicMarketIndicators'), available: true },
-        { text: t('standardSupport'), available: true },
-        { text: t('basicAnalytics'), available: true },
-        { text: t('advancedFeatures'), available: false },
-      ],
-      isPopular: false,
-      callToAction: t('currentPlan'),
-      disabled: true,
-    },
-    {
-      id: 'basic',
-      name: t('basicPlan'),
-      price: '$29',
-      period: t('monthly'),
-      description: t('suitableForBeginners'),
-      color: 'from-green-500 to-emerald-600',
-      icon: <Zap className="h-5 w-5" />,
-      features: [
-        { text: t('limitedSignals', { count: 30 }), available: true },
-        { text: t('basicMarketAnalysis'), available: true },
-        { text: t('signalAccuracyPercent', { percent: 85 }), available: true },
+        { text: t('realTimeFundamentalAnalysis'), available: true },
+        { text: t('keyTradingSignals'), available: true },
+        { text: t('dailyMarketUpdates'), available: true },
+        { text: t('beginnerFriendlyTools'), available: true },
+        { text: t('privateTelegramAccess'), available: true },
         { text: t('prioritySupport'), available: true },
-        { text: t('realtimeAlerts'), available: false },
       ],
+      idealFor: t('idealForBeginners'),
       isPopular: false,
-      callToAction: t('subscribe'),
+      callToAction: t('subscribeNow'),
       disabled: false,
     },
     {
-      id: 'pro',
-      name: t('proPlan'),
-      price: '$79',
+      id: 'monthly',
+      name: t('recommended'),
+      label: t('monthlyPlan'),
+      price: currency === 'USD' ? `$${planPrices.monthly.USD}` : `${planPrices.monthly.STARS}`,
       period: t('monthly'),
-      description: t('forProfessionalTraders'),
+      description: t('advancedTechnicalAnalysis'),
       color: 'from-blue-500 to-indigo-600',
       icon: <Star className="h-5 w-5" />,
+      botVersions: botVersions.monthly,
       features: [
-        { text: t('unlimitedSignals'), available: true },
-        { text: t('advancedMarketAnalysis'), available: true },
-        { text: t('signalAccuracyPercent', { percent: 92 }), available: true },
-        { text: t('realtimeAlerts'), available: true },
-        { text: t('24hourSupport'), available: true },
+        { text: t('professionalTechnicalAnalysis'), available: true },
+        { text: t('instantMarketAlerts'), available: true },
+        { text: t('customPairAnalysis'), available: true },
+        { text: t('weeklyPerformanceReports'), available: true },
+        { text: t('educationalContentAccess'), available: true },
+        { text: t('directExpertSupport'), available: true },
       ],
+      idealFor: t('perfectForActiveTraders'),
       isPopular: true,
-      callToAction: t('subscribe'),
+      callToAction: t('upgradeMyTrading'),
       disabled: false,
     },
     {
-      id: 'vip',
-      name: t('vipPlan'),
-      price: '$149',
-      period: t('monthly'),
-      description: t('forSpecializedTraders'),
+      id: 'annual',
+      name: t('premium'),
+      label: t('annualPlan'),
+      price: currency === 'USD' ? `$${planPrices.annual.USD}` : `${planPrices.annual.STARS}`,
+      period: t('yearly'),
+      description: t('aiPoweredAnalysis'),
+      color: 'from-purple-500 to-pink-600',
+      icon: <Award className="h-5 w-5" />,
+      botVersions: botVersions.annual,
+      features: [
+        { text: t('aiPoweredTrendPrediction'), available: true },
+        { text: t('customTradingStrategies'), available: true },
+        { text: t('advancedMarketReports'), available: true },
+        { text: t('vipSupport'), available: true },
+        { text: t('partialRefundGuarantee'), available: true },
+        { text: t('advancedTradingTools'), available: true },
+      ],
+      idealFor: t('designedForProfessionals'),
+      isPopular: false,
+      callToAction: t('unlockProTrading'),
+      disabled: false,
+    },
+    {
+      id: 'premium',
+      name: t('premiumData'),
+      label: t('premiumAnnualPlan'),
+      price: currency === 'USD' ? `$${planPrices.premium.USD}` : `${planPrices.premium.STARS}`,
+      period: t('yearly'),
+      description: t('advancedDataDrivenAnalysis'),
       color: 'from-amber-500 to-yellow-600',
       icon: <Medal className="h-5 w-5" />,
+      botVersions: botVersions.premium,
       features: [
-        { text: t('allProFeatures'), available: true },
-        { text: t('exclusiveVipSignals'), available: true },
-        { text: t('signalAccuracyPercent', { percent: 95 }), available: true },
-        { text: t('personalizedStrategy'), available: true },
-        { text: t('privateConsultation'), available: true },
+        { text: t('advancedMarketDataAnalysis'), available: true },
+        { text: t('robotPoweredTradingSignals'), available: true },
+        { text: t('ultraFastMarketInsights'), available: true },
+        { text: t('exclusivePremiumStrategies'), available: true },
+        { text: t('dedicatedAccountManager'), available: true },
+        { text: t('prioritySignalDelivery'), available: true },
       ],
+      idealFor: t('forProfessionalTradersPrecision'),
       isPopular: false,
-      callToAction: t('subscribe'),
+      callToAction: t('getPremiumDataAccess'),
       disabled: false,
+      isNew: true
     }
   ];
+  
+  // تغيير العملة
+  const toggleCurrency = () => {
+    setCurrency(prev => prev === 'USD' ? 'STARS' : 'USD');
+  };
+  
+  // تحديث إصدار الروبوت المختار
+  const handleBotVersionChange = (planId: string, version: string) => {
+    setSelectedBotVersions(prev => ({
+      ...prev,
+      [planId]: version
+    }));
+  };
   
   // مفوض التعامل مع ترقية الاشتراك
   const handleUpgrade = (planId: string) => {
     if (isProcessing) return;
+    if (!selectedBotVersions[planId]) {
+      toast({
+        title: t('botVersionRequired'),
+        description: t('pleasSelectBotVersion'),
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setSelectedPlan(planId);
     setIsProcessing(true);
     
-    // محاكاة عملية الدفع - في التطبيق الحقيقي، يجب توجيه المستخدم إلى صفحة الدفع
+    // إرسال بيانات الاشتراك
     setTimeout(() => {
-      upgradeMutation.mutate(planId);
+      upgradeMutation.mutate({
+        planType: planId,
+        botVersion: selectedBotVersions[planId],
+      });
     }, 1500);
   };
   
@@ -160,8 +223,26 @@ export default function SubscriptionPage() {
     }
     return user.subscriptionLevel;
   };
+
+  // تعيين الإصدارات الافتراضية للروبوت
+  useEffect(() => {
+    const defaultVersions: {[key: string]: string} = {};
+    plans.forEach(plan => {
+      if (plan.botVersions && plan.botVersions.length > 0) {
+        defaultVersions[plan.id] = '';
+      }
+    });
+    setSelectedBotVersions(defaultVersions);
+  }, []);
   
   const currentPlan = getCurrentPlan();
+  
+  // دعم للواجهات الأخرى
+  const socialLinks = [
+    { name: 'Telegram', icon: 'telegram', url: 'https://t.me/Binarjoinanelytic_bot', image: '/telegram.png' },
+    { name: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/message/WFOMDMQWZUJMN1', image: '/whatsapp.png' },
+    { name: 'YouTube', icon: 'youtube', url: 'https://youtube.com/@binarjoinanalytic', image: '/youtube.png' }
+  ];
   
   return (
     <Layout>
@@ -170,11 +251,26 @@ export default function SubscriptionPage() {
         <meta name="description" content={t('subscriptionMetaDescription')} />
       </Helmet>
       
+      {/* تم إضافة الأساليب كصفوف في Tailwind */}
+      
       <div className="p-4 md:p-6">
         {/* عنوان الصفحة */}
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2">{t('subscriptionPlans')}</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">{t('subscriptionPageDescription')}</p>
+          <h1 className="text-3xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
+        </div>
+        
+        {/* زر تبديل العملة العام */}
+        <div className="mb-6 flex justify-center">
+          <Button 
+            variant="outline" 
+            onClick={toggleCurrency}
+            className="flex items-center gap-2"
+          >
+            {currency === 'USD' ? <Star className="h-4 w-4" /> : <DollarSign className="h-4 w-4" />}
+            {currency === 'USD' ? t('switchToStars') : t('switchToUSD')}
+            <RefreshCw className="h-4 w-4 mr-1" />
+          </Button>
         </div>
         
         {/* شريط التنبيه */}
@@ -207,12 +303,12 @@ export default function SubscriptionPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           {plans.map((plan) => {
             const isPlanActive = currentPlan === plan.id;
-            const isDisabled = plan.disabled || isPlanActive || isProcessing;
+            const isDisabled = isPlanActive || isProcessing;
             
             return (
               <Card 
                 key={plan.id} 
-                className={`overflow-hidden border-2 transition-all ${
+                className={`plan-card overflow-hidden border-2 transition-all ${
                   isPlanActive 
                     ? 'border-primary shadow-md' 
                     : plan.isPopular 
@@ -220,37 +316,72 @@ export default function SubscriptionPage() {
                       : 'border-border hover:border-border/80 hover:shadow-sm'
                 } ${plan.isPopular ? 'lg:-mt-2 lg:mb-2' : ''}`}
               >
-                {plan.isPopular && (
-                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-medium">
-                    {t('mostPopular')}
+                {plan.isNew && (
+                  <div className="new-badge">
+                    NEW!
                   </div>
                 )}
                 
-                <CardHeader className={`${plan.isPopular ? 'pt-4' : 'pt-6'} pb-0 text-center`}>
-                  <div className={`mx-auto rounded-full p-2.5 mb-4 bg-gradient-to-r ${plan.color} text-white`}>
-                    {plan.icon}
+                {plan.isPopular && (
+                  <div className="bg-primary text-primary-foreground text-center py-1.5 text-sm font-medium">
+                    {t('recommended')}
                   </div>
-                  <CardTitle className="text-xl mb-1">{plan.name}</CardTitle>
-                  <CardDescription className="min-h-10">{plan.description}</CardDescription>
-                </CardHeader>
+                )}
                 
-                <CardContent className="pt-4 pb-0 text-center">
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold">{plan.price}</span>
-                    {plan.period && (
-                      <span className="text-muted-foreground"> / {plan.period}</span>
-                    )}
+                <CardHeader className={`${(plan.isPopular || plan.isNew) ? 'pt-4' : 'pt-6'} pb-2 text-center plan-header`}>
+                  <Badge className="mb-2" variant="outline">{plan.name}</Badge>
+                  <CardTitle className="text-xl mb-1">{plan.label}</CardTitle>
+                  <div className={`price ${currency === 'USD' ? 'price-usd' : ''}`}>
+                    {plan.price}
                   </div>
                   
-                  <ul className="space-y-3 text-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="plan-currency-toggle w-full text-xs"
+                    onClick={toggleCurrency}
+                  >
+                    {currency === 'USD' 
+                      ? <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToStars', {count: currency === 'USD' ? planPrices[plan.id as keyof typeof planPrices].STARS : planPrices[plan.id as keyof typeof planPrices].USD})}</>
+                      : <><RefreshCw className="h-3 w-3 mr-1" />{t('switchToUSD')}</>
+                    }
+                  </Button>
+                  
+                  <CardDescription className="mt-2">{plan.description}</CardDescription>
+                  
+                  <div className="bot-version-container">
+                    <Select
+                      value={selectedBotVersions[plan.id] || ''}
+                      onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t('selectBotVersion')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t('selectBotVersion')}</SelectItem>
+                        {plan.botVersions.map((version) => (
+                          <SelectItem key={version} value={version}>
+                            {version}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pt-0 pb-0">
+                  <h3 className="font-medium text-center mb-3">
+                    {plan.id === 'weekly' && t('planHighlights')}
+                    {plan.id === 'monthly' && t('advancedFeatures')}
+                    {plan.id === 'annual' && t('exclusiveProfessionalFeatures')}
+                    {plan.id === 'premium' && t('premiumDataFeatures')}
+                  </h3>
+                  
+                  <ul className="features-list space-y-2 mb-4">
                     {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center gap-2">
-                        {feature.available ? (
-                          <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
-                        ) : (
-                          <AlertCircle className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                        )}
-                        <span className={feature.available ? '' : 'text-muted-foreground'}>
+                      <li key={idx}>
+                        <Check className="h-4 w-4 text-green-500 mr-2 mt-1 feature-icon" />
+                        <span className="feature-text">
                           {feature.text}
                         </span>
                       </li>
@@ -258,7 +389,12 @@ export default function SubscriptionPage() {
                   </ul>
                 </CardContent>
                 
-                <CardFooter className="pt-6 pb-6">
+                <CardFooter className="pt-2 pb-6 flex flex-col">
+                  <div className="ideal-for text-muted-foreground mb-3">
+                    <LifeBuoy className="h-4 w-4 mr-2 text-muted-foreground" />
+                    {plan.idealFor}
+                  </div>
+                  
                   <Button 
                     variant={isPlanActive ? "secondary" : plan.isPopular ? "default" : "outline"}
                     className={`w-full ${plan.isPopular ? 'bg-gradient-to-r from-primary to-primary-foreground/80 text-white hover:from-primary/90 hover:to-primary-foreground/70' : ''}`}
@@ -274,7 +410,11 @@ export default function SubscriptionPage() {
                       t('currentPlan')
                     ) : (
                       <>
-                        <CreditCard className="mr-2 h-4 w-4" />
+                        {plan.id === 'premium' ? (
+                          <Medal className="mr-2 h-4 w-4" />
+                        ) : (
+                          <CreditCard className="mr-2 h-4 w-4" />
+                        )}
                         {plan.callToAction}
                       </>
                     )}
@@ -283,6 +423,37 @@ export default function SubscriptionPage() {
               </Card>
             );
           })}
+        </div>
+        
+        {/* بانر ترويجي */}
+        <div className="promotional-banner mb-10">
+          <h3 className="text-xl font-bold mb-3 flex items-center">
+            <span className="text-red-500 mr-2">🔴</span>
+            {t('newBinarJoinVersion')}
+            <span className="text-amber-500 ml-2">🔥</span>
+          </h3>
+          <p className="mb-4">{t('preciseSignalsDescription')}</p>
+          
+          <h4 className="font-bold mb-2">{t('whyBinarJoinV41')}</h4>
+          <ul className="space-y-2 mb-4">
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
+              <span>{t('modernUserFriendlyDesign')}</span>
+            </li>
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
+              <span>{t('accurateTradingSignals')}</span>
+            </li>
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
+              <span>{t('multiPlatform')}</span>
+            </li>
+            <li className="flex items-start">
+              <Check className="h-4 w-4 text-green-500 mr-2 mt-1" />
+              <span>{t('automaticallyUpdatedSignals')}</span>
+            </li>
+          </ul>
+          <p className="font-medium">{t('tryItNow')}</p>
         </div>
         
         {/* ميزات إضافية */}
@@ -324,6 +495,22 @@ export default function SubscriptionPage() {
               </div>
             </CardContent>
           </Card>
+        </div>
+        
+        {/* روابط التواصل */}
+        <div className="social-links mb-8">
+          {socialLinks.map(link => (
+            <a 
+              href={link.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="social-link"
+              key={link.name}
+            >
+              <img src={link.image} alt={link.name} className="w-6 h-6" />
+              {link.name}
+            </a>
+          ))}
         </div>
         
         {/* الأسئلة الشائعة */}

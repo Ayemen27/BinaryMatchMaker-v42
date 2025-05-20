@@ -3,6 +3,113 @@
 @tailwind utilities;
 
 @layer base {
+  /* أنماط صفحة الاشتراك */
+  .plan-card {
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .plan-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+  
+  .plan-header {
+    position: relative;
+  }
+  
+  .price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    position: relative;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .price-usd::before {
+    content: '$';
+    font-size: 1.5rem;
+    position: relative;
+    margin-right: 0.25rem;
+    opacity: 0.7;
+  }
+  
+  .features-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .features-list li {
+    display: flex;
+    align-items: start;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  .new-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #ff5252;
+    color: white;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transform: rotate(15deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
+  
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .social-link:hover {
+    background-color: rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+  }
+  
+  .social-link img {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .promotional-banner {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-left: 4px solid #ffdd3d;
+  }
+  
+  @media (max-width: 768px) {
+    .price {
+      font-size: 2rem;
+    }
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
