@@ -242,9 +242,9 @@ export default function SubscriptionPage() {
   
   // دعم للواجهات الأخرى
   const socialLinks = [
-    { name: 'Telegram', icon: 'telegram', url: 'https://t.me/Binarjoinanelytic_bot', image: '/telegram.png' },
-    { name: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/message/WFOMDMQWZUJMN1', image: '/whatsapp.png' },
-    { name: 'YouTube', icon: 'youtube', url: 'https://youtube.com/@binarjoinanalytic', image: '/youtube.png' }
+    { name: 'Telegram', icon: 'telegram', url: 'https://t.me/Binarjoinanelytic_bot', image: '/telegram.svg' },
+    { name: 'WhatsApp', icon: 'whatsapp', url: 'https://wa.me/message/WFOMDMQWZUJMN1', image: '/whatsapp.svg' },
+    { name: 'YouTube', icon: 'youtube', url: 'https://youtube.com/@binarjoinanalytic', image: '/youtube.svg' }
   ];
   
   return (
@@ -509,13 +509,16 @@ export default function SubscriptionPage() {
               href={link.url} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="social-link flex items-center bg-gray-100 hover:bg-gray-200 p-3 rounded-lg transition-all"
+              className="social-link flex items-center bg-gray-100 hover:bg-gray-200 p-2 rounded-lg transition-all"
               key={link.name}
             >
-              {link.name === 'Telegram' && <img src="/telegram.svg" alt="Telegram" className="w-4 h-4 mr-2" />}
-              {link.name === 'WhatsApp' && <img src="/whatsapp.svg" alt="WhatsApp" className="w-4 h-4 mr-2" />}
-              {link.name === 'YouTube' && <img src="/youtube.svg" alt="YouTube" className="w-4 h-4 mr-2" />}
-              <span className="font-medium">{link.name}</span>
+              <img 
+                src={link.image} 
+                alt={link.name} 
+                className="w-4 h-4 mr-1.5" 
+                style={{ maxWidth: '16px', maxHeight: '16px' }}
+              />
+              <span className="font-medium text-sm">{link.name}</span>
             </a>
           ))}
         </div>
