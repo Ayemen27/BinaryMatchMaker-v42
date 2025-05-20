@@ -161,7 +161,15 @@ export function SettingsTabs() {
   useEffect(() => {
     if (allSettings) {
       // تحديث نموذج الملف الشخصي
-      const user = allSettings.user || {};
+      const user = allSettings.user || { 
+        username: "", 
+        email: "",
+        fullName: "",
+        language: "ar", 
+        id: 0,
+        subscriptionLevel: "free"
+      };
+      
       const profileValues = {
         username: user.username || "",
         email: user.email || "",
@@ -172,7 +180,16 @@ export function SettingsTabs() {
       profileForm.reset(profileValues);
       
       // تحديث نموذج الإعدادات العامة
-      const general = allSettings.general || {};
+      const general = allSettings.general || { 
+        theme: "light",
+        defaultAsset: "BTC/USDT",
+        defaultTimeframe: "1h",
+        chartType: "candlestick",
+        showTradingTips: true,
+        autoRefreshData: true,
+        refreshInterval: 60
+      };
+      
       const generalValues = {
         theme: general.theme || "light",
         defaultAsset: general.defaultAsset || "BTC/USDT",
@@ -187,7 +204,15 @@ export function SettingsTabs() {
       generalSettingsForm.reset(generalValues);
       
       // تحديث نموذج إعدادات الإشعارات
-      const notifications = allSettings.notifications || {};
+      const notifications = allSettings.notifications || { 
+        emailNotifications: true,
+        pushNotifications: true,
+        signalAlerts: true,
+        marketUpdates: false,
+        accountAlerts: true,
+        promotionalEmails: false
+      };
+      
       const notificationValues = {
         emailNotifications: typeof notifications.emailNotifications === 'boolean' ? notifications.emailNotifications : true,
         pushNotifications: typeof notifications.pushNotifications === 'boolean' ? notifications.pushNotifications : true,

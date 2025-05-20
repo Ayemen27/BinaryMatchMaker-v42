@@ -50,9 +50,9 @@ export interface NotificationSettings {
 
 // جميع الإعدادات
 export interface AllSettings {
-  user?: UserProfile | null;
-  general?: GeneralSettings | null;
-  notifications?: NotificationSettings | null;
+  user?: UserProfile;
+  general?: GeneralSettings;
+  notifications?: NotificationSettings;
 }
 
 // أنواع بيانات نموذج الإعدادات للعرض

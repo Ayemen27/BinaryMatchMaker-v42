@@ -22,6 +22,7 @@ export default function UnifiedSettingsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { allSettings, isLoading } = useSettings();
+  const defaultUserData = { id: 0, username: "", language: "ar", subscriptionLevel: "free" };
   
   // إذا لم يكن المستخدم مسجل دخوله، قم بتوجيهه إلى صفحة تسجيل الدخول
   if (!user) {
@@ -60,10 +61,10 @@ export default function UnifiedSettingsPage() {
               </div>
             ) : (
               <>
-                <AccountInfoCard userData={allSettings?.user || {}} className="mb-4" />
+                <AccountInfoCard userData={allSettings?.user || defaultUserData} className="mb-4" />
                 
                 {/* لوحة الإحصائيات */}
-                <StatsDashboard userData={allSettings?.user || {}} className="mb-4" />
+                <StatsDashboard userData={allSettings?.user || defaultUserData} className="mb-4" />
                 
                 {/* مبدل اللغة */}
                 <LanguageSwitcher 
