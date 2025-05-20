@@ -458,6 +458,22 @@ export default function SubscriptionPage() {
           })}
         </div>
         
+        {/* روابط التواصل الاجتماعي */}
+        <div className="social-links flex justify-center gap-4 mb-8">
+          {socialLinks.map((link) => (
+            <a 
+              key={link.name} 
+              href={link.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="social-link flex items-center p-2 rounded-lg hover:bg-muted transition-all"
+            >
+              <img src={link.image} alt={link.name} className="w-8 h-8 mr-2" />
+              <span className="font-medium">{link.name}</span>
+            </a>
+          ))}
+        </div>
+        
         {/* ميزات إضافية */}
         <div className="mb-10">
           <Card>
