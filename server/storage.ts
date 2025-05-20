@@ -164,10 +164,23 @@ export class DatabaseStorage implements IStorage {
       if (data.username) updateFields.username = data.username;
       if (data.email) updateFields.email = data.email;
       if (data.fullName) updateFields.full_name = data.fullName;
+      if (data.password) updateFields.password = data.password; // إضافة معالجة كلمة المرور
+      
+      // في حالة عدم وجود حقول للتحديث، نقوم بالخروج
+      if (Object.keys(updateFields).length === 0) {
+        console.log('لا توجد حقول للتحديث لهذا المستخدم:', id);
+        // نقوم باسترجاع بيانات المستخدم الحالية
+        const currentUser = await this.getUser(id);
+        if (!currentUser) {
+          throw new Error('المستخدم غير موجود');
+        }
+        return currentUser;
+      }
       
       console.log('تحديث بيانات المستخدم باستخدام SQL المخصص:', {
         userId: id,
-        fields: Object.keys(updateFields)
+        fields: Object.keys(updateFields),
+        containsPassword: !!data.password // مراقبة وجهة لتتبع تحديث كلمة المرور
       });
       
       // بناء استعلام SQL
@@ -175,8 +188,7 @@ export class DatabaseStorage implements IStorage {
         return `${key} = $${index + 2}`;
       });
       
-      // إضافة حقل تاريخ التحديث
-      updateParts.push(`updated_at = CURRENT_TIMESTAMP`);
+      // ملاحظة: لا نستخدم حقل updated_at لأنه غير موجود في الجدول
       
       const query = `
         UPDATE users 
@@ -189,7 +201,18 @@ export class DatabaseStorage implements IStorage {
       const params = [id, ...Object.values(updateFields)];
       
       console.log('استعلام تحديث المستخدم:', query);
-      console.log('معلمات الاستعلام:', params);
+      
+      if (data.password) {
+        // إخفاء كلمة المرور في السجلات
+        const safeParams = [...params];
+        const passwordIndex = Object.keys(updateFields).indexOf('password') + 1;
+        if (passwordIndex >= 0) {
+          safeParams[passwordIndex + 1] = '******';
+        }
+        console.log('معلمات الاستعلام (آمنة):', safeParams);
+      } else {
+        console.log('معلمات الاستعلام:', params);
+      }
       
       // تنفيذ الاستعلام
       const result = await db.query(query, params);
@@ -197,6 +220,11 @@ export class DatabaseStorage implements IStorage {
       if (!result || result.length === 0) {
         throw new Error('المستخدم غير موجود');
       }
+      
+      console.log('تم تحديث بيانات المستخدم بنجاح:', {
+        userId: id,
+        updatedFields: Object.keys(updateFields)
+      });
       
       return result[0];
     } catch (error) {
