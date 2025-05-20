@@ -75,10 +75,11 @@ export function GeneralSettings() {
     refreshInterval: 60,
   };
   
-  // استرداد الإعدادات المخزنة محليًا (إن وجدت)
+  // استرداد الإعدادات المخزنة محليًا (إن وجدت) - تم توحيد اسم المفتاح مع settings-manager.ts
   const getLocalSettings = (): UserSettingsFormValues => {
     try {
-      const storedSettings = localStorage.getItem('user_settings');
+      // استخدام نفس المفتاح الذي يستخدمه settings-manager.ts (userSettings بدلاً من user_settings)
+      const storedSettings = localStorage.getItem('userSettings');
       if (storedSettings) {
         const parsedSettings = JSON.parse(storedSettings);
         console.log("تم استرداد الإعدادات من التخزين المحلي:", parsedSettings);
@@ -90,10 +91,11 @@ export function GeneralSettings() {
     return defaultSettings;
   };
   
-  // حفظ الإعدادات في التخزين المحلي
+  // حفظ الإعدادات في التخزين المحلي - تم توحيد اسم المفتاح
   const saveLocalSettings = (settings: UserSettingsFormValues) => {
     try {
-      localStorage.setItem('user_settings', JSON.stringify(settings));
+      // استخدام نفس المفتاح الذي يستخدمه settings-manager.ts
+      localStorage.setItem('userSettings', JSON.stringify(settings));
       console.log("تم حفظ الإعدادات في التخزين المحلي:", settings);
     } catch (error) {
       console.error("خطأ في حفظ الإعدادات في التخزين المحلي:", error);
