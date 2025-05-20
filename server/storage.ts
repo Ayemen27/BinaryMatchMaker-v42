@@ -438,20 +438,108 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUserNotificationSettings(userId: number, settings: Partial<UserNotificationSettings>): Promise<UserNotificationSettings> {
-    const [updatedSettings] = await db
-      .update(userNotificationSettings)
-      .set({
-        ...settings,
-        updatedAt: new Date(),
-      })
-      .where(eq(userNotificationSettings.userId, userId))
-      .returning();
-    
-    if (!updatedSettings) {
-      throw new Error('User notification settings not found');
+    try {
+      console.log('تحديث إعدادات الإشعارات للمستخدم:', {
+        userId,
+        settings
+      });
+      
+      // استخدم استعلام SQL مباشر بدلاً من ORM
+      // 1. تحضير حقول التحديث
+      const updateFields: string[] = [];
+      const updateValues: any[] = [];
+      let paramIndex = 1;
+      
+      // معالجة كل الحقول المُرسلة
+      if (settings.emailNotifications !== undefined) {
+        updateFields.push(`email_notifications = $${paramIndex}`);
+        updateValues.push(settings.emailNotifications);
+        paramIndex++;
+      }
+      
+      if (settings.pushNotifications !== undefined) {
+        updateFields.push(`push_notifications = $${paramIndex}`);
+        updateValues.push(settings.pushNotifications);
+        paramIndex++;
+      }
+      
+      if (settings.signalAlerts !== undefined) {
+        updateFields.push(`signal_alerts = $${paramIndex}`);
+        updateValues.push(settings.signalAlerts);
+        paramIndex++;
+      }
+      
+      if (settings.marketUpdates !== undefined) {
+        updateFields.push(`market_updates = $${paramIndex}`);
+        updateValues.push(settings.marketUpdates);
+        paramIndex++;
+      }
+      
+      if (settings.accountAlerts !== undefined) {
+        updateFields.push(`account_alerts = $${paramIndex}`);
+        updateValues.push(settings.accountAlerts);
+        paramIndex++;
+      }
+      
+      if (settings.promotionalEmails !== undefined) {
+        updateFields.push(`promotional_emails = $${paramIndex}`);
+        updateValues.push(settings.promotionalEmails);
+        paramIndex++;
+      }
+      
+      // إضافة حقل تاريخ التحديث
+      updateFields.push(`updated_at = CURRENT_TIMESTAMP`);
+      
+      // إذا لم تكن هناك حقول للتحديث، قم باسترجاع الإعدادات الحالية
+      if (updateFields.length === 0 || updateFields.length === 1) {
+        console.log('لا توجد حقول لتحديثها، استرجاع الإعدادات الحالية');
+        const existingSettings = await this.getUserNotificationSettings(userId);
+        if (!existingSettings) {
+          throw new Error('إعدادات إشعارات المستخدم غير موجودة');
+        }
+        return existingSettings;
+      }
+      
+      // 2. بناء استعلام التحديث
+      const query = `
+        UPDATE user_notification_settings 
+        SET ${updateFields.join(', ')} 
+        WHERE user_id = $${paramIndex} 
+        RETURNING *
+      `;
+      
+      // إضافة معرف المستخدم لشرط WHERE
+      updateValues.push(userId);
+      
+      console.log('استعلام تحديث إعدادات الإشعارات:', query);
+      console.log('قيم المعلمات:', updateValues);
+      
+      // 3. تنفيذ الاستعلام
+      const result = await db.query(query, updateValues);
+      
+      if (!result || result.length === 0) {
+        // إذا لم يتم العثور على إعدادات للمستخدم، قم بإنشائها
+        console.log(`إعدادات إشعارات المستخدم ${userId} غير موجودة، سيتم إنشاؤها`);
+        
+        const defaultSettings: InsertUserNotificationSettings = {
+          userId,
+          emailNotifications: settings.emailNotifications !== undefined ? settings.emailNotifications : true,
+          pushNotifications: settings.pushNotifications !== undefined ? settings.pushNotifications : true,
+          signalAlerts: settings.signalAlerts !== undefined ? settings.signalAlerts : true,
+          marketUpdates: settings.marketUpdates !== undefined ? settings.marketUpdates : true,
+          accountAlerts: settings.accountAlerts !== undefined ? settings.accountAlerts : true,
+          promotionalEmails: settings.promotionalEmails !== undefined ? settings.promotionalEmails : false,
+        };
+        
+        return this.createUserNotificationSettings(defaultSettings);
+      }
+      
+      console.log(`تم تحديث إعدادات إشعارات المستخدم ${userId} بنجاح:`, result[0]);
+      return result[0];
+    } catch (error) {
+      console.error('خطأ في تحديث إعدادات إشعارات المستخدم:', error);
+      throw error;
     }
-    
-    return updatedSettings;
   }
   
   // Subscription methods
