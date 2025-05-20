@@ -141,6 +141,24 @@ export function SettingsForm() {
       shouldTouch: true
     });
     
+    // حفظ الإعداد المحدث في التخزين المحلي فوراً لتجنب خسارة التغييرات
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        // الحصول على الإعدادات الحالية من التخزين المحلي أو استخدام القيم الافتراضية
+        const storedSettings = localStorage.getItem('userSettings');
+        const currentSettings = storedSettings ? JSON.parse(storedSettings) : { ...settings };
+        
+        // تحديث الإعداد المتغير
+        currentSettings[name] = value;
+        
+        // حفظ الإعدادات المحدثة في التخزين المحلي
+        localStorage.setItem('userSettings', JSON.stringify(currentSettings));
+        console.log(`[تخزين محلي] تم حفظ التغيير في ${name} إلى:`, value);
+      }
+    } catch (error) {
+      console.error(`[تخزين محلي] خطأ أثناء حفظ التغيير:`, error);
+    }
+    
     // حفظ جميع القيم في المتغير المحلي
     const formValues = form.getValues();
     console.log(`[تغيير الإعدادات] قيم النموذج الحالية:`, formValues);
@@ -152,23 +170,21 @@ export function SettingsForm() {
       document.documentElement.classList.add(value);
     }
     
-    // إعداد التأخير لتجنب تنفيذ عمليات متزامنة متعددة
-    setTimeout(() => {
-      try {
-        // إنشاء نسخة احتياطية من إعدادات المستخدم الحالية
-        const updatedSettings = { ...settings };
-        
-        // تحديث القيمة المتغيرة في النسخة الاحتياطية
-        updatedSettings[name] = value;
-        
-        console.log(`[تغيير الإعدادات] إرسال التحديث للخادم:`, { [name]: value });
-        
-        // إرسال التحديث للخادم
-        updateSettings({ [name]: value });
-      } catch (error) {
-        console.error(`[تغيير الإعدادات] خطأ أثناء تحديث الإعداد ${name}:`, error);
-      }
-    }, 100);
+    // تنفيذ وظيفة التحديث مباشرة بدون تأخير
+    try {
+      // إنشاء نسخة مكتملة من الإعدادات الحالية مع التحديث الجديد
+      const completeSettings = {
+        ...settings,  // استخدام إعدادات المستخدم الحالية كأساس
+        [name]: value // تطبيق التغيير الجديد
+      };
+      
+      console.log(`[تغيير الإعدادات] الإعدادات الكاملة المحدثة:`, completeSettings);
+      
+      // إرسال التحديث للخادم
+      updateSettings({ [name]: value });
+    } catch (error) {
+      console.error(`[تغيير الإعدادات] خطأ أثناء تحديث الإعداد ${name}:`, error);
+    }
   }
   
   return (
@@ -211,6 +227,7 @@ export function SettingsForm() {
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultAsset", value)}
                   value={settings.defaultAsset}
+                  defaultValue={settings.defaultAsset}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -242,6 +259,7 @@ export function SettingsForm() {
                 <Select
                   onValueChange={(value) => handleSettingChange("defaultTimeframe", value)}
                   value={settings.defaultTimeframe}
+                  defaultValue={settings.defaultTimeframe}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -272,7 +290,8 @@ export function SettingsForm() {
                 <FormLabel>{t("chartType")}</FormLabel>
                 <Select
                   onValueChange={(value) => handleSettingChange("chartType", value)}
-                  value={field.value || settings.chartType}
+                  value={settings.chartType}
+                  defaultValue={settings.chartType}
                 >
                   <FormControl>
                     <SelectTrigger>

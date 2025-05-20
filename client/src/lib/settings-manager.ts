@@ -94,12 +94,22 @@ export function useSettings() {
       // تحضير الإعدادات المكتملة بدمج الإعدادات الحالية مع التغييرات الجديدة
       // هذا يضمن أن جميع الإعدادات يتم حفظها بشكل صحيح
       const completeSettings = {
-        ...(data || defaultSettings), // استخدام البيانات الحالية أو القيم الافتراضية
+        ...(data || localSettings || defaultSettings), // استخدام البيانات الحالية أو المحلية أو القيم الافتراضية
         ...newSettings // تطبيق التغييرات الجديدة فوق القيم الحالية
       };
       
       // طباعة الإعدادات المكتملة للتأكد من صحتها
       console.log('الإعدادات الكاملة التي سيتم إرسالها:', completeSettings);
+      
+      // حفظ الإعدادات الكاملة محليًا قبل الإرسال للخادم (احتياطي)
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          localStorage.setItem('userSettings', JSON.stringify(completeSettings));
+          console.log('تم حفظ الإعدادات الكاملة في التخزين المحلي');
+        }
+      } catch (error) {
+        console.error('خطأ أثناء حفظ الإعدادات في التخزين المحلي:', error);
+      }
       
       const response = await apiRequest('PATCH', SETTINGS_KEY, newSettings);
       if (!response.ok) {
