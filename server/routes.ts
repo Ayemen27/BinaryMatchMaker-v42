@@ -768,24 +768,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userId = req.user.id;
       
-      // إعداد بيانات التحديث لتتوافق مع بنية الجدول في قاعدة البيانات
+      // إعداد بيانات التحديث لتتوافق مع بنية الجدول في قاعدة البيانات - تم تبسيط التحويل
       const notificationSettings = {
-        emailNotifications: typeof req.body.emailNotifications !== 'undefined' ? req.body.emailNotifications : 
-                         typeof req.body.allowEmailNotifications !== 'undefined' ? req.body.allowEmailNotifications : undefined,
-        
-        pushNotifications: typeof req.body.pushNotifications !== 'undefined' ? req.body.pushNotifications : 
-                        typeof req.body.allowPushNotifications !== 'undefined' ? req.body.allowPushNotifications : undefined,
-        
-        signalAlerts: typeof req.body.signalAlerts !== 'undefined' ? req.body.signalAlerts : 
-                   typeof req.body.receiveSignalAlerts !== 'undefined' ? req.body.receiveSignalAlerts : undefined,
-        
-        marketUpdates: typeof req.body.marketUpdates !== 'undefined' ? req.body.marketUpdates : 
-                    typeof req.body.receiveMarketUpdates !== 'undefined' ? req.body.receiveMarketUpdates : undefined,
-        
-        accountAlerts: typeof req.body.accountAlerts !== 'undefined' ? req.body.accountAlerts : undefined,
-        
-        promotionalEmails: typeof req.body.promotionalEmails !== 'undefined' ? req.body.promotionalEmails : 
-                        typeof req.body.receiveNewFeatures !== 'undefined' ? req.body.receiveNewFeatures : undefined,
+        // استخدام الأسماء الجديدة المتطابقة مع قاعدة البيانات مباشرة
+        emailNotifications: req.body.emailNotifications ?? req.body.allowEmailNotifications,
+        pushNotifications: req.body.pushNotifications ?? req.body.allowPushNotifications,
+        signalAlerts: req.body.signalAlerts ?? req.body.receiveSignalAlerts,
+        marketUpdates: req.body.marketUpdates ?? req.body.receiveMarketUpdates,
+        accountAlerts: req.body.accountAlerts,
+        promotionalEmails: req.body.promotionalEmails ?? req.body.receiveNewFeatures,
       };
       
       // تنقية البيانات من القيم غير المحددة
@@ -865,14 +856,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userId = req.user.id;
       
-      // تحويل البيانات إلى التنسيق المناسب لقاعدة البيانات
+      // تحويل البيانات إلى التنسيق المناسب لقاعدة البيانات - تم تبسيط التحويل
       const notificationSettings: Partial<UserNotificationSettings> = {
-        emailNotifications: req.body.emailNotifications || req.body.allowEmailNotifications,
-        pushNotifications: req.body.pushNotifications || req.body.allowPushNotifications,
-        signalAlerts: req.body.signalAlerts || req.body.receiveSignalAlerts,
-        marketUpdates: req.body.marketUpdates || req.body.receiveMarketUpdates,
+        // استخدام الأسماء الجديدة المتطابقة مع قاعدة البيانات مباشرة
+        emailNotifications: req.body.emailNotifications ?? req.body.allowEmailNotifications,
+        pushNotifications: req.body.pushNotifications ?? req.body.allowPushNotifications,
+        signalAlerts: req.body.signalAlerts ?? req.body.receiveSignalAlerts,
+        marketUpdates: req.body.marketUpdates ?? req.body.receiveMarketUpdates,
         accountAlerts: req.body.accountAlerts,
-        promotionalEmails: req.body.promotionalEmails || req.body.receiveNewFeatures,
+        promotionalEmails: req.body.promotionalEmails ?? req.body.receiveNewFeatures,
       };
       
       console.log('تحديث إعدادات الإشعارات لقاعدة البيانات:', {
