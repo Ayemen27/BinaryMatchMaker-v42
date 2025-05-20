@@ -337,19 +337,44 @@ export default function SettingsPage() {
     }
   });
   
-  // Language mutation
+  // Language mutation - تم تحسين طريقة معالجة التبديل بين اللغات
   const languageMutation = useMutation({
     mutationFn: async (language: string) => {
-      const res = await apiRequest("PATCH", "/api/user/language", { language });
-      return await res.json();
+      console.log('تغيير اللغة إلى:', language);
+      
+      // إضافة علامة وقت لتجنب مشاكل التخزين المؤقت
+      const timestampedUrl = `/api/user/language?ts=${Date.now()}`;
+      const response = await apiRequest("PUT", timestampedUrl, { language });
+      
+      // التحقق من الاستجابة
+      if (!response.ok) {
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'فشل تغيير اللغة';
+        } catch (e) {
+          errorMessage = 'فشل تغيير اللغة: خطأ غير معروف';
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // حفظ اللغة المفضلة للمستخدم في التخزين المحلي
+      try {
+        localStorage.setItem('userLanguage', data.language || 'ar');
+      } catch (error) {
+        console.error('خطأ في حفظ اللغة في التخزين المحلي:', error);
+      }
+      
       toast({
         title: t('languageChanged'),
         description: t('languageChangeSuccess'),
       });
     },
     onError: (error: Error) => {
+      console.error('خطأ في تغيير اللغة:', error);
       toast({
         title: t('changeFailed'),
         description: error.message,
@@ -358,19 +383,44 @@ export default function SettingsPage() {
     }
   });
   
-  // Notifications mutation
+  // Notifications mutation - تم تحسين طريقة معالجة الإشعارات
   const notificationsMutation = useMutation({
     mutationFn: async (settings: NotificationSettings) => {
-      const res = await apiRequest("PATCH", "/api/user/notifications", settings);
-      return await res.json();
+      console.log('تحديث إعدادات الإشعارات:', settings);
+      
+      // إضافة علامة وقت لتجنب مشاكل التخزين المؤقت
+      const timestampedUrl = `/api/user/notifications?ts=${Date.now()}`;
+      const response = await apiRequest("PUT", timestampedUrl, settings);
+      
+      // التحقق من الاستجابة
+      if (!response.ok) {
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'فشل تحديث إعدادات الإشعارات';
+        } catch (e) {
+          errorMessage = 'فشل تحديث إعدادات الإشعارات: خطأ غير معروف';
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // حفظ إعدادات الإشعارات في التخزين المحلي
+      try {
+        localStorage.setItem('userNotifications', JSON.stringify(data));
+      } catch (error) {
+        console.error('خطأ في حفظ إعدادات الإشعارات في التخزين المحلي:', error);
+      }
+      
       toast({
         title: t('notificationsUpdated'),
         description: t('notificationsUpdateSuccess'),
       });
     },
     onError: (error: Error) => {
+      console.error('خطأ في تحديث إعدادات الإشعارات:', error);
       toast({
         title: t('updateFailed'),
         description: error.message,
@@ -379,20 +429,40 @@ export default function SettingsPage() {
     }
   });
   
-  // API Key mutation
+  // API Key mutation - تم تحسين طريقة معالجة مفاتيح API
   const apiKeyMutation = useMutation({
     mutationFn: async (data: ApiKeyFormValues) => {
-      const res = await apiRequest("PATCH", "/api/user/settings/api", data);
-      return await res.json();
+      console.log('تحديث إعدادات مفتاح API:', { ...data, openaiApiKey: data.openaiApiKey ? '***' : undefined });
+      
+      // إضافة علامة وقت لتجنب مشاكل التخزين المؤقت
+      const timestampedUrl = `/api/user/settings/api?ts=${Date.now()}`;
+      const response = await apiRequest("PUT", timestampedUrl, data);
+      
+      // التحقق من الاستجابة
+      if (!response.ok) {
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || 'فشل تحديث إعدادات مفتاح API';
+        } catch (e) {
+          errorMessage = 'فشل تحديث إعدادات مفتاح API: خطأ غير معروف';
+        }
+        throw new Error(errorMessage);
+      }
+      
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // إلغاء الذاكرة المؤقتة وإعادة تحميل البيانات
       queryClient.invalidateQueries({ queryKey: ["/api/user/settings"] });
+      
       toast({
         title: t('apiKeyUpdated') || 'تم تحديث مفتاح API',
         description: t('apiKeyUpdateSuccess') || 'تم تحديث إعدادات API بنجاح',
       });
     },
     onError: (error: Error) => {
+      console.error('خطأ في تحديث إعدادات مفتاح API:', error);
       toast({
         title: t('updateFailed') || 'فشل التحديث',
         description: error.message,

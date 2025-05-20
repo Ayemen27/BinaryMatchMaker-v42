@@ -61,8 +61,8 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// تحديث إعدادات API
-router.patch("/api", async (req: Request, res: Response) => {
+// تحديث إعدادات API (دعم PUT و PATCH للتوافق الخلفي)
+router.put("/api", async (req: Request, res: Response) => {
   try {
     // التحقق من أن المستخدم مسجل دخوله
     if (!req.isAuthenticated()) {
@@ -86,6 +86,14 @@ router.patch("/api", async (req: Request, res: Response) => {
     const { useCustomAiKey, useAiForSignals, openaiApiKey } = result.data;
     const userId = req.user!.id;
 
+    // سجل طلب تحديث إعدادات API
+    logger.info("UserSettings", "طلب تحديث إعدادات API", {
+      userId,
+      useCustomAiKey,
+      useAiForSignals,
+      hasKey: !!openaiApiKey
+    });
+
     // التحقق من وجود إعدادات للمستخدم، وإنشاؤها إذا لم تكن موجودة
     let userSettings = await storage.getUserSettings(userId);
     
@@ -97,6 +105,8 @@ router.patch("/api", async (req: Request, res: Response) => {
         useAiForSignals,
         openaiApiKey: useCustomAiKey ? openaiApiKey : null
       });
+      
+      logger.info("UserSettings", "تم إنشاء إعدادات API جديدة", { userId });
     } else {
       // تحديث الإعدادات الحالية
       const updatedSettings = {
@@ -106,20 +116,21 @@ router.patch("/api", async (req: Request, res: Response) => {
       };
       
       userSettings = await storage.updateUserSettings(userId, updatedSettings);
+      
+      logger.info("UserSettings", "تم تحديث إعدادات API", { 
+        userId,
+        useCustomApiKey: useCustomAiKey,
+        useAiForSignals
+      });
     }
-
-    logger.info("UserSettings", "تم تحديث إعدادات API", { 
-      userId,
-      useCustomApiKey: useCustomAiKey,
-      useAiForSignals
-    });
 
     // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
     const { openaiApiKey: _, ...safeSettings } = userSettings;
     
     return res.status(200).json({
       ...safeSettings,
-      hasCustomApiKey: !!openaiApiKey && useCustomAiKey
+      hasCustomApiKey: !!openaiApiKey && useCustomAiKey,
+      _serverTime: new Date().toISOString()
     });
   } catch (error) {
     logger.error("UserSettings", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
@@ -128,6 +139,12 @@ router.patch("/api", async (req: Request, res: Response) => {
       message: error instanceof Error ? error.message : "خطأ غير معروف" 
     });
   }
+});
+
+// دعم PATCH للتوافق الخلفي
+router.patch("/api", async (req: Request, res: Response) => {
+  // توجيه المعالج السابق للحفاظ على دعم التوافق مع الإصدارات السابقة
+  return router.handle(req, res);
 });
 
 // تمت إزالة المعالج المكرر الأول هنا - وتركنا فقط المعالج الثاني الأكثر تفصيلاً أدناه
