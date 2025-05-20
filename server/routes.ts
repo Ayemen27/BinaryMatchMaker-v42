@@ -355,13 +355,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const { username, email, fullName } = req.body;
+      
+      // طباعة البيانات قبل الإرسال إلى قاعدة البيانات
+      console.log('[تصحيح] البيانات المرسلة إلى قاعدة البيانات:', {
+        userId: req.user.id,
+        username,
+        email,
+        fullName
+      });
+      
       const updatedUser = await storage.updateUserProfile(req.user.id, { 
         username, 
         email, 
         fullName 
       });
 
-      console.log('تم تحديث معلومات المستخدم بنجاح:', updatedUser);
+      console.log('[تصحيح] البيانات المسترجعة بعد التحديث:', updatedUser);
       res.json(updatedUser);
     } catch (error) {
       console.error('خطأ في تحديث معلومات المستخدم:', error);
