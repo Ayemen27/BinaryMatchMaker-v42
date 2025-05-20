@@ -1,7 +1,7 @@
 /**
  * علامات تبويب الإعدادات الموحدة
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSettings } from "@/lib/settings-manager";
 import { useAuth } from "@/hooks/use-auth";
@@ -158,93 +158,62 @@ export function SettingsTabs() {
   });
   
   // تحديث نماذج الإعدادات عند استلام البيانات
-  if (allSettings) {
-    // تحديث نموذج الملف الشخصي
-    if (allSettings.user) {
-      const profileValues = {
-        username: allSettings.user.username || "",
-        email: allSettings.user.email || "",
-        fullName: allSettings.user.fullName || "",
-        language: allSettings.user.language || "ar",
-      };
-      
-      if (
-        profileForm.getValues().username !== profileValues.username ||
-        profileForm.getValues().email !== profileValues.email ||
-        profileForm.getValues().fullName !== profileValues.fullName ||
-        profileForm.getValues().language !== profileValues.language
-      ) {
+  useEffect(() => {
+    if (allSettings) {
+      // تحديث نموذج الملف الشخصي
+      if (allSettings.user) {
+        const profileValues = {
+          username: allSettings.user.username || "",
+          email: allSettings.user.email || "",
+          fullName: allSettings.user.fullName || "",
+          language: allSettings.user.language || "ar",
+        };
+        
         profileForm.reset(profileValues);
       }
-    }
-    
-    // تحديث نموذج الإعدادات العامة
-    if (allSettings.general) {
-      const generalValues = {
-        theme: allSettings.general.theme || "light",
-        defaultAsset: allSettings.general.defaultAsset || "BTC/USDT",
-        defaultTimeframe: allSettings.general.defaultTimeframe || "1h",
-        defaultPlatform: allSettings.general.defaultPlatform || "",
-        chartType: allSettings.general.chartType || "candlestick",
-        showTradingTips: typeof allSettings.general.showTradingTips === 'boolean' ? allSettings.general.showTradingTips : true,
-        autoRefreshData: typeof allSettings.general.autoRefreshData === 'boolean' ? allSettings.general.autoRefreshData : true,
-        refreshInterval: allSettings.general.refreshInterval || 60,
-      };
       
-      // التحقق من وجود تغييرات قبل إعادة الضبط
-      if (
-        generalSettingsForm.getValues().theme !== generalValues.theme ||
-        generalSettingsForm.getValues().defaultAsset !== generalValues.defaultAsset ||
-        generalSettingsForm.getValues().defaultTimeframe !== generalValues.defaultTimeframe ||
-        generalSettingsForm.getValues().chartType !== generalValues.chartType ||
-        generalSettingsForm.getValues().showTradingTips !== generalValues.showTradingTips ||
-        generalSettingsForm.getValues().autoRefreshData !== generalValues.autoRefreshData ||
-        generalSettingsForm.getValues().refreshInterval !== generalValues.refreshInterval
-      ) {
+      // تحديث نموذج الإعدادات العامة
+      if (allSettings.general) {
+        const generalValues = {
+          theme: allSettings.general.theme || "light",
+          defaultAsset: allSettings.general.defaultAsset || "BTC/USDT",
+          defaultTimeframe: allSettings.general.defaultTimeframe || "1h",
+          defaultPlatform: allSettings.general.defaultPlatform || "",
+          chartType: allSettings.general.chartType || "candlestick",
+          showTradingTips: typeof allSettings.general.showTradingTips === 'boolean' ? allSettings.general.showTradingTips : true,
+          autoRefreshData: typeof allSettings.general.autoRefreshData === 'boolean' ? allSettings.general.autoRefreshData : true,
+          refreshInterval: allSettings.general.refreshInterval || 60,
+        };
+        
         generalSettingsForm.reset(generalValues);
       }
-    }
-    
-    // تحديث نموذج إعدادات الإشعارات
-    if (allSettings.notifications) {
-      const notificationValues = {
-        emailNotifications: typeof allSettings.notifications.emailNotifications === 'boolean' ? allSettings.notifications.emailNotifications : true,
-        pushNotifications: typeof allSettings.notifications.pushNotifications === 'boolean' ? allSettings.notifications.pushNotifications : true,
-        signalAlerts: typeof allSettings.notifications.signalAlerts === 'boolean' ? allSettings.notifications.signalAlerts : true,
-        marketUpdates: typeof allSettings.notifications.marketUpdates === 'boolean' ? allSettings.notifications.marketUpdates : false,
-        accountAlerts: typeof allSettings.notifications.accountAlerts === 'boolean' ? allSettings.notifications.accountAlerts : true,
-        promotionalEmails: typeof allSettings.notifications.promotionalEmails === 'boolean' ? allSettings.notifications.promotionalEmails : false,
-      };
       
-      if (
-        notificationSettingsForm.getValues().emailNotifications !== notificationValues.emailNotifications ||
-        notificationSettingsForm.getValues().pushNotifications !== notificationValues.pushNotifications ||
-        notificationSettingsForm.getValues().signalAlerts !== notificationValues.signalAlerts ||
-        notificationSettingsForm.getValues().marketUpdates !== notificationValues.marketUpdates ||
-        notificationSettingsForm.getValues().accountAlerts !== notificationValues.accountAlerts ||
-        notificationSettingsForm.getValues().promotionalEmails !== notificationValues.promotionalEmails
-      ) {
+      // تحديث نموذج إعدادات الإشعارات
+      if (allSettings.notifications) {
+        const notificationValues = {
+          emailNotifications: typeof allSettings.notifications.emailNotifications === 'boolean' ? allSettings.notifications.emailNotifications : true,
+          pushNotifications: typeof allSettings.notifications.pushNotifications === 'boolean' ? allSettings.notifications.pushNotifications : true,
+          signalAlerts: typeof allSettings.notifications.signalAlerts === 'boolean' ? allSettings.notifications.signalAlerts : true,
+          marketUpdates: typeof allSettings.notifications.marketUpdates === 'boolean' ? allSettings.notifications.marketUpdates : false,
+          accountAlerts: typeof allSettings.notifications.accountAlerts === 'boolean' ? allSettings.notifications.accountAlerts : true,
+          promotionalEmails: typeof allSettings.notifications.promotionalEmails === 'boolean' ? allSettings.notifications.promotionalEmails : false,
+        };
+        
         notificationSettingsForm.reset(notificationValues);
       }
-    }
-    
-    // تحديث نموذج إعدادات API
-    if (allSettings.general) {
-      const apiValues = {
-        useAiForSignals: typeof allSettings.general.useAiForSignals === 'boolean' ? allSettings.general.useAiForSignals : true,
-        useCustomAiKey: typeof allSettings.general.useCustomAiKey === 'boolean' ? allSettings.general.useCustomAiKey : false,
-        openaiApiKey: allSettings.general.openaiApiKey || "",
-      };
       
-      if (
-        apiSettingsForm.getValues().useAiForSignals !== apiValues.useAiForSignals ||
-        apiSettingsForm.getValues().useCustomAiKey !== apiValues.useCustomAiKey ||
-        apiSettingsForm.getValues().openaiApiKey !== apiValues.openaiApiKey
-      ) {
+      // تحديث نموذج إعدادات API
+      if (allSettings.general) {
+        const apiValues = {
+          useAiForSignals: typeof allSettings.general.useAiForSignals === 'boolean' ? allSettings.general.useAiForSignals : true,
+          useCustomAiKey: typeof allSettings.general.useCustomAiKey === 'boolean' ? allSettings.general.useCustomAiKey : false,
+          openaiApiKey: allSettings.general.openaiApiKey || "",
+        };
+        
         apiSettingsForm.reset(apiValues);
       }
     }
-  }
+  }, [allSettings]);
   
   // التعامل مع تغيير اللغة
   function handleLanguageChange(value: string) {
