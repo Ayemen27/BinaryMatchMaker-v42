@@ -48,10 +48,18 @@ router.get("/", async (req: Request, res: Response) => {
     // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية
     const { openaiApiKey, ...safeSettings } = settings;
     
-    return res.status(200).json({
+    // طباعة البيانات الأصلية من قاعدة البيانات للتصحيح
+    console.log('[تصحيح] البيانات المستلمة من قاعدة البيانات:', JSON.stringify(settings, null, 2));
+    
+    // البيانات التي سيتم إرسالها إلى العميل
+    const responseData = {
       ...safeSettings,
       hasCustomApiKey: !!openaiApiKey // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
-    });
+    };
+    
+    console.log('[تصحيح] البيانات المرسلة إلى العميل:', JSON.stringify(responseData, null, 2));
+    
+    return res.status(200).json(responseData);
   } catch (error) {
     logger.error("UserSettings", error instanceof Error ? error : new Error(String(error)), { userId: req.user?.id });
     return res.status(500).json({ 
