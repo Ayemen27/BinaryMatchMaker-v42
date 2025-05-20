@@ -93,7 +93,7 @@ export default function SubscriptionPage() {
       price: currency === 'USD' ? `$${planPrices.weekly.USD}` : `${planPrices.weekly.STARS}`,
       period: t('weekly'),
       description: t('realTimeAnalysis'),
-      color: 'from-green-500 to-teal-600',
+      color: 'from-amber-400 to-yellow-500',
       icon: <Shield className="h-5 w-5" />,
       botVersions: botVersions.weekly,
       features: [
@@ -116,7 +116,7 @@ export default function SubscriptionPage() {
       price: currency === 'USD' ? `$${planPrices.monthly.USD}` : `${planPrices.monthly.STARS}`,
       period: t('monthly'),
       description: t('advancedTechnicalAnalysis'),
-      color: 'from-blue-500 to-indigo-600',
+      color: 'from-amber-400 to-yellow-500',
       icon: <Star className="h-5 w-5" />,
       botVersions: botVersions.monthly,
       features: [
@@ -139,7 +139,7 @@ export default function SubscriptionPage() {
       price: currency === 'USD' ? `$${planPrices.annual.USD}` : `${planPrices.annual.STARS}`,
       period: t('yearly'),
       description: t('aiPoweredAnalysis'),
-      color: 'from-purple-500 to-pink-600',
+      color: 'from-amber-400 to-yellow-500',
       icon: <Award className="h-5 w-5" />,
       botVersions: botVersions.annual,
       features: [
