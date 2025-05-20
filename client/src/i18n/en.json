@@ -7,6 +7,14 @@
   "analyticsTitle": "Advanced Analytics",
   "upgradePlan": "Upgrade Plan",
   "remainingSignals": "Remaining Signals: {{count}}",
+  "signalsAndPerformance": "Signals and Performance",
+  
+  "recentSignals": "Recent Signals",
+  "topPerformers": "Top Performers",
+  "marketOverview": "Market Overview",
+  "signalHistory": "Signal History",
+  "tradingIndicators": "Trading Indicators",
+  "subscriptionPlans": "Subscription Plans",
   
   "settings": "Settings",
   "settingsDescription": "Customize your account settings and preferences",

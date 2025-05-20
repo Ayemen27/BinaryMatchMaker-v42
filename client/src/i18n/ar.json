@@ -7,6 +7,14 @@
   "analyticsTitle": "تحليلات متقدمة",
   "upgradePlan": "ترقية الخطة",
   "remainingSignals": "الإشارات المتبقية: {{count}}",
+  "signalsAndPerformance": "الإشارات والأداء",
+  
+  "recentSignals": "أحدث الإشارات",
+  "topPerformers": "أفضل الأداء",
+  "marketOverview": "نظرة عامة على السوق",
+  "signalHistory": "سجل الإشارات",
+  "tradingIndicators": "مؤشرات التداول",
+  "subscriptionPlans": "خطط الاشتراك",
   
   "settings": "الإعدادات",
   "settingsDescription": "تخصيص إعدادات حسابك وتفضيلاتك",
