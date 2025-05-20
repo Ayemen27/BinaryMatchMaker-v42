@@ -354,10 +354,11 @@ export default function SubscriptionPage() {
                     size="sm"
                     className={`plan-currency-toggle text-xs py-1 ${currency === 'STARS' ? 'stars-active' : ''}`}
                     onClick={toggleCurrency}
+                    dir="rtl"
                   >
                     {currency === 'USD' 
-                      ? <><Star className="h-4 w-4" /> {t('switchToStars', {count: planPrices[plan.id as keyof typeof planPrices].STARS})}</>
-                      : <><DollarSign className="h-4 w-4" /> {t('switchToUSD')}</>
+                      ? <><RefreshCw className="h-4 w-4 ml-1" /> {`التبديل إلى النجوم (${planPrices[plan.id as keyof typeof planPrices].STARS})`}</>
+                      : <><RefreshCw className="h-4 w-4 ml-1" /> {`التبديل إلى الدولار`}</>
                     }
                   </Button>
                   
@@ -369,11 +370,11 @@ export default function SubscriptionPage() {
                       onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                     >
                       <SelectTrigger className="bot-version-select h-10 px-4">
-                        <SelectValue placeholder={t('حدد إصدار البوت')} />
-                        <ChevronDown className="h-4 w-4 ml-auto text-gray-500" />
+                        <SelectValue placeholder="حدد إصدار البوت" />
+                        <ChevronDown className="h-4 w-4" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="_default">{t('selectBotVersion')}</SelectItem>
+                        <SelectItem value="_default">اختر إصدار البوت</SelectItem>
                         {plan.botVersions.map((version) => (
                           <SelectItem key={version} value={version}>
                             {version}
