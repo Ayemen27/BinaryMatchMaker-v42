@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { storage } from "../storage";
 import { z } from "zod";
 import { logger } from "../services/logger";
+import { prepareResponseData, prepareRequestData } from "../utils/field-converter";
 
 // إنشاء موجه الطرق
 const router = express.Router();
@@ -45,42 +46,18 @@ router.get("/", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "لم يتم العثور على إعدادات للمستخدم" });
     }
 
-    // لا نقوم بإرجاع مفتاح API في الاستجابة لأسباب أمنية (تعامل مع البيانات المستلمة من قاعدة البيانات)
-    // يجب التعامل مع الأسماء كما هي في قاعدة البيانات (snake_case)
-    const { openai_api_key, ...safeSettings } = settings;
+    // طباعة البيانات الأصلية للتشخيص
+    console.log('[تصحيح] البيانات الأصلية من قاعدة البيانات:', JSON.stringify(settings, null, 2));
     
-    // طباعة البيانات الأصلية من قاعدة البيانات للتصحيح (مع إخفاء المفتاح)
-    console.log('[تصحيح] البيانات المستلمة من قاعدة البيانات:', JSON.stringify({
-      ...settings,
-      openai_api_key: settings.openai_api_key ? '***المفتاح مخفي***' : null
-    }, null, 2));
+    // تجهيز البيانات للإرسال إلى واجهة المستخدم:
+    // 1. تحويل أسماء الحقول من snake_case إلى camelCase
+    // 2. إزالة الحقول الحساسة (مثل مفتاح API)
+    const convertedSettings = prepareResponseData(settings, ['openai_api_key']);
     
-    // تحويل أسماء الحقول من snake_case إلى camelCase
-    function snakeToCamel(obj: any): any {
-      if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
-      
-      if (Array.isArray(obj)) {
-        return obj.map(item => snakeToCamel(item));
-      }
-      
-      const transformed: Record<string, any> = {};
-      for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-          // تحويل اسم الحقل من snake_case إلى camelCase
-          const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-          transformed[camelKey] = snakeToCamel(obj[key]);
-        }
-      }
-      return transformed;
-    }
-    
-    // تحويل البيانات المسترجعة إلى الصيغة المناسبة للواجهة (camelCase)
-    const convertedSettings = snakeToCamel(safeSettings);
-    
-    // البيانات التي سيتم إرسالها إلى العميل
+    // إضافة معلومات إضافية مثل وجود مفتاح API
     const responseData = {
       ...convertedSettings,
-      hasCustomApiKey: !!openai_api_key // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
+      hasCustomApiKey: !!settings.openai_api_key // إرسال معلومة فقط إذا كان المستخدم لديه مفتاح مخزن
     };
     
     console.log('[تصحيح] البيانات المرسلة إلى العميل:', JSON.stringify(responseData, null, 2));
