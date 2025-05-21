@@ -146,6 +146,20 @@ export default function TelegramStarsMiniApp() {
   
   // تحميل واجهة برمجة تطبيقات تلجرام
   useEffect(() => {
+    // إنشاء نسخة مؤقتة من بيانات المستخدم للعرض التجريبي
+    const demoUser = {
+      id: 12345678,
+      first_name: "مستخدم",
+      last_name: "تلجرام",
+      username: "telegram_user",
+      language_code: "ar"
+    };
+    
+    // في البيئة التجريبية، استخدم بيانات المستخدم المؤقتة
+    if (process.env.NODE_ENV === 'development') {
+      setTelegramUser(demoUser);
+    }
+    
     const tgWebApp = (window as any).Telegram?.WebApp;
     
     if (tgWebApp) {
@@ -158,18 +172,6 @@ export default function TelegramStarsMiniApp() {
       // الحصول على معلومات المستخدم
       if (tgWebApp.initDataUnsafe?.user) {
         setTelegramUser(tgWebApp.initDataUnsafe.user);
-        // حفظ اسم المستخدم في التخزين المحلي للاستخدام عند إعادة التحميل
-        localStorage.setItem('telegramUser', JSON.stringify(tgWebApp.initDataUnsafe.user));
-      } else {
-        // محاولة استرجاع البيانات من التخزين المحلي إذا لم تكن متوفرة من تلجرام
-        const savedUser = localStorage.getItem('telegramUser');
-        if (savedUser) {
-          try {
-            setTelegramUser(JSON.parse(savedUser));
-          } catch (e) {
-            console.error('خطأ في قراءة بيانات المستخدم المخزنة', e);
-          }
-        }
       }
       
       // تكوين سلوك الزر الرئيسي
@@ -188,33 +190,12 @@ export default function TelegramStarsMiniApp() {
       // إخفاء شاشة التحميل بعد تهيئة تطبيق تيليجرام بنجاح
       setTimeout(() => {
         setIsLoading(false);
-      }, 1500);
+      }, 1000);
     } else {
-      console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
-      
-      // عرض رسالة تحذيرية للمستخدمين الذين يحاولون الوصول من خارج تلجرام
-      // نبحث عن البيانات المحفوظة أولاً
-      const savedUser = localStorage.getItem('telegramUser');
-      if (savedUser) {
-        try {
-          setTelegramUser(JSON.parse(savedUser));
-        } catch (e) {
-          console.error('خطأ في قراءة بيانات المستخدم المخزنة', e);
-        }
-      }
-      
-      // في حالة عدم وجود SDK تيليجرام، نعرض الصفحة بعد فترة قصيرة
+      // في حالة عدم وجود SDK تيليجرام، نعرض الصفحة في وضع العرض التجريبي
       setTimeout(() => {
         setIsLoading(false);
-        
-        // عرض رسالة للمستخدم
-        toast({
-          title: t('telegramAppRecommended'),
-          description: t('forBestExperienceUseTelegram'),
-          variant: 'default',
-          duration: 5000
-        });
-      }, 1500);
+      }, 1000);
     }
   }, [t]);
   
@@ -401,27 +382,11 @@ export default function TelegramStarsMiniApp() {
       {/* شريط علوي */}
       <TelegramHeader telegramUser={telegramUser} i18n={i18n} t={t} />
       
-      <div className="container max-w-4xl mx-auto py-6 px-4">
+      <div className="container max-w-4xl mx-auto py-6 px-4 mt-16">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
         </div>
-
-        {telegramUser && (
-          <div className="bg-accent/30 rounded-lg p-4 mb-6">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-                <span className="text-lg font-bold">{telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}</span>
-              </div>
-              <div>
-                <p className="font-medium">
-                  {telegramUser.first_name || ''} {telegramUser.last_name || ''}
-                </p>
-                {telegramUser.username && <p className="text-sm text-muted-foreground">@{telegramUser.username}</p>}
-              </div>
-            </div>
-          </div>
-        )}
         
         <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 flex items-start">
           <Info className="h-5 w-5 text-yellow-500 mt-0.5 mr-2" />
