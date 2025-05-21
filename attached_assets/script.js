@@ -98,108 +98,209 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    window.toggleCurrency = function(planName) {
-        const currentCurrency = localStorage.getItem('currency') || 'USD';
-        const newCurrency = currentCurrency === 'USD' ? 'STARS' : 'USD';
-        localStorage.setItem('currency', newCurrency);
-
-        // Find the toggle button for this plan
-        const toggleButton = document.querySelector(`.plan-currency-toggle[onclick="toggleCurrency('${planName}')"]`);
-        
-        if (toggleButton) {
-            // First, add the 'clicked' class for animation effect
-            toggleButton.classList.add('clicked');
+    /**
+     * نظام تبديل العملة المُحسّن
+     * يتناسق مع نظام الدفع بنجوم تلجرام لضمان تجربة مستخدم سلسة
+     */
+    window.currencySystem = {
+        // تقوم بتبديل العملة وتحديث المعلومات ذات الصلة
+        switchCurrency: function(planName) {
+            // تبديل العملة
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const newCurrency = currentCurrency === 'USD' ? 'STARS' : 'USD';
+            localStorage.setItem('currency', newCurrency);
             
-            // After animation completes, remove the class
+            // تحديث واجهة المستخدم
+            return this.updatePlanInterface(planName, newCurrency);
+        },
+        
+        // تحديث واجهة خطة الاشتراك بناءً على العملة المختارة
+        updatePlanInterface: function(planName, currency) {
+            // البحث عن زر التبديل
+            const toggleButton = document.querySelector(`.plan-currency-toggle[onclick="toggleCurrency('${planName}')"]`);
+            if (!toggleButton) return false;
+            
+            // إضافة تأثير النقر
+            toggleButton.classList.add('clicked');
             setTimeout(() => {
                 toggleButton.classList.remove('clicked');
             }, 800);
             
-            // Update prices for this specific plan
+            // تحديث العناصر المرئية
             const planCard = toggleButton.closest('.plan-card');
-            const priceElement = planCard.querySelector('.price');
-            let starsAmount = planName === 'Weekly Plan' ? 750 : planName === 'Monthly Plan' ? 2300 : 10000;
+            if (!planCard) return false;
             
-            if (newCurrency === 'USD') {
-                toggleButton.classList.remove('stars-active');
-                
-                // Set USD prices
-                if (planName === 'Weekly Plan') priceElement.textContent = '9.99';
-                else if (planName === 'Monthly Plan') priceElement.textContent = '29.99';
-                else if (planName === 'Annual Plan') priceElement.textContent = '149.99';
-                
-                toggleButton.innerHTML = `
-                    <i class="fas fa-exchange-alt"></i>
-                    <span>Switch to Stars (${starsAmount})</span>
-                `;
-                
-                // تغيير سلوك زر الاشتراك لاستخدام النافذة المنبثقة للدفع عند استخدام العملة التقليدية
-                const subscribeButton = planCard.querySelector('.subscribe-btn');
-                if (subscribeButton) {
-                    subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
-                }
+            const priceElement = planCard.querySelector('.price');
+            if (!priceElement) return false;
+            
+            // استخراج معلومات حول سعر النجوم
+            const starsAmount = window.starPaymentSystem.getStarsAmount(planName);
+            
+            // تحديث الواجهة حسب العملة
+            if (currency === 'USD') {
+                return this.switchToUSD(toggleButton, planCard, priceElement, planName, starsAmount);
             } else {
-                toggleButton.classList.add('stars-active');
-                
-                // Set Stars prices
-                if (planName === 'Weekly Plan') priceElement.textContent = '750 Stars';
-                else if (planName === 'Monthly Plan') priceElement.textContent = '2300 Stars';
-                else if (planName === 'Annual Plan') priceElement.textContent = '10000 Stars';
-                
-                toggleButton.innerHTML = `
-                    <i class="fas fa-dollar-sign"></i>
-                    <span>Switch to USD</span>
-                `;
-                
-                // تغيير سلوك زر الاشتراك للذهاب مباشرة إلى تلجرام عند استخدام نجوم تلجرام
-                const subscribeButton = planCard.querySelector('.subscribe-btn');
-                if (subscribeButton) {
-                    subscribeButton.setAttribute('onclick', 'redirectToTelegramStars(event)');
-                }
+                return this.switchToStars(toggleButton, planCard, priceElement, planName, starsAmount);
             }
-        }
-    };
-
-    // Initialize star buttons state
-    const initialCurrency = localStorage.getItem('currency') || 'USD';
-    if (initialCurrency === 'STARS') {
-        document.querySelectorAll('.plan-currency-toggle').forEach(button => {
-            button.classList.add('stars-active');
-            button.innerHTML = `
+        },
+        
+        // تحويل الواجهة إلى وضع الدولار
+        switchToUSD: function(toggleButton, planCard, priceElement, planName, starsAmount) {
+            // تحديث تصنيفات CSS
+            toggleButton.classList.remove('stars-active');
+            planCard.setAttribute('data-currency', 'USD');
+            
+            // ضبط الأسعار
+            if (planName === 'Weekly Plan') priceElement.textContent = '9.99';
+            else if (planName === 'Monthly Plan') priceElement.textContent = '29.99';
+            else if (planName === 'Annual Plan') priceElement.textContent = '149.99';
+            
+            // تحديث نص زر التبديل
+            toggleButton.innerHTML = `
+                <i class="fas fa-exchange-alt"></i>
+                <span>Switch to Stars (${starsAmount})</span>
+            `;
+            
+            // تغيير سلوك زر الاشتراك لاستخدام النافذة المنبثقة
+            const subscribeButton = planCard.querySelector('.subscribe-btn');
+            if (subscribeButton) {
+                // إزالة أي مستمعات أحداث سابقة
+                subscribeButton.onclick = null;
+                // تعيين حدث جديد
+                subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+            }
+            
+            return true;
+        },
+        
+        // تحويل الواجهة إلى وضع النجوم
+        switchToStars: function(toggleButton, planCard, priceElement, planName, starsAmount) {
+            // تحديث تصنيفات CSS
+            toggleButton.classList.add('stars-active');
+            planCard.setAttribute('data-currency', 'STARS');
+            
+            // ضبط أسعار النجوم مع رمز مرئي
+            priceElement.innerHTML = `<i class="fas fa-star text-warning"></i> ${starsAmount} Stars`;
+            
+            // تحديث نص زر التبديل
+            toggleButton.innerHTML = `
                 <i class="fas fa-dollar-sign"></i>
                 <span>Switch to USD</span>
             `;
             
-            // تغيير سلوك أزرار الاشتراك للذهاب مباشرة إلى تلجرام عند استخدام طريقة الدفع بالنجوم
-            const planCard = button.closest('.plan-card');
-            if (planCard) {
-                const subscribeButton = planCard.querySelector('.subscribe-btn');
-                if (subscribeButton) {
-                    subscribeButton.setAttribute('onclick', 'redirectToTelegramStars(event)');
-                }
-                
-                // تحديث أسعار النجوم لكل خطة
-                const planName = planCard.querySelector('h2')?.textContent?.trim();
-                const priceElement = planCard.querySelector('.price');
-                
-                if (planName === 'Weekly Plan' && priceElement) {
-                    priceElement.textContent = '750 Stars';
-                } else if (planName === 'Monthly Plan' && priceElement) {
-                    priceElement.textContent = '2300 Stars';
-                } else if (planName === 'Annual Plan' && priceElement) {
-                    priceElement.textContent = '10000 Stars';
-                }
-            }
-        });
-    } else {
-        // تأكد من أن كل أزرار الاشتراك تستخدم النوافذ المنبثقة عند الدفع بالعملات التقليدية
-        document.querySelectorAll('.plan-card').forEach(planCard => {
+            // تغيير سلوك زر الاشتراك للتوجيه المباشر إلى تلجرام
             const subscribeButton = planCard.querySelector('.subscribe-btn');
             if (subscribeButton) {
-                subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+                // تعيين وظيفة معالجة مباشرة
+                subscribeButton.onclick = function(event) {
+                    event.preventDefault();
+                    window.starPaymentSystem.processTelegramPayment(event);
+                    return false;
+                };
             }
-        });
-    }
+            
+            // إغلاق أي نافذة منبثقة مفتوحة
+            const modal = document.getElementById('paymentModal');
+            if (modal && modal.style.display === 'block') {
+                modal.style.display = 'none';
+            }
+            
+            return true;
+        }
+    };
+    
+    // واجهة تبديل العملة للاستخدام في onclick
+    window.toggleCurrency = function(planName) {
+        window.currencySystem.switchCurrency(planName);
+        return false; // منع الإجراء الافتراضي
+    };
+
+    /**
+     * تهيئة حالة الأزرار بناءً على خيار العملة المخزنة
+     * هذا الكود يتم تنفيذه عند تحميل الصفحة للتأكد من أن واجهة المستخدم تعكس خيار العملة بشكل صحيح
+     */
+    // استخدام نظام العملة المُحسن
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const initialCurrency = localStorage.getItem('currency') || 'USD';
+            
+            // الكشف عن بطاقات الخطط الموجودة في الصفحة
+            const planCards = document.querySelectorAll('.plan-card');
+            
+            // لكل بطاقة خطة، قم بتحديث واجهتها بناءً على العملة المخزنة
+            planCards.forEach(planCard => {
+                // استخراج اسم الخطة
+                const planName = planCard.querySelector('h2')?.textContent?.trim();
+                if (!planName) return;
+                
+                // تهيئة حالة الخطة بناءً على العملة المخزنة
+                const toggleButton = planCard.querySelector('.plan-currency-toggle');
+                const priceElement = planCard.querySelector('.price');
+                
+                // الحصول على عدد النجوم لهذه الخطة
+                const starsAmount = window.starPaymentSystem.getStarsAmount(planName);
+                
+                if (initialCurrency === 'STARS') {
+                    // تحديث الواجهة لعرض حالة النجوم
+                    if (toggleButton) {
+                        toggleButton.classList.add('stars-active');
+                        toggleButton.innerHTML = `
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Switch to USD</span>
+                        `;
+                    }
+                    
+                    planCard.setAttribute('data-currency', 'STARS');
+                    
+                    // تحديث سعر النجوم مع رمز النجمة
+                    if (priceElement) {
+                        priceElement.innerHTML = `<i class="fas fa-star text-warning"></i> ${starsAmount} Stars`;
+                    }
+                    
+                    // تعديل سلوك زر الاشتراك للتوجيه المباشر إلى تلجرام
+                    const subscribeButton = planCard.querySelector('.subscribe-btn');
+                    if (subscribeButton) {
+                        // استخدام وظائف النظام لتعيين الحدث لتجنب ظهور النافذة المنبثقة
+                        subscribeButton.onclick = function(event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            window.starPaymentSystem.processTelegramPayment(event);
+                            return false;
+                        };
+                    }
+                } else {
+                    // إعداد الواجهة لعرض حالة الدولار الأمريكي
+                    if (toggleButton) {
+                        toggleButton.classList.remove('stars-active');
+                        toggleButton.innerHTML = `
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>Switch to Stars (${starsAmount})</span>
+                        `;
+                    }
+                    
+                    planCard.setAttribute('data-currency', 'USD');
+                    
+                    // ضبط الأسعار بالدولار
+                    if (priceElement) {
+                        if (planName === 'Weekly Plan') priceElement.textContent = '9.99';
+                        else if (planName === 'Monthly Plan') priceElement.textContent = '29.99';
+                        else if (planName === 'Annual Plan') priceElement.textContent = '149.99';
+                    }
+                    
+                    // تعديل سلوك زر الاشتراك لاستخدام النافذة المنبثقة
+                    const subscribeButton = planCard.querySelector('.subscribe-btn');
+                    if (subscribeButton) {
+                        subscribeButton.onclick = null; // إزالة أي أحداث قديمة
+                        subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+                    }
+                }
+            });
+            
+            console.log('[CurrencySystem] Interface initialized with currency:', initialCurrency);
+        } catch (error) {
+            console.error('[CurrencySystem] Error during initialization:', error);
+        }
+    });
     
     // Enhanced error handling for form submission
     function submitUserInfo(event, method, plan, price) {
@@ -369,21 +470,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modify functions to handle potential undefined scenarios
     // دالة جديدة للتوجيه المباشر إلى تلجرام عند اختيار الدفع بالنجوم
-    window.redirectToTelegramStars = function(event) {
-        try {
-            if (!event || !event.target) return;
-            
-            const planCard = event.target.closest('.plan-card');
-            if (!planCard) return;
-
+    /**
+     * نظام التوجيه المباشر إلى نجوم تلجرام
+     * وظيفة مُحسنة ومُعاد هيكلتها للتوجيه المباشر إلى بوت تلجرام بدون أي نوافذ منبثقة
+     */
+    window.starPaymentSystem = {
+        // التحقق من صحة اختيار نسخة البوت
+        validateBotSelection: function(planCard) {
             const botVersionSelect = planCard.querySelector('.bot-version');
             const errorMessage = planCard.querySelector('.error-message');
             
-            if (!botVersionSelect) return;
-
+            if (!botVersionSelect) return false;
+            
             const selectedVersion = botVersionSelect.value;
             if (!selectedVersion) {
-                // إظهار رسالة الخطأ مع التأثير المتحرك
+                // إظهار تأثير الخطأ مع التنبيه
                 botVersionSelect.classList.add('highlight-select', 'shake');
                 if (errorMessage) errorMessage.classList.add('visible');
                 
@@ -396,39 +497,87 @@ document.addEventListener('DOMContentLoaded', function() {
                     botVersionSelect.classList.remove('highlight-select');
                     if (errorMessage) errorMessage.classList.remove('visible');
                 }, 3000);
-                return;
+                
+                return false;
             }
-
-            // استخراج تفاصيل الخطة بطريقة آمنة مع قيم افتراضية
-            const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
-            const planPrice = planCard.querySelector('.price')?.textContent?.trim() || '0 Stars';
-
-            // تخزين المعلومات المختارة
-            localStorage.setItem('selectedPlan', planName);
-            localStorage.setItem('selectedPrice', planPrice);
-            localStorage.setItem('selectedBotVersion', 
-                botVersionSelect.options[botVersionSelect.selectedIndex]?.text || 'Unknown Version'
-            );
-
-            // حساب عدد النجوم المطلوبة بناء على الخطة
-            let starsAmount = 750; // القيمة الافتراضية للخطة الأسبوعية
-            if (planName === 'Monthly Plan') starsAmount = 2300;
-            if (planName === 'Annual Plan') starsAmount = 10000;
             
-            // إعداد الرسالة التي سترسل إلى بوت تلجرام
-            const message = encodeURIComponent(
+            return {
+                botVersion: botVersionSelect.options[botVersionSelect.selectedIndex]?.text || 'Unknown Version',
+                versionValue: selectedVersion
+            };
+        },
+        
+        // حساب عدد النجوم المطلوبة بناءً على نوع الخطة
+        getStarsAmount: function(planName) {
+            switch(planName) {
+                case 'Weekly Plan': return 750;
+                case 'Monthly Plan': return 2300;
+                case 'Annual Plan': return 10000;
+                default: return 750; // قيمة افتراضية
+            }
+        },
+        
+        // إعداد رسالة للإرسال إلى بوت تلجرام
+        prepareMessage: function(planName, botVersion, starsAmount) {
+            return encodeURIComponent(
                 `Stars Subscription Request\n\n` +
                 `Subscription Info:\n` +
                 `📦 Plan: ${planName}\n` +
-                `🤖 Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                `🤖 Bot Version: ${botVersion}\n` +
                 `⭐ Stars Required: ${starsAmount} Stars`
             );
-            
-            // توجيه المستخدم مباشرة إلى محادثة تلجرام
-            window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
-        } catch (error) {
-            console.error('Telegram stars redirect error:', error);
+        },
+        
+        // التنفيذ الرئيسي - معالجة الدفع
+        processTelegramPayment: function(event) {
+            try {
+                // إلغاء الحدث الافتراضي لمنع سلوك النافذة المنبثقة
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                // العثور على بطاقة الخطة
+                const planCard = event.target ? event.target.closest('.plan-card') : null;
+                if (!planCard) return false;
+                
+                // التحقق من اختيار نسخة البوت
+                const botInfo = this.validateBotSelection(planCard);
+                if (!botInfo) return false;
+                
+                // استخراج معلومات الخطة
+                const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
+                
+                // حساب عدد النجوم وتخزين التفاصيل
+                const starsAmount = this.getStarsAmount(planName);
+                
+                // تخزين البيانات للرجوع إليها لاحقاً
+                localStorage.setItem('selectedPlan', planName);
+                localStorage.setItem('selectedPrice', `${starsAmount} Stars`);
+                localStorage.setItem('selectedBotVersion', botInfo.botVersion);
+                localStorage.setItem('paymentMethod', 'telegram_stars');
+                
+                // إعداد الرسالة وفتح رابط تلجرام
+                const message = this.prepareMessage(planName, botInfo.botVersion, starsAmount);
+                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                
+                // إغلاق أي نافذة منبثقة قد تكون مفتوحة
+                const modal = document.getElementById('paymentModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('[StarPaymentSystem] Error during payment process:', error);
+                return false;
+            }
         }
+    };
+    
+    // تعريف وظيفة مختصرة للاستخدام في onclick
+    window.redirectToTelegramStars = function(event) {
+        return window.starPaymentSystem.processTelegramPayment(event);
     };
 
     window.showPaymentModal = function(event) {
