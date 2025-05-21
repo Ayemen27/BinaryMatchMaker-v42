@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet';
 import { 
   Check, Star, Shield, Award, Medal, Loader2, Zap, 
-  AlertCircle, Info
+  AlertCircle, Info, Globe, User, Menu
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import '../styles/subscription.css';
@@ -329,17 +329,61 @@ export default function TelegramStarsMiniApp() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto py-6 px-4" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+    <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <Helmet>
         <title>BinarJoin Analytics | {t('subscriptionPlans')}</title>
         <meta name="description" content={t('subscriptionMetaDescription')} />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
       
-      <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
-        <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
-      </div>
+      {/* شريط علوي */}
+      <header className="bg-primary text-white p-3 sticky top-0 z-50 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <Menu className="h-5 w-5 mr-2 md:hidden" />
+            <h1 className="text-lg font-bold">BinarJoin Analytics</h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-white hover:bg-primary-800"
+              onClick={() => {
+                const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+                i18n.changeLanguage(newLang);
+                localStorage.setItem('language', newLang);
+                document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+              }}
+            >
+              <Globe className="h-4 w-4 mr-1" />
+              <span className="text-sm">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
+            </Button>
+            
+            <div className="flex items-center border-l border-white/20 pl-3">
+              {telegramUser ? (
+                <div className="flex items-center">
+                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold mr-2">
+                    {telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}
+                  </div>
+                  <span className="text-sm hidden md:inline-block">{telegramUser.first_name || t('guest')}</span>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <User className="h-4 w-4 mr-1" />
+                  <span className="text-sm">{t('guest')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <div className="container max-w-4xl mx-auto py-6 px-4">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
+        </div>
 
       {telegramUser && (
         <div className="bg-accent/30 rounded-lg p-4 mb-6">
