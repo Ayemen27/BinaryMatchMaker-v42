@@ -422,12 +422,10 @@ export default function TelegramStarsMiniApp() {
               </CardHeader>
               
               <CardContent className="px-4 py-2 flex flex-col items-center">
-                <div className="text-4xl font-bold text-yellow-500 flex items-center mb-3">
-                  <span className="">$</span>
-                  <span className="">{plan.priceInUSD}</span>
+                <div className="text-3xl font-bold text-yellow-500 flex items-center mb-3">
+                  <span className="text-sm ml-1">⭐</span>
+                  <span className="">{plan.price}</span>
                 </div>
-                
-{/* تم إزالة زر التبديل إلى الدولار */}
                 
                 <p className="text-sm text-center mb-3">{plan.description}</p>
                 
