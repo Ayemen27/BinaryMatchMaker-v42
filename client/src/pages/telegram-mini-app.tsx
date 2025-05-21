@@ -201,8 +201,8 @@ export default function TelegramMiniApp() {
               variant: 'default'
             });
             
-            // توجيه المستخدم إلى بوت تلجرام
-            window.location.href = `https://t.me/OXG_OXG?start=pay_${planId}_${paymentId}`;
+            // توجيه المستخدم إلى بوت تلجرام بالاسم الصحيح
+            window.location.href = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planId}_${paymentId}`;
           } else {
             toast({
               title: 'حدث خطأ',
