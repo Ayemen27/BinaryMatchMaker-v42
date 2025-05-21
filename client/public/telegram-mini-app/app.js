@@ -290,16 +290,10 @@ function handlePayment() {
       telegramWebApp.sendData(JSON.stringify(paymentData));
       console.log('تم إرسال بيانات الدفع بنجاح إلى تلجرام');
       
-      // إرسال تنبيه للمستخدم (اختياري - ربما تم تعطيله في بعض الحالات)
-      /*
-      telegramWebApp.showAlert(
-        `تم تقديم طلب الدفع بنجاح للخطة: ${plan.title}\nالمبلغ: ${plan.price} نجمة`,
-        () => {
-          // إغلاق التطبيق المصغر بعد الانتهاء
-          telegramWebApp.close();
-        }
-      );
-      */
+      // إخفاء شاشة التحميل بعد إرسال البيانات بنجاح
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+      }, 800);
     } catch (error) {
       console.error('خطأ في إرسال بيانات الدفع:', error);
       document.getElementById('loading').classList.add('hidden');
