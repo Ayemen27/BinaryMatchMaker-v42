@@ -27,8 +27,30 @@ const router = Router();
  */
 router.post('/webhook', async (req, res) => {
   try {
-    // التحقق من بوت التلجرام باستخدام رمز التحقق (سيتم تنفيذه لاحقًا)
-    // يجب أن يكون هناك التحقق من المصدر باستخدام رمز سري مشترك أو توقيع
+    // التحقق من مصدر الطلب باستخدام رمز التحقق الموجود في الرأس (headers)
+    const authToken = req.headers['x-telegram-bot-auth'];
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    
+    // في بيئة الإنتاج، يجب التحقق من صحة الطلب
+    if (!authToken && process.env.NODE_ENV === 'production') {
+      console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - لا يوجد رمز تحقق');
+      return res.status(403).json({
+        success: false,
+        message: 'غير مصرح بالوصول - رمز التحقق غير موجود'
+      });
+    }
+    
+    // التحقق من صحة رمز التحقق
+    if (authToken && botToken && authToken !== `Bearer ${botToken}` && process.env.NODE_ENV === 'production') {
+      console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - رمز تحقق غير صالح');
+      return res.status(403).json({
+        success: false,
+        message: 'غير مصرح بالوصول - رمز تحقق غير صالح'
+      });
+    }
+    
+    // التحقق من عنوان IP للطلب (في تطبيق إنتاجي، يجب التحقق من قائمة العناوين المسموح بها)
+    // يمكن إضافة قائمة بعناوين IP خوادم تلجرام للتحقق منها
     
     console.log('[نظام دفع تلجرام] استلام طلب دفع:', req.body);
     
