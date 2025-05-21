@@ -461,18 +461,17 @@ export default function TelegramStarsMiniApp() {
                 </div>
                 
                 <Button 
-                  className="subscription-button"
+                  className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2"
                   onClick={() => handlePlanSelect(plan.id)}
                   disabled={isProcessing}
                 >
                   {isProcessing && selectedPlan === plan.id ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mx-2 h-4 w-4 animate-spin" />
                       {t('processing')}
                     </>
                   ) : (
                     <>
-                      <Zap className="mr-2 h-4 w-4" />
                       {plan.callToAction}
                     </>
                   )}
