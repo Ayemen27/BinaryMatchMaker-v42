@@ -445,14 +445,14 @@ export default function TelegramStarsMiniApp() {
                 <div className="mb-4">
                   <label className="text-sm font-medium mb-1 block">{t('selectBotVersion')}:</label>
                   <Select
-                    value={selectedBotVersions[plan.id] || ''}
+                    value={selectedBotVersions[plan.id] || plan.botVersions[0] || ''}
                     onValueChange={(value) => handleBotVersionChange(plan.id, value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={t('selectVersion')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {plan.botVersions.map((version) => (
+                      {plan.botVersions && plan.botVersions.map((version) => (
                         <SelectItem key={version} value={version}>
                           {version}
                         </SelectItem>
