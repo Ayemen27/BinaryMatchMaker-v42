@@ -195,7 +195,7 @@
   "aiPoweredAnalysis": "Comprehensive market analysis powered by AI and strategy",
   "advancedDataDrivenAnalysis": "Advanced data-driven analysis with AI predictions",
   
-  "switchToStars": "Switch to Stars ({{count}})",
+  "switchToStars": "Switch to Telegram Stars ({{count}})",
   "switchToUSD": "Switch to USD",
   "selectBotVersion": "Select Bot Version",
   "botVersionRequired": "Bot Version Required",
@@ -320,7 +320,7 @@
   "paypal": "PayPal",
   "westernunion": "Western Union",
   "moneygram": "MoneyGram",
-  "stars": "Stars",
+  "stars": "Telegram Stars",
   "paymentMethodDisabled": "Payment Method Disabled",
   "paymentMethodDisabledDescription": "This payment method is currently not available. Please choose another payment method."
 }
