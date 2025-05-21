@@ -333,7 +333,7 @@ export default function SubscriptionPage() {
     const userId = user?.id || 'guest';
     const username = encodeURIComponent(user?.username || 'guest');
     // إنشاء رابط للبوت مع جميع المعلومات المطلوبة
-    const telegramBotUrl = `https://t.me/OXG_OXG?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
     
     // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
     localStorage.setItem('selectedPlan', planId);
