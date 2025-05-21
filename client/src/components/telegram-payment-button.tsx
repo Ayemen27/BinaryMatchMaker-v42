@@ -21,10 +21,10 @@ export function TelegramPaymentButton({
   // معالج يوجه المستخدم إلى رابط البوت في تلجرام
   const handlePayment = () => {
     // إظهار رسالة توجيهية للمستخدم
-    alert(`للاشتراك في الخطة، استخدم بوت التلجرام الخاص بنا:\n\n@OXG_OXG\n\nيمكنك إرسال الأمر التالي للبوت:\n/${planId}`);
+    alert(`للاشتراك في الخطة، استخدم بوت التلجرام الخاص بنا:\n\n@Payment_gateway_Binar_bot\n\nيمكنك إرسال الأمر التالي للبوت:\n/${planId}`);
     
     // فتح رابط بوت تلجرام في نافذة جديدة
-    window.open('https://t.me/OXG_OXG', '_blank');
+    window.open('https://t.me/Payment_gateway_Binar_bot', '_blank');
     
     if (onPaymentInitiated) {
       onPaymentInitiated();
