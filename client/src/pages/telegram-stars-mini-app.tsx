@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet';
-import { Check, Star, Shield, Award, Medal, Loader2, Zap, Info } from 'lucide-react';
+import { Check, Star, Shield, Award, Medal, Loader2, Zap, Info, DollarSign } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { LoadingScreen } from '@/components/telegram/loading-screen';
 import { TelegramHeader } from '@/components/telegram/header';
@@ -383,24 +383,45 @@ export default function TelegramStarsMiniApp() {
       <TelegramHeader telegramUser={telegramUser} i18n={i18n} t={t} />
       
       <div className="container max-w-4xl mx-auto py-6 px-4 mt-16">
-        <div className="mb-6 text-center">
+        <div className="mb-4 text-center">
           <h1 className="text-2xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
         </div>
         
-        <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 flex items-start">
-          <Info className="h-5 w-5 text-yellow-500 mt-0.5 mr-2" />
-          <div>
-            <p className="text-sm">{t('telegramStarsOnlyInfo')}</p>
-          </div>
+        <div className="mb-4 flex flex-wrap gap-2 justify-center">
+          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            {t('switchToUSD')}
+          </Button>
+          
+          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 6.63 5.37 12 12 12s12-5.37 12-12C24 5.37 18.63 0 12 0zm5.43 8.43-1.68 7.92c-.13.59-.48.74-.97.46l-2.67-1.97-1.3 1.25c-.14.14-.26.26-.54.26l.19-2.7 4.91-4.44c.21-.19-.05-.28-.33-.1l-6.08 3.83-2.62-.86c-.57-.18-.58-.57.12-.84l10.23-3.94c.47-.18.88.11.74.7z"/>
+            </svg>
+            {t('openInTelegram')}
+          </Button>
+          
+          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
+            <Star className="h-3.5 w-3.5 text-yellow-500" />
+            {t('payWithStars')}
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 gap-4 mb-8">
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`border border-gray-200 bg-white rounded-lg overflow-hidden shadow-sm mb-2 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
+              className={`border border-gray-100 bg-white rounded-lg overflow-hidden shadow-sm mb-3 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
             >
+              {plan.isNew && (
+                <div className="bg-green-500 text-white text-xs font-bold text-center py-1">
+                  NEW!
+                </div>
+              )}
               <CardHeader className="pb-0 pt-3 px-3">
                 <div className="flex justify-end items-start text-right">
                   <div>
@@ -411,18 +432,16 @@ export default function TelegramStarsMiniApp() {
               </CardHeader>
               
               <CardContent className="px-3 py-2">
-                <p className="text-sm text-right mb-2">{plan.description}</p>
-                
-                <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
+                <div className="flex justify-between items-center mb-2">
                   <div className="text-xl font-bold text-yellow-500 flex items-center">
-                    <span className="text-yellow-500">{t('stars')}</span>
                     <span className="mx-1">{plan.price}</span>
-                    <Star className="h-5 w-5 text-yellow-500" />
                   </div>
                   <span className="text-xs text-muted-foreground">{plan.period}</span>
                 </div>
                 
-                <div className="mb-3">
+                <p className="text-sm text-right mb-3">{plan.description}</p>
+                
+                <div className="mb-4">
                   <div className="mb-3">
                     <label className="text-sm mb-1 block text-right">{t('selectBotVersion')}:</label>
                     <Select
@@ -443,7 +462,26 @@ export default function TelegramStarsMiniApp() {
                   </div>
                 </div>
                 
-                <div className="mt-1">
+                {plan.id === 'premium' && (
+                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-3 rounded-lg mb-4 border border-yellow-100">
+                    <div className="text-right mb-2">
+                      <span className="inline-block text-red-500 font-bold text-sm">🔴 جديد!</span> {plan.extraDescription}
+                    </div>
+                    <ul className="text-right text-sm space-y-1">
+                      <li className="flex justify-end items-center gap-2">
+                        <span>تصميم حديث وسهل الاستخدام - تجربة سلسة وسريعة على جميع الأجهزة 📱💻</span>
+                        <span className="text-green-600">✅</span>
+                      </li>
+                      <li className="flex justify-end items-center gap-2">
+                        <span>إشارات تداول دقيقة - مبنية على تحليل في الوقت الحقيقي واتجاهات السوق 📊</span>
+                        <span className="text-green-600">✅</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+                
+                <div className="mt-3">
+                  <h4 className="text-sm font-medium text-right mb-2">ميزات الخطة</h4>
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex justify-end items-center py-1 gap-2 text-right">
                       <span className="text-sm">
@@ -455,7 +493,7 @@ export default function TelegramStarsMiniApp() {
                 </div>
               </CardContent>
               
-              <CardFooter className="pt-0 pb-3 px-3">
+              <CardFooter className="pt-0 pb-3 px-3 flex flex-col">
                 <div className="text-center bg-yellow-50 py-2 px-3 rounded-lg text-sm text-gray-700 w-full mb-2">
                   {plan.idealFor}
                 </div>
