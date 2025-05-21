@@ -317,7 +317,7 @@ export default function SubscriptionPage() {
     }
     
     // إنشاء رابط تلجرام مع معرف الطلب (باستخدام البوت الصحيح)
-    const telegramBotUrl = `https://t.me/BinarJoin_PaymentBot?start=payment_${paymentId}_${planId}_${starsAmount}_${botVersion}`;
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=payment_${paymentId}_${planId}_${starsAmount}_${botVersion}`;
     
     // إرسال إشعار للمستخدم
     toast({
