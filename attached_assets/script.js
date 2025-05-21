@@ -367,8 +367,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 botVersionSelect.options[botVersionSelect.selectedIndex]?.text || 'Unknown Version'
             );
 
-            // Continue with existing payment modal logic
+            // التحقق من طريقة الدفع المختارة
             const currentCurrency = localStorage.getItem('currency') || 'USD';
+            
+            // إذا اختار المستخدم الدفع بنجوم تلجرام، توجه مباشرة إلى بوت تلجرام بدون ظهور النافذة المنبثقة
+            if (currentCurrency === 'STARS') {
+                // حساب عدد النجوم المطلوبة بناء على الخطة
+                let starsAmount = 750; // Default for Weekly Plan
+                if (planName === 'Monthly Plan') starsAmount = 2300;
+                if (planName === 'Annual Plan') starsAmount = 10000;
+                
+                // إعداد الرسالة التي سترسل إلى بوت تلجرام
+                const message = encodeURIComponent(
+                    `Stars Subscription Request\n\n` +
+                    `Subscription Info:\n` +
+                    `📦 Plan: ${planName}\n` +
+                    `🤖 Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                    `⭐ Stars Required: ${starsAmount} Stars`
+                );
+                
+                // توجيه المستخدم مباشرة إلى محادثة تلجرام
+                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                return; // توقف هنا وعدم إظهار النافذة المنبثقة
+            }
+            
+            // للدفع بالطرق التقليدية، استمر بإظهار النافذة المنبثقة
             const modal = document.getElementById('paymentModal');
             if (!modal) return;
             
@@ -377,55 +400,20 @@ document.addEventListener('DOMContentLoaded', function() {
             const modalContent = modal.querySelector('.modal-content');
             if (!modalContent) return;
 
-            if (currentCurrency === 'STARS') {
-                // Show only Telegram Stars payment option
-                const starsAmount = prices[planName].STARS;
-                modalContent.innerHTML = `
-                    <span class="close-modal" onclick="closeModal()">&#xd7;</span>
-                    <h2>Enter Your Information</h2>
-                    <div class="user-info-form">
-                        <div class="form-group">
-                            <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" placeholder="Enter your full name">
-                            <div class="form-error" id="fullNameError">Please enter your full name</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="Enter your email">
-                            <div class="form-error" id="emailError">Please enter a valid email</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="country">Country</label>
-                            <select id="country" style="width: 100%"></select>
-                            <div class="form-error" id="countryError">Please select your country</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone">
-                            <div class="form-error" id="phoneError">Please enter a valid phone number</div>
-                        </div>
-                        <button class="proceed-btn" onclick="submitUserInfo(event, 'telegram', '${planName}', '${prices[planName].STARS} Stars')">
-                            <i class="fas fa-check"></i> Proceed with Stars Payment
-                        </button>
-                    </div>
-                `;
-                initializeFormComponents();
-            } else {
-                // Show regular payment options
-                modalContent.innerHTML = `
-                    <span class="close-modal" onclick="closeModal()">&#xd7;</span>
-                    <h2>Choose Payment Method</h2>
-                    
-                    <div class="tabs-container">
-                        <div class="payment-tab active" onclick="showTab('platforms')">Platforms</div>
-                        <div class="payment-tab" onclick="showTab('wallets')">Wallets</div>
-                        <div class="payment-tab" onclick="showTab('traditional')">Traditional</div>
-                    </div>
+            // عرض خيارات الدفع التقليدية
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&#xd7;</span>
+                <h2>Choose Payment Method</h2>
+                
+                <div class="tabs-container">
+                    <div class="payment-tab active" onclick="showTab('platforms')">Platforms</div>
+                    <div class="payment-tab" onclick="showTab('wallets')">Wallets</div>
+                    <div class="payment-tab" onclick="showTab('traditional')">Traditional</div>
+                </div>
 
-                    ${getPaymentSectionsHTML()}
-                `;
-                showTab('platforms');
-            }
+                ${getPaymentSectionsHTML()}
+            `;
+            showTab('platforms');
         } catch (error) {
             console.error('Payment modal error:', error);
         }
