@@ -334,13 +334,25 @@ export default function SubscriptionPage() {
     localStorage.setItem('selectedPlan', planId);
     localStorage.setItem('starsAmount', String(starsAmount));
     
-    // إرسال إشعار للمستخدم مع تعليمات إضافية
+    // إرسال إشعار للمستخدم مع تعليمات إضافية وواضحة
     toast({
       title: t('redirectingToTelegram'),
-      description: t('useCommandInBot', { command: `/pay ${planId} ${starsAmount}` }),
+      description: t('useCommandInBot', { command: `/pay ${planType} ${starsAmount}` }),
       variant: 'default',
       duration: 8000,
     });
+    
+    // إضافة إشعار إضافي بتعليمات الدفع المفصلة
+    setTimeout(() => {
+      toast({
+        title: 'كيفية الدفع بنجوم تلجرام',
+        description: `1. انتظر فتح البوت وظهور رسالة البدء
+2. استخدم الأمر: /pay ${planType} ${starsAmount} 
+3. اتبع تعليمات البوت لإكمال عملية الدفع`,
+        duration: 15000,
+        variant: 'default',
+      });
+    }, 1000);
     
     // توجيه المستخدم إلى تلجرام
     window.open(telegramBotUrl, '_blank');
