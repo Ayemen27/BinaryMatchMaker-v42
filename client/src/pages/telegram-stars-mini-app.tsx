@@ -407,9 +407,9 @@ export default function TelegramStarsMiniApp() {
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`border-2 hover:shadow-md transition-all ${selectedPlan === plan.id ? 'border-primary' : 'border-border'}`}
+              className={`subscription-card ${selectedPlan === plan.id ? 'selected' : 'border-border'}`}
             >
-              <CardHeader className="pb-2">
+              <CardHeader className="subscription-card-header pb-2">
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle>{plan.name}</CardTitle>
@@ -430,9 +430,9 @@ export default function TelegramStarsMiniApp() {
               
               <CardContent className="pb-2">
                 <div className="mb-4 flex items-center">
-                  <div className="text-2xl font-bold text-primary flex items-center">
-                    <Star className="h-5 w-5 mr-1 text-yellow-500" />
-                    {plan.price} <span className="text-sm mr-1">{t('stars')}</span>
+                  <div className="subscription-price text-2xl text-primary">
+                    <Star className="h-5 w-5 text-yellow-500" />
+                    {plan.price} <span className="text-sm">{t('stars')}</span>
                   </div>
                 </div>
                 
@@ -463,8 +463,8 @@ export default function TelegramStarsMiniApp() {
                 
                 <div className="space-y-2 mb-4">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2" />
+                    <div key={index} className="subscription-feature">
+                      <Check className="subscription-feature-icon h-4 w-4" />
                       <span className="text-sm">{feature.text}</span>
                     </div>
                   ))}
