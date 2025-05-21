@@ -333,23 +333,33 @@ export class TelegramBotService {
    */
   private async sendMessage(chatId: number, text: string): Promise<void> {
     try {
+      console.log(`[خدمة البوت] محاولة إرسال رسالة إلى المستخدم ${chatId}: ${text.substring(0, 50)}...`);
+      
       const apiUrl = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
+      console.log(`[خدمة البوت] استخدام API URL: ${apiUrl.split('/bot')[0]}/bot***`);
+      
+      const payload = {
+        chat_id: chatId,
+        text,
+        parse_mode: 'HTML'
+      };
+      
+      console.log(`[خدمة البوت] بيانات الرسالة:`, JSON.stringify(payload).substring(0, 100) + '...');
+      
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: 'HTML'
-        })
+        body: JSON.stringify(payload)
       });
       
       const data = await response.json();
       
-      if (!data.ok) {
-        console.error('[خدمة البوت] فشل في إرسال الرسالة:', data.description);
+      if (data.ok) {
+        console.log(`[خدمة البوت] تم إرسال الرسالة بنجاح إلى المستخدم ${chatId}`);
+      } else {
+        console.error('[خدمة البوت] فشل في إرسال الرسالة:', data.description, data);
       }
     } catch (error) {
       console.error('[خدمة البوت] خطأ أثناء إرسال الرسالة:', error);
