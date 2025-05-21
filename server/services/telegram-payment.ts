@@ -52,82 +52,25 @@ export class TelegramPaymentService {
     endDate.setDate(endDate.getDate() + durationInDays);
     
     try {
-      // التحقق من وجود اشتراك حالي
-      const [existingSubscription] = await db
-        .select()
-        .from(subscriptions)
-        .where(
-          eq(subscriptions.userId, userId)
-        );
+      // استخدام خدمة التخزين لمعالجة الدفع بالنجوم
+      const subscription = await storage.processStarsPayment(
+        userId,
+        plan,
+        starsAmount,
+        paymentId
+      );
       
-      let subscription;
-      
-      if (existingSubscription) {
-        // تحديث الاشتراك الحالي
-        const [updatedSubscription] = await db
-          .update(subscriptions)
-          .set({
-            type: subscriptionType,
-            startDate,
-            endDate,
-            isActive: true,
-            paymentMethod: 'telegram_stars',
-            amount: starsAmount,
-            currency: 'STARS',
-            transactionId: paymentId,
-            updatedAt: new Date()
-          })
-          .where(eq(subscriptions.id, existingSubscription.id))
-          .returning();
-          
-        subscription = updatedSubscription;
-      } else {
-        // إنشاء اشتراك جديد
-        const [newSubscription] = await db
-          .insert(subscriptions)
-          .values({
-            userId,
-            type: subscriptionType,
-            startDate,
-            endDate,
-            isActive: true,
-            paymentMethod: 'telegram_stars',
-            amount: starsAmount,
-            currency: 'STARS',
-            transactionId: paymentId,
-            dailySignalLimit: subscriptionType === 'free' ? 3 : 
-                             subscriptionType === 'basic' ? 10 : 
-                             subscriptionType === 'pro' ? 25 : 
-                             50, // vip
-            createdAt: new Date(),
-            updatedAt: new Date()
-          })
-          .returning();
-          
-        subscription = newSubscription;
-      }
-      
-      // تحديث مستوى اشتراك المستخدم في جدول المستخدمين
-      await db
-        .update(users)
-        .set({
-          subscriptionLevel: subscriptionType,
-          subscriptionExpiry: endDate,
-        })
-        .where(eq(users.id, userId));
+      // تحديث مستوى اشتراك المستخدم
+      await storage.updateUserSubscriptionLevel(userId, subscriptionType, endDate);
       
       // إرسال إشعار للمستخدم
-      await db
-        .insert(notifications)
-        .values({
-          userId,
-          type: 'account',
-          title: 'تم تفعيل الاشتراك',
-          message: `تم تفعيل اشتراكك بنجاح (${subscriptionType}) حتى تاريخ ${endDate.toLocaleDateString('ar-SA')}`,
-          read: false,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        });
+      await storage.createNotification({
+        userId,
+        type: 'account',
+        title: 'تم تفعيل الاشتراك',
+        message: `تم تفعيل اشتراكك بنجاح (${subscriptionType}) حتى تاريخ ${endDate.toLocaleDateString('ar-SA')}`,
+        read: false
+      });
       
       return {
         success: true,
