@@ -316,14 +316,19 @@ export default function SubscriptionPage() {
       console.error('فشل في حفظ حالة الطلب', e);
     }
     
-    // إنشاء رابط تلجرام مع معرف الطلب (باستخدام البوت الصحيح والصيغة المبسطة)
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=${planId}_${starsAmount}`;
+    // إنشاء رابط تلجرام باستخدام البوت الصحيح وأمر بداية بسيط
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot`;
     
-    // إرسال إشعار للمستخدم
+    // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
+    localStorage.setItem('selectedPlan', planId);
+    localStorage.setItem('starsAmount', String(starsAmount));
+    
+    // إرسال إشعار للمستخدم مع تعليمات إضافية
     toast({
       title: t('redirectingToTelegram'),
-      description: t('telegramStarsPaymentInfo'),
+      description: t('useCommandInBot', { command: `/pay ${planId} ${starsAmount}` }),
       variant: 'default',
+      duration: 8000,
     });
     
     // توجيه المستخدم إلى تلجرام
