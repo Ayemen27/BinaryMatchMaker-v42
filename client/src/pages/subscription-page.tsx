@@ -325,7 +325,10 @@ export default function SubscriptionPage() {
             className="flex items-center gap-2"
           >
             {currency === 'USD' ? <Star className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
-            {currency === 'USD' ? t('switchToStars') : t('switchToUSD')}
+            {currency === 'USD' 
+              ? t('switchToStars').replace('{{count}}', '750') 
+              : t('switchToUSD')
+            }
             <RefreshCw className="h-3 w-3 mr-1" />
           </Button>
         </div>
