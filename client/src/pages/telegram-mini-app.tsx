@@ -1,178 +1,232 @@
-import React, { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Label } from '@/components/ui/label';
-import { useQuery } from '@tanstack/react-query';
-
-// تعريف أنواع البيانات لـ Telegram WebApp
-declare global {
-  interface Window {
-    Telegram: {
-      WebApp: {
-        ready: () => void;
-        onEvent: (eventType: string, eventHandler: any) => void;
-        offEvent: (eventType: string, eventHandler: any) => void;
-        sendData: (data: string) => void;
-        MainButton: {
-          text: string;
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-          isVisible: boolean;
-        };
-        BackButton: {
-          show: () => void;
-          hide: () => void;
-          onClick: (callback: () => void) => void;
-          offClick: (callback: () => void) => void;
-        };
-        initData: string;
-        initDataUnsafe: any;
-        colorScheme: 'light' | 'dark';
-        close: () => void;
-      };
-    };
-  }
-}
-
-// أسعار الخطط بعملة النجوم
-const PLAN_PRICES = {
-  weekly_plan: 750,
-  monthly_plan: 2300,
-  annual_plan: 10000,
-  premium_plan: 18500
-};
+import { Check, Star, Zap, Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import '../styles/telegram-mini-app.css';
 
 // معلومات الخطط
 const PLAN_INFO = {
-  weekly_plan: {
+  weekly: {
+    id: 'weekly',
     name: 'الخطة الأسبوعية',
     description: 'تحليلات متقدمة وإشارات تداول لمدة أسبوع',
-    features: ['10 إشارات يوميًا', 'تحليل سوق الفوركس', 'دعم الخيارات الثنائية']
+    price: 750,
+    badge: null,
+    features: [
+      { text: '10 إشارات يوميًا' },
+      { text: 'تحليل سوق الفوركس' },
+      { text: 'دعم الخيارات الثنائية' },
+      { text: 'تنبيهات أساسية' }
+    ],
+    idealFor: 'للمتداولين المبتدئين',
+    callToAction: 'اختر الخطة الأسبوعية'
   },
-  monthly_plan: {
+  monthly: {
+    id: 'monthly',
     name: 'الخطة الشهرية',
     description: 'تحليلات متقدمة وإشارات تداول لمدة شهر',
-    features: ['25 إشارة يوميًا', 'تحليل سوق الفوركس والعملات الرقمية', 'دعم الخيارات الثنائية', 'تنبيهات فورية']
+    price: 2300,
+    badge: { text: 'الأكثر شعبية', color: 'bg-yellow-500' },
+    features: [
+      { text: '25 إشارة يوميًا' },
+      { text: 'تحليل سوق الفوركس والعملات الرقمية' },
+      { text: 'دعم الخيارات الثنائية' },
+      { text: 'تنبيهات فورية' },
+      { text: 'تحليلات السوق الأسبوعية' }
+    ],
+    idealFor: 'للمتداولين النشطين',
+    callToAction: 'اختر الخطة الشهرية'
   },
-  annual_plan: {
+  annual: {
+    id: 'annual',
     name: 'الخطة السنوية',
     description: 'تحليلات متقدمة وإشارات تداول لمدة سنة',
-    features: ['50 إشارة يوميًا', 'تحليل جميع الأسواق', 'دعم الخيارات الثنائية والعقود', 'تنبيهات فورية', 'دعم فني على مدار الساعة']
+    price: 10000,
+    badge: { text: 'أفضل قيمة', color: 'bg-green-500' },
+    features: [
+      { text: '50 إشارة يوميًا' },
+      { text: 'تحليل جميع الأسواق' },
+      { text: 'دعم الخيارات الثنائية والعقود' },
+      { text: 'تنبيهات فورية' },
+      { text: 'دعم فني على مدار الساعة' },
+      { text: 'تقارير تحليلية شهرية' },
+      { text: 'استراتيجيات متقدمة' }
+    ],
+    idealFor: 'للمتداولين المحترفين',
+    callToAction: 'اختر الخطة السنوية'
   },
-  premium_plan: {
+  premium: {
+    id: 'premium',
     name: 'الخطة المتميزة',
     description: 'جميع الميزات المتقدمة لمدة سنة',
-    features: ['إشارات غير محدودة', 'تحليل متقدم لجميع الأسواق', 'روبوت تداول آلي', 'دعم فني مخصص', 'تدريب شخصي']
+    price: 18500,
+    badge: null,
+    features: [
+      { text: 'إشارات غير محدودة' },
+      { text: 'تحليل متقدم لجميع الأسواق' },
+      { text: 'روبوت تداول آلي' },
+      { text: 'دعم فني مخصص' },
+      { text: 'تدريب شخصي' },
+      { text: 'استراتيجيات خاصة' },
+      { text: 'تقارير مخصصة' },
+      { text: 'مجتمع المتداولين المميزين' }
+    ],
+    idealFor: 'للمتداولين المتقدمين والمؤسسات',
+    callToAction: 'اختر الخطة المتميزة'
   }
 };
 
+// واجهة لمعلومات مستخدم تلجرام
+interface TelegramUser {
+  id: number;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+}
+
+// تطبيق تلجرام المصغر
 export default function TelegramMiniApp() {
-  const { toast } = useToast();
+  const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const [telegramUser, setTelegramUser] = useState<any>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // استرجاع معلومات المستخدم من Telegram WebApp
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
+  const [telegramWebApp, setTelegramWebApp] = useState<any>(null);
+  
+  // تحميل واجهة برمجة تطبيقات تلجرام
   useEffect(() => {
-    // التحقق من تحميل SDK تلجرام
-    const initTelegramWebApp = () => {
-      if (window.Telegram && window.Telegram.WebApp) {
-        try {
-          // إخبار تلجرام أن التطبيق جاهز
-          window.Telegram.WebApp.ready();
-
-          // استخراج معلومات المستخدم من initDataUnsafe
-          if (window.Telegram.WebApp.initDataUnsafe?.user) {
-            setTelegramUser(window.Telegram.WebApp.initDataUnsafe.user);
-          }
-
-          // تهيئة زر الرجوع
-          window.Telegram.WebApp.BackButton.hide();
-
-          setIsInitialized(true);
-          
-          console.log('تم تهيئة Telegram WebApp بنجاح');
-        } catch (error) {
-          console.error('خطأ في تهيئة Telegram WebApp:', error);
-          toast({
-            title: 'خطأ في التهيئة',
-            description: 'حدث خطأ أثناء تهيئة التطبيق المصغر',
-            variant: 'destructive'
-          });
-        }
-      } else {
-        console.warn('Telegram WebApp SDK غير متاح. ربما لا يتم فتح الصفحة داخل تطبيق تلجرام.');
+    const tgWebApp = (window as any).Telegram?.WebApp;
+    
+    if (tgWebApp) {
+      console.log('تم اكتشاف Telegram WebApp SDK');
+      setTelegramWebApp(tgWebApp);
+      
+      // إخبار تطبيق تلجرام أن التطبيق جاهز
+      tgWebApp.ready();
+      
+      // الحصول على معلومات المستخدم
+      if (tgWebApp.initDataUnsafe?.user) {
+        setTelegramUser(tgWebApp.initDataUnsafe.user);
       }
-    };
-
-    initTelegramWebApp();
-
-    // تنظيف عند فك التثبيت
-    return () => {
-      if (window.Telegram?.WebApp) {
-        // إلغاء أي أحداث مسجلة
-        const mainButtonHandler = () => {};
-        window.Telegram.WebApp.MainButton.offClick(mainButtonHandler);
+      
+      // تكوين سلوك الزر الرئيسي
+      tgWebApp.MainButton.setParams({
+        text: 'اختر خطة للاشتراك',
+        color: tgWebApp.themeParams.button_color || '#50a8eb',
+        text_color: tgWebApp.themeParams.button_text_color || '#ffffff',
+        is_visible: false
+      });
+      
+      // إضافة الداكن إذا كان وضع تلجرام داكناً
+      if (tgWebApp.colorScheme === 'dark') {
+        document.body.classList.add('dark');
       }
-    };
-  }, [toast]);
-
-  // معالجة اختيار الخطة
-  const handlePlanSelection = (planId: string) => {
+    } else {
+      console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
+    }
+  }, []);
+  
+  // اختيار خطة
+  const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
     
-    // إظهار زر الدفع الرئيسي في واجهة تلجرام
-    if (window.Telegram?.WebApp?.MainButton) {
-      window.Telegram.WebApp.MainButton.text = `الدفع (${PLAN_PRICES[planId as keyof typeof PLAN_PRICES]} نجمة)`;
-      window.Telegram.WebApp.MainButton.onClick(() => handlePayment(planId));
-      window.Telegram.WebApp.MainButton.show();
+    // تحديث زر تلجرام الرئيسي
+    if (telegramWebApp?.MainButton) {
+      const plan = PLAN_INFO[planId as keyof typeof PLAN_INFO];
+      telegramWebApp.MainButton.setText(`الدفع (${plan.price} نجمة)`);
+      telegramWebApp.MainButton.show();
+      telegramWebApp.MainButton.onClick(() => handlePayment(planId));
     }
   };
-
-  // معالجة عملية الدفع
+  
+  // معالجة الدفع
   const handlePayment = (planId: string) => {
+    if (!planId) return;
+    
+    setIsProcessing(true);
+    const plan = PLAN_INFO[planId as keyof typeof PLAN_INFO];
+    
+    // إنشاء معرف فريد للدفع
+    const paymentId = `tgmini_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    
+    // تجهيز بيانات الدفع
+    const paymentData = {
+      action: 'process_stars_payment',
+      paymentId,
+      planId: planId,
+      starsAmount: plan.price,
+      timestamp: Date.now()
+    };
+    
+    // إضافة معلومات المستخدم إذا كانت متاحة
+    if (telegramUser) {
+      Object.assign(paymentData, {
+        userId: telegramUser.id,
+        username: telegramUser.username,
+        firstName: telegramUser.first_name,
+        lastName: telegramUser.last_name
+      });
+    }
+    
+    console.log('بيانات الدفع:', paymentData);
+    
     try {
-      const starsAmount = PLAN_PRICES[planId as keyof typeof PLAN_PRICES];
-      const paymentId = `tgmini_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-      
-      // إعداد بيانات الدفع
-      const paymentData = {
-        planId,
-        starsAmount,
-        paymentId,
-        telegramUserId: telegramUser?.id,
-        username: telegramUser?.username || 'guest',
-        timestamp: Date.now()
-      };
-      
-      console.log('معالجة الدفع بنجوم تلجرام:', paymentData);
-      
-      // إرسال البيانات إلى تطبيق تلجرام الأم
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.sendData(JSON.stringify(paymentData));
+      // إرسال البيانات مباشرة إلى تطبيق تلجرام
+      if (telegramWebApp) {
+        telegramWebApp.sendData(JSON.stringify(paymentData));
+        console.log('تم إرسال بيانات الدفع بنجاح إلى تلجرام');
         
-        toast({
-          title: 'تمت المعالجة',
-          description: 'تم إرسال طلب الدفع بنجاح. يرجى إكمال العملية في تلجرام.',
-          duration: 3000
-        });
+        // إخفاء شاشة التحميل بعد إرسال البيانات بنجاح
+        setTimeout(() => {
+          setIsProcessing(false);
+        }, 800);
       } else {
-        // في حالة الاختبار خارج تلجرام
-        toast({
-          title: 'وضع الاختبار',
-          description: 'تم محاكاة عملية الدفع بنجاح.',
-          duration: 3000
+        // في حالة التشغيل خارج تلجرام، نرسل الطلب إلى الخادم
+        fetch('/api/telegram-payments/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          setIsProcessing(false);
+          if (data.success) {
+            toast({
+              title: 'تمت معالجة الطلب بنجاح',
+              description: 'سيتم توجيهك إلى تلجرام لإكمال الدفع',
+              variant: 'default'
+            });
+            
+            // توجيه المستخدم إلى بوت تلجرام
+            window.location.href = `https://t.me/OXG_OXG?start=pay_${planId}_${paymentId}`;
+          } else {
+            toast({
+              title: 'حدث خطأ',
+              description: data.message || 'فشلت معالجة الطلب. يرجى المحاولة مرة أخرى.',
+              variant: 'destructive'
+            });
+          }
+        })
+        .catch(error => {
+          console.error('خطأ في معالجة الدفع:', error);
+          setIsProcessing(false);
+          toast({
+            title: 'حدث خطأ في الاتصال',
+            description: 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.',
+            variant: 'destructive'
+          });
         });
       }
     } catch (error) {
-      console.error('خطأ في معالجة الدفع:', error);
+      console.error('خطأ في إرسال بيانات الدفع:', error);
+      setIsProcessing(false);
       toast({
-        title: 'خطأ في الدفع',
-        description: 'حدث خطأ أثناء معالجة عملية الدفع. يرجى المحاولة مرة أخرى.',
+        title: 'حدث خطأ',
+        description: 'فشلت معالجة الطلب. يرجى المحاولة مرة أخرى.',
         variant: 'destructive'
       });
     }
@@ -209,45 +263,67 @@ export default function TelegramMiniApp() {
           >
             <CardHeader>
               <CardTitle>{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
+              <div className="flex justify-between items-center">
+                <div className="text-xl font-bold text-primary flex items-center">
+                  <Star className="h-5 w-5 mr-1 text-yellow-500" />
+                  {plan.price} <span className="text-sm mr-1">نجمة</span>
+                </div>
+                {plan.badge && (
+                  <div className={`text-xs text-white px-2 py-1 rounded-full text-center ${plan.badge.color}`}>
+                    {plan.badge.text}
+                  </div>
+                )}
+              </div>
             </CardHeader>
+            
             <CardContent>
-              <div className="text-2xl font-bold mb-4 flex items-center">
-                <span className="text-yellow-500 mr-2">⭐</span>
-                {PLAN_PRICES[planId as keyof typeof PLAN_PRICES]} نجمة
-              </div>
+              <p className="text-muted-foreground mb-4">{plan.description}</p>
               
-              <Separator className="my-4" />
-              
-              <div className="space-y-2">
-                <Label>المميزات:</Label>
-                <ul className="space-y-1 list-disc list-inside">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="text-sm">{feature}</li>
-                  ))}
-                </ul>
-              </div>
+              <ul className="space-y-2 mb-4">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start">
+                    <Check className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="feature-text">
+                      {feature.text}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
-            <CardFooter>
+            
+            <CardFooter className="pt-2 pb-4 px-3 flex flex-col">
+              <div className="ideal-for mb-3 flex items-center justify-center text-center text-sm">
+                {plan.id === 'monthly' && (
+                  <Zap className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
+                )}
+                {plan.id === 'premium' && (
+                  <Star className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
+                )}
+                <span>{plan.idealFor}</span>
+              </div>
+              
               <Button 
-                className="w-full" 
-                onClick={() => handlePlanSelection(planId)}
-                variant={selectedPlan === planId ? "default" : "outline"}
+                className="subscription-button"
+                onClick={() => handlePlanSelect(plan.id)}
+                disabled={isProcessing}
               >
-                {selectedPlan === planId ? 'الخطة المختارة ✓' : 'اختر هذه الخطة'}
+                {isProcessing && selectedPlan === plan.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('processing')}
+                  </>
+                ) : (
+                  plan.callToAction
+                )}
               </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
 
-      {!isInitialized && (
-        <div className="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-          <p className="text-yellow-600 dark:text-yellow-400">
-            يرجى التأكد من فتح هذه الصفحة من خلال تطبيق تلجرام للحصول على أفضل تجربة.
-          </p>
-        </div>
-      )}
+      <div className="note text-center text-sm text-muted-foreground mb-4">
+        <p>ملاحظة: سيتم معالجة الدفع عبر نجوم تلجرام مباشرة.</p>
+      </div>
     </div>
   );
 }
