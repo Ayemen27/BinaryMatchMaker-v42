@@ -254,7 +254,7 @@ export class TelegramBotService {
   }
   
   /**
-   * معالجة الدفع بالنجوم
+   * معالجة الدفع بالنجوم (باستخدام واجهة فواتير تليجرام)
    */
   private async processPayment(
     chatId: number, 
@@ -269,12 +269,94 @@ export class TelegramBotService {
     
     // إنشاء معرف فريد للمعاملة
     const paymentId = `tg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const telegramUserId = user.id.toString();
     
     try {
-      // إرسال رسالة قيد المعالجة
-      await this.sendMessage(chatId, '⏳ جاري معالجة الدفع...');
+      // إعداد عناوين الخطط
+      const planTitles: {[key: string]: string} = {
+        'weekly': 'اشتراك أسبوعي',
+        'monthly': 'اشتراك شهري',
+        'annual': 'اشتراك سنوي',
+        'premium': 'اشتراك بريميوم'
+      };
+
+      // إعداد وصف الخطط
+      const planDescriptions: {[key: string]: string} = {
+        'weekly': 'اشتراك أسبوعي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة أسبوع',
+        'monthly': 'اشتراك شهري في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة شهر',
+        'annual': 'اشتراك سنوي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة سنة',
+        'premium': 'اشتراك بريميوم في BinarJoin Analytics - جميع الميزات المتقدمة لمدة سنة'
+      };
       
-      // استدعاء خدمة معالجة الدفع
+      // إنشاء فاتورة دفع بنجوم تليجرام
+      const invoiceUrl = `https://api.telegram.org/bot${this.botToken}/sendInvoice`;
+      
+      // بيانات الفاتورة
+      const invoiceData = {
+        chat_id: chatId,
+        title: planTitles[planType] || `اشتراك ${planType}`,
+        description: planDescriptions[planType] || 'اشتراك في منصة BinarJoin Analytics للتحليلات المتقدمة',
+        payload: `${paymentId}_${planType}_${telegramUserId}`,
+        provider_token: this.botToken, // يمكن أن تحتاج إلى توكن مخصص للمدفوعات في الإنتاج
+        currency: 'XTR', // عملة نجوم تليجرام
+        prices: [
+          {
+            label: `اشتراك ${planType}`,
+            amount: starsAmount
+          }
+        ],
+        start_parameter: `payment_${planType}_${starsAmount}`
+      };
+      
+      console.log('[خدمة البوت] محاولة إرسال فاتورة دفع:', JSON.stringify(invoiceData, null, 2).substring(0, 200));
+      
+      // إرسال فاتورة الدفع
+      const response = await fetch(invoiceUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(invoiceData)
+      });
+      
+      const result = await response.json();
+      
+      if (result.ok) {
+        console.log('[خدمة البوت] تم إرسال فاتورة الدفع بنجاح:', result.result.message_id);
+        
+        // إرسال تعليمات إضافية
+        await this.sendMessage(chatId, 
+          '📋 تم إنشاء فاتورة الدفع أعلاه. يرجى إكمال عملية الدفع خلال الفاتورة.\n\n' +
+          '✅ بعد إتمام الدفع، سيتم تفعيل اشتراكك تلقائيًا.'
+        );
+      } else {
+        console.error('[خدمة البوت] فشل في إرسال فاتورة الدفع:', result);
+        
+        // استخدام طريقة الدفع التقليدية في حال فشل إرسال الفاتورة
+        await this.legacyPaymentProcess(chatId, planType, starsAmount, user, paymentId);
+      }
+    } catch (error) {
+      console.error('[خدمة البوت] خطأ في معالجة الدفع:', error);
+      
+      // استخدام طريقة الدفع التقليدية في حال حدوث خطأ
+      await this.legacyPaymentProcess(chatId, planType, starsAmount, user, paymentId);
+    }
+  }
+  
+  /**
+   * عملية الدفع التقليدية (احتياطية)
+   */
+  private async legacyPaymentProcess(
+    chatId: number, 
+    planType: string, 
+    starsAmount: number, 
+    user: any,
+    paymentId: string
+  ): Promise<void> {
+    try {
+      // إرسال رسالة قيد المعالجة
+      await this.sendMessage(chatId, '⏳ جاري معالجة الدفع بالطريقة التقليدية...');
+      
       const telegramUserId = user.id.toString();
       
       // محاولة العثور على المستخدم أو إنشاء حساب مؤقت له
@@ -304,7 +386,7 @@ export class TelegramBotService {
         throw new Error('فشل في معالجة الدفع');
       }
     } catch (error) {
-      console.error('[خدمة البوت] خطأ في معالجة الدفع:', error);
+      console.error('[خدمة البوت] خطأ في معالجة الدفع التقليدي:', error);
       
       await this.sendMessage(chatId, 
         '❌ حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى لاحقًا أو التواصل مع الدعم الفني.'
