@@ -264,38 +264,68 @@ function handlePayment() {
   // إنشاء معرف فريد للدفع
   const paymentId = `tgmini_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
   
-  // تجهيز بيانات الدفع
-  const paymentData = {
-    action: 'process_stars_payment',
-    paymentId,
-    planId: selectedPlan,
-    starsAmount: plan.price,
-    timestamp: Date.now()
-  };
+  // تحويل نوع الخطة إلى الصيغة المطلوبة (weekly_plan -> weekly)
+  const planType = selectedPlan.replace('_plan', '');
   
-  // إضافة معلومات المستخدم إذا كانت متاحة
-  if (telegramUser) {
-    paymentData.userId = telegramUser.id;
-    paymentData.username = telegramUser.username;
-    paymentData.firstName = telegramUser.first_name;
-    paymentData.lastName = telegramUser.last_name;
-  }
-  
-  console.log('بيانات الدفع:', paymentData);
-  
-  // إرسال البيانات إلى التطبيق الأم
   if (telegramWebApp) {
     try {
-      // إرسال البيانات مباشرة إلى تطبيق تلجرام
-      telegramWebApp.sendData(JSON.stringify(paymentData));
-      console.log('تم إرسال بيانات الدفع بنجاح إلى تلجرام');
+      // طريقة 1: استخدام openTelegramLink لفتح بوت الدفع مباشرة
+      const botUsername = 'Payment_gateway_Binar_bot';
       
-      // إخفاء شاشة التحميل بعد إرسال البيانات بنجاح
-      setTimeout(() => {
-        document.getElementById('loading').classList.add('hidden');
-      }, 800);
+      // إعداد معلمات البوت
+      let userParams = '';
+      if (telegramUser) {
+        userParams = `_${telegramUser.id}`;
+        if (telegramUser.username) {
+          userParams += `_${telegramUser.username}`;
+        }
+      }
+      
+      // إنشاء رابط بدء البوت مع معلمات الدفع
+      const startParam = `pay_${planType}_${plan.price}${userParams}`;
+      const botUrl = `https://t.me/${botUsername}?start=${startParam}`;
+      
+      console.log('فتح رابط بوت الدفع:', botUrl);
+      
+      // إخفاء شاشة التحميل
+      document.getElementById('loading').classList.add('hidden');
+      
+      // استخدام المنصة لفتح البوت (إذا أمكن)
+      if (telegramWebApp.platform && ['android', 'ios', 'macos', 'tdesktop'].includes(telegramWebApp.platform)) {
+        // في منصات الموبايل وسطح المكتب، نفتح البوت مباشرة
+        telegramWebApp.openTelegramLink(botUrl);
+      } else {
+        // طريقة 2: إرسال البيانات إلى التطبيق الأم لمعالجتها
+        // تجهيز بيانات الدفع
+        const paymentData = {
+          action: 'process_stars_payment',
+          paymentId,
+          planId: selectedPlan,
+          planType: planType,
+          starsAmount: plan.price,
+          timestamp: Date.now()
+        };
+        
+        // إضافة معلومات المستخدم إذا كانت متاحة
+        if (telegramUser) {
+          paymentData.userId = telegramUser.id;
+          paymentData.username = telegramUser.username;
+          paymentData.firstName = telegramUser.first_name;
+          paymentData.lastName = telegramUser.last_name;
+        }
+        
+        console.log('إرسال بيانات الدفع للتطبيق الأم:', paymentData);
+        
+        // إرسال البيانات إلى الصفحة الأم
+        telegramWebApp.sendData(JSON.stringify(paymentData));
+        
+        // إظهار رسالة للمستخدم
+        if (telegramWebApp.showAlert) {
+          telegramWebApp.showAlert('تم إرسال طلب الدفع بنجاح. سيتم تحويلك إلى بوت الدفع.');
+        }
+      }
     } catch (error) {
-      console.error('خطأ في إرسال بيانات الدفع:', error);
+      console.error('خطأ في معالجة الدفع:', error);
       document.getElementById('loading').classList.add('hidden');
       
       if (telegramWebApp?.showAlert) {
@@ -308,9 +338,16 @@ function handlePayment() {
     // محاكاة الدفع عندما نكون خارج تطبيق تلجرام
     console.log('محاكاة الدفع في وضع التجربة');
     
+    // إنشاء رابط البوت للاختبار
+    const botUsername = 'Payment_gateway_Binar_bot';
+    const startParam = `pay_${planType}_${plan.price}`;
+    const botUrl = `https://t.me/${botUsername}?start=${startParam}`;
+    
+    console.log('رابط محاكاة البوت:', botUrl);
+    
     setTimeout(() => {
       document.getElementById('loading').classList.add('hidden');
-      alert(`تمت محاكاة الدفع بنجاح للخطة: ${plan.title}\nالمبلغ: ${plan.price} نجمة`);
+      alert(`تمت محاكاة الدفع بنجاح للخطة: ${plan.title}\nالمبلغ: ${plan.price} نجمة\nيمكنك الدفع عبر الرابط: ${botUrl}`);
     }, 1500);
   }
 }
