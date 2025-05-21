@@ -316,8 +316,8 @@ export default function SubscriptionPage() {
       console.error('فشل في حفظ حالة الطلب', e);
     }
     
-    // إنشاء رابط تلجرام مع معرف الطلب (باستخدام البوت الصحيح)
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=payment_${paymentId}_${planId}_${starsAmount}_${botVersion}`;
+    // إنشاء رابط تلجرام مع معرف الطلب (باستخدام البوت الصحيح والصيغة المبسطة)
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=${planId}_${starsAmount}`;
     
     // إرسال إشعار للمستخدم
     toast({
