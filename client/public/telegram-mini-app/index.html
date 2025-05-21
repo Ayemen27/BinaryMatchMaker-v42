@@ -33,6 +33,74 @@
     </div>
   </div>
 
+  <!-- النافذة المنبثقة للتأكيد قبل الدفع بنجوم تلجرام -->
+  <div id="payment-popup" class="popup-overlay">
+    <div class="popup-container">
+      <div class="popup-header">
+        <h3 class="popup-title">تأكيد الاشتراك</h3>
+        <p class="popup-subtitle" id="popup-plan-name">خطة الاشتراك</p>
+        <button class="popup-close" id="popup-close-btn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="popup-content">
+        <div class="popup-section">
+          <h4 class="popup-section-title">طريقة الدفع</h4>
+          <div class="payment-methods">
+            <div class="payment-method selected" id="stars-payment-method">
+              <div class="payment-method-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="payment-method-details">
+                <p class="payment-method-name">نجوم تلجرام</p>
+                <p class="payment-method-description">دفع سريع ومباشر</p>
+              </div>
+              <div class="payment-method-price" id="stars-price">0</div>
+            </div>
+            <div class="payment-method" id="usd-payment-method">
+              <div class="payment-method-icon">
+                <i class="fas fa-credit-card"></i>
+              </div>
+              <div class="payment-method-details">
+                <p class="payment-method-name">بطاقة ائتمان</p>
+                <p class="payment-method-description">دفع آمن</p>
+              </div>
+              <div class="payment-method-price" id="usd-price">$0</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="popup-section">
+          <h4 class="popup-section-title">ملخص الطلب</h4>
+          <div class="order-summary">
+            <div class="order-item">
+              <span class="order-item-label">المستخدم:</span>
+              <span class="order-item-value" id="popup-user-id">-</span>
+            </div>
+            <div class="order-item">
+              <span class="order-item-label">الخطة:</span>
+              <span class="order-item-value" id="popup-plan-type">-</span>
+            </div>
+            <div class="order-item">
+              <span class="order-item-label">المدة:</span>
+              <span class="order-item-value" id="popup-duration">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="popup-footer">
+        <button class="popup-button" id="confirm-payment-btn">
+          تأكيد الدفع بالنجوم
+        </button>
+        <p class="popup-disclaimer">
+          بالضغط على تأكيد، أنت توافق على شروط الخدمة وسياسة الخصوصية
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
