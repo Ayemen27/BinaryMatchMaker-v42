@@ -5,11 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet';
-import { 
-  Check, Star, Shield, Award, Medal, Loader2, Zap, 
-  AlertCircle, Info, Globe, User, Menu
-} from 'lucide-react';
+import { Check, Star, Shield, Award, Medal, Loader2, Zap, Info } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { LoadingScreen } from '@/components/telegram/loading-screen';
+import { TelegramHeader } from '@/components/telegram/header';
 import '../styles/subscription.css';
 import '../styles/telegram-mini-app.css';
 
@@ -20,86 +19,6 @@ interface TelegramUser {
   last_name?: string;
   username?: string;
   language_code?: string;
-}
-
-// مكون صفحة التحميل الاحترافية
-function LoadingScreen({ text = 'جاري التحميل...', t }: { text?: string, t: any }) {
-  return (
-    <div 
-      className="telegram-loader-container"
-    >
-      <div className="telegram-loader-icon">
-        <div className="telegram-loader-icon-pulse"></div>
-        <div className="telegram-loader-icon-inner"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Star className="h-12 w-12 text-primary" />
-        </div>
-      </div>
-      
-      <h2 className="text-2xl font-bold mb-2 text-center">{t('loadingTelegramApp')}</h2>
-      <p className="text-muted-foreground text-center max-w-xs">{t('preparingPaymentInterface')}</p>
-      
-      <div className="telegram-loader-progress">
-        <div className="telegram-loader-progress-bar"></div>
-      </div>
-      <p className="text-sm text-muted-foreground mt-2">{t('connectingToTelegram')}</p>
-    </div>
-  );
-}
-
-// مكون الشريط العلوي
-function TelegramHeader({ 
-  telegramUser, 
-  i18n, 
-  t 
-}: { 
-  telegramUser: TelegramUser | null, 
-  i18n: any,
-  t: any
-}) {
-  return (
-    <header className="telegram-app-header">
-      <div className="container mx-auto flex justify-between items-center">
-        <div className="flex items-center">
-          <Menu className="h-5 w-5 mr-2 md:hidden" />
-          <h1 className="text-lg font-bold">BinarJoin Analytics</h1>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-white hover:bg-primary-800"
-            onClick={() => {
-              const newLang = i18n.language === 'ar' ? 'en' : 'ar';
-              i18n.changeLanguage(newLang);
-              localStorage.setItem('language', newLang);
-              document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-            }}
-          >
-            <Globe className="h-4 w-4 mr-1" />
-            <span className="text-sm">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
-          </Button>
-          
-          <div className="flex items-center border-l border-white/20 pl-3">
-            {telegramUser ? (
-              <div className="flex items-center">
-                <div className="telegram-user-avatar">
-                  {telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}
-                </div>
-                <span className="text-sm hidden md:inline-block">{telegramUser.first_name || t('guest')}</span>
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <User className="h-4 w-4 mr-1" />
-                <span className="text-sm">{t('guest')}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  );
 }
 
 export default function TelegramStarsMiniApp() {
@@ -127,7 +46,7 @@ export default function TelegramStarsMiniApp() {
     premium: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic V.4.1']
   };
   
-  // بنية خطط الاشتراك مع مزيد من التفاصيل والميزات
+  // بنية خطط الاشتراك
   const plans = [
     {
       id: 'weekly',
@@ -417,6 +336,7 @@ export default function TelegramStarsMiniApp() {
     }
   };
 
+  // عرض صفحة التحميل
   if (isLoading) {
     return (
       <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
@@ -429,6 +349,7 @@ export default function TelegramStarsMiniApp() {
     );
   }
 
+  // عرض واجهة المستخدم الرئيسية
   return (
     <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <Helmet>
