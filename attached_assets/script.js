@@ -211,6 +211,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // واجهة تبديل العملة للاستخدام في onclick
     window.toggleCurrency = function(planName) {
+        // تسجيل عملية تبديل العملة للتتبع
+        const currentCurrency = localStorage.getItem('currency') || 'USD';
+        const newCurrency = currentCurrency === 'USD' ? 'STARS' : 'USD';
+        console.log(`[CurrencySystem] Switching currency for plan "${planName}" from ${currentCurrency} to ${newCurrency}`);
+        
         window.currencySystem.switchCurrency(planName);
         return false; // منع الإجراء الافتراضي
     };
@@ -539,17 +544,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // العثور على بطاقة الخطة
                 const planCard = event.target ? event.target.closest('.plan-card') : null;
-                if (!planCard) return false;
+                if (!planCard) {
+                    console.log('[StarPaymentSystem] Error: Plan card not found');
+                    return false;
+                }
                 
                 // التحقق من اختيار نسخة البوت
                 const botInfo = this.validateBotSelection(planCard);
-                if (!botInfo) return false;
+                if (!botInfo) {
+                    console.log('[StarPaymentSystem] Error: Bot version not selected');
+                    return false;
+                }
                 
                 // استخراج معلومات الخطة
                 const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
                 
                 // حساب عدد النجوم وتخزين التفاصيل
                 const starsAmount = this.getStarsAmount(planName);
+                
+                console.log(`[StarPaymentSystem] Processing Telegram payment for plan: ${planName}`);
+                console.log(`[StarPaymentSystem] Stars amount: ${starsAmount}, Bot version: ${botInfo.botVersion}`);
                 
                 // تخزين البيانات للرجوع إليها لاحقاً
                 localStorage.setItem('selectedPlan', planName);
@@ -559,12 +573,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // إعداد الرسالة وفتح رابط تلجرام
                 const message = this.prepareMessage(planName, botInfo.botVersion, starsAmount);
+                console.log('[StarPaymentSystem] Redirecting to Telegram bot');
                 window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
                 
                 // إغلاق أي نافذة منبثقة قد تكون مفتوحة
                 const modal = document.getElementById('paymentModal');
                 if (modal) {
                     modal.style.display = 'none';
+                    console.log('[StarPaymentSystem] Closed payment modal');
                 }
                 
                 return true;
@@ -590,11 +606,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // الحصول على العملة الحالية
         const currentCurrency = localStorage.getItem('currency') || 'USD';
         
+        // تسجيل بيانات عملية الدفع للتتبع والتحليل
+        console.log('[PaymentSystem] Payment attempt with currency:', currentCurrency);
+        
+        // العثور على معلومات الخطة
+        const planCard = event.target.closest('.plan-card');
+        if (planCard) {
+            const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
+            console.log('[PaymentSystem] Plan selected:', planName);
+        }
+        
         // التحقق من نوع العملة
         if (currentCurrency === 'STARS') {
+            console.log('[PaymentSystem] Using Telegram Stars payment - direct redirect without popup');
             // استخدام نظام دفع نجوم تلجرام مباشرة بدون نوافذ منبثقة
             window.starPaymentSystem.processTelegramPayment(event);
         } else {
+            console.log('[PaymentSystem] Using USD payment - showing payment popup');
             // استخدام النافذة المنبثقة للدفع التقليدي
             showPaymentModal(event);
         }
