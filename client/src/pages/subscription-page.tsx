@@ -328,7 +328,12 @@ export default function SubscriptionPage() {
     
     // استخدام اسم المستخدم الدقيق للبوت مع تمرير معلومات الدفع
     const planType = planId.replace('_plan', ''); // تحويل "weekly_plan" إلى "weekly"
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}`;
+    
+    // إضافة معلومات المستخدم كمعلمة في أمر البدء
+    const userId = user?.id || 'guest';
+    const username = encodeURIComponent(user?.username || 'guest');
+    // إنشاء رابط للبوت مع جميع المعلومات المطلوبة
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
     
     // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
     localStorage.setItem('selectedPlan', planId);
