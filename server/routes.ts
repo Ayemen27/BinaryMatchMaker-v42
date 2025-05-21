@@ -27,56 +27,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Telegram payments routes (مدفوعات نجوم تلجرام)
   app.use('/api/telegram-payments', telegramPaymentsRoutes);
   
-  // مسار مخصص لتلقي التحديثات من تليجرام بدون المرور عبر مسارات المدفوعات
+  // Telegram bot routes (مسارات بوت تليجرام)
+  app.use('/api/telegram-bot', telegramBotRoutes);
+  
+  // توجيه مسار الويب هوك القديم إلى المسار الجديد (للتوافق مع الإصدارات القديمة)
   app.post('/api/telegram-payments/webhook', express.json(), (req, res) => {
-    // ارسال استجابة 200 فوراً لتفادي إعادة الإرسال من طرف تليجرام
-    res.status(200).send("OK");
-    
-    console.log('[بوت تليجرام] استلام تحديث جديد');
-    
-    try {
-      // طباعة البيانات المستلمة للتشخيص
-      if (req.body) {
-        console.log('[بوت تليجرام] محتوى الطلب:');
-        console.log(JSON.stringify(req.body, null, 2).substring(0, 500));
-      }
-      
-      // إذا كانت هناك رسالة في التحديث
-      if (req.body && req.body.message) {
-        const message = req.body.message;
-        const chatId = message.chat?.id;
-        const text = message.text || '';
-        
-        console.log(`[بوت تليجرام] رسالة من ${chatId}: ${text}`);
-        
-        // إرسال رد بسيط إلى المستخدم
-        if (chatId) {
-          const botToken = process.env.TELEGRAM_BOT_TOKEN;
-          
-          if (botToken) {
-            setTimeout(() => {
-              fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  chat_id: chatId,
-                  text: `تم استلام رسالتك: "${text}"\nشكرًا لتواصلك معنا.`
-                })
-              })
-              .then(response => response.json())
-              .then(data => {
-                console.log('[بوت تليجرام] تم إرسال الرد بنجاح:', data.ok);
-              })
-              .catch(error => {
-                console.error('[بوت تليجرام] فشل في إرسال الرد:', error);
-              });
-            }, 500); // تأخير بسيط لضمان استجابة سريعة للويب هوك أولاً
-          }
-        }
-      }
-    } catch (error) {
-      console.error('[بوت تليجرام] خطأ في معالجة تحديث البوت:', error);
-    }
+    console.log('[بوت تليجرام] توجيه الطلب إلى المسار الجديد');
+    // إعادة توجيه الطلب إلى المسار الجديد
+    req.url = '/api/telegram-bot/webhook';
+    app._router.handle(req, res);
   });
 
   // API routes
