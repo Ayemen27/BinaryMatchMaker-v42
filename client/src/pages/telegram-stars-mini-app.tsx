@@ -43,7 +43,7 @@ export default function TelegramStarsMiniApp() {
     weekly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0'],
     monthly: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0'],
     annual: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0'],
-    premium: ['BinarJoinAnalytic v1.0', 'BinarJoinAnalytic Main v2.0', 'BinarJoinAnalytic AI v3.0', 'BinarJoinAnalytic V.4.1']
+    premium: ['BinarJoinAnalytic V.4.1'] // تحديث لاستخدام إصدار 4.1 فقط
   };
   
   // بنية خطط الاشتراك
@@ -64,6 +64,7 @@ export default function TelegramStarsMiniApp() {
         { text: t('dailyMarketUpdates'), available: true },
         { text: t('beginnerFriendlyTools'), available: true },
         { text: t('privateTelegramAccess'), available: true },
+        { text: t('prioritySupport'), available: true },
       ],
       idealFor: t('idealForBeginners'),
       isPopular: false,
@@ -86,6 +87,7 @@ export default function TelegramStarsMiniApp() {
         { text: t('customPairAnalysis'), available: true },
         { text: t('weeklyPerformanceReports'), available: true },
         { text: t('educationalContentAccess'), available: true },
+        { text: t('directExpertSupport'), available: true },
       ],
       idealFor: t('perfectForActiveTraders'),
       isPopular: true,
@@ -108,6 +110,7 @@ export default function TelegramStarsMiniApp() {
         { text: t('advancedMarketReports'), available: true },
         { text: t('vipSupport'), available: true },
         { text: t('partialRefundGuarantee'), available: true },
+        { text: t('advancedTradingTools'), available: true },
       ],
       idealFor: t('designedForProfessionals'),
       isPopular: false,
@@ -130,6 +133,7 @@ export default function TelegramStarsMiniApp() {
         { text: t('ultraFastMarketInsights'), available: true },
         { text: t('exclusiveStrategies'), available: true },
         { text: t('dedicatedAccountManager'), available: true },
+        { text: t('prioritySignalDelivery'), available: true },
       ],
       idealFor: t('idealForV41'),
       isPopular: false,
@@ -407,9 +411,9 @@ export default function TelegramStarsMiniApp() {
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`subscription-card ${selectedPlan === plan.id ? 'selected' : 'border-border'}`}
+              className={`border-2 hover:shadow-md transition-all ${selectedPlan === plan.id ? 'border-primary' : 'border-border'}`}
             >
-              <CardHeader className="subscription-card-header pb-2">
+              <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle>{plan.name}</CardTitle>
@@ -429,17 +433,27 @@ export default function TelegramStarsMiniApp() {
               </CardHeader>
               
               <CardContent className="pb-2">
-                <div className="mb-4 flex items-center">
-                  <div className="subscription-price text-2xl text-primary">
-                    <Star className="h-5 w-5 text-yellow-500" />
-                    {plan.price} <span className="text-sm">{t('stars')}</span>
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-xl font-bold text-primary flex items-center">
+                    <Star className="h-5 w-5 mr-1 text-yellow-500" />
+                    {plan.price} <span className="text-sm mr-1">{t('stars')}</span>
                   </div>
+                  <div className="text-xs text-muted-foreground">{plan.period}</div>
                 </div>
                 
-                <p className="text-sm mb-2 font-medium">{plan.description}</p>
+                <p className="text-sm font-medium mb-2">{plan.description}</p>
                 
                 {plan.extraDescription && (
                   <p className="text-xs text-muted-foreground mb-3">{plan.extraDescription}</p>
+                )}
+                
+                {plan.id === 'premium' && (
+                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg mb-4 border border-yellow-100 dark:border-yellow-800">
+                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
+                      <Medal className="h-4 w-4 inline-block mr-1" /> {t('exclusiveAccess')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{t('v41ExtraDescription')}</p>
+                  </div>
                 )}
                 
                 <div className="mb-4">
@@ -461,21 +475,31 @@ export default function TelegramStarsMiniApp() {
                   </Select>
                 </div>
                 
-                <div className="space-y-2 mb-4">
+                <ul className="space-y-2 mb-4">
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="subscription-feature">
-                      <Check className="subscription-feature-icon h-4 w-4" />
-                      <span className="text-sm">{feature.text}</span>
-                    </div>
+                    <li key={index} className="flex items-start">
+                      <Check className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">
+                        {feature.text}
+                      </span>
+                    </li>
                   ))}
-                </div>
-                
-                <p className="text-xs text-muted-foreground">{plan.idealFor}</p>
+                </ul>
               </CardContent>
               
-              <CardFooter>
+              <CardFooter className="pt-2 pb-4 px-3 flex flex-col">
+                <div className="ideal-for mb-3 flex items-center justify-center text-center text-sm">
+                  {plan.id === 'monthly' && (
+                    <Zap className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
+                  )}
+                  {plan.id === 'premium' && (
+                    <Star className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
+                  )}
+                  <span>{plan.idealFor}</span>
+                </div>
+                
                 <Button 
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="subscription-button"
                   onClick={() => handlePlanSelect(plan.id)}
                   disabled={isProcessing}
                 >
