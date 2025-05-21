@@ -297,7 +297,7 @@ export class TelegramBotService {
         title: planTitles[planType] || `اشتراك ${planType}`,
         description: planDescriptions[planType] || 'اشتراك في منصة BinarJoin Analytics للتحليلات المتقدمة',
         payload: `${paymentId}_${planType}_${telegramUserId}`,
-        provider_token: this.botToken, // يمكن أن تحتاج إلى توكن مخصص للمدفوعات في الإنتاج
+        provider_token: process.env.TELEGRAM_PAYMENT_TOKEN || '284685063:TEST:ODg3MWM5ZTZlNTRl', // استخدام توكن مخصص للمدفوعات
         currency: 'XTR', // عملة نجوم تليجرام
         prices: [
           {
