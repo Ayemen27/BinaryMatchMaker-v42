@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet';
-import { Check, Star, Shield, Award, Medal, Loader2, Zap, Info, DollarSign } from 'lucide-react';
+import { Check, Star, Shield, Award, Medal, Loader2, Zap, Info, DollarSign, X } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { LoadingScreen } from '@/components/telegram/loading-screen';
 import { TelegramHeader } from '@/components/telegram/header';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import '../styles/subscription.css';
 import '../styles/telegram-mini-app.css';
 
@@ -29,6 +31,10 @@ export default function TelegramStarsMiniApp() {
   const [telegramWebApp, setTelegramWebApp] = useState<any>(null);
   const [selectedBotVersions, setSelectedBotVersions] = useState<{[key: string]: string}>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [username, setUsername] = useState<string>("");
+  const [userStars, setUserStars] = useState<string>("");
+  const [currentPlan, setCurrentPlan] = useState<string>("");
   
   // أسعار الخطط المختلفة - نستخدم فقط أسعار النجوم هنا
   const planPrices = {
@@ -386,40 +392,17 @@ export default function TelegramStarsMiniApp() {
       {/* شريط علوي */}
       <TelegramHeader telegramUser={telegramUser} i18n={i18n} t={t} />
       
-      <div className="container max-w-4xl mx-auto py-6 px-4 mt-16">
+      <div className="container max-w-sm mx-auto py-6 px-2 mt-16">
         <div className="mb-4 text-center">
-          <h1 className="text-2xl font-bold mb-2">{t('tradingSignalSubscriptionPlans')}</h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
-        </div>
-        
-        <div className="mb-4 flex flex-wrap gap-2 justify-center">
-          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="16"></line>
-              <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
-            {t('switchToUSD')}
-          </Button>
-          
-          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 6.63 5.37 12 12 12s12-5.37 12-12C24 5.37 18.63 0 12 0zm5.43 8.43-1.68 7.92c-.13.59-.48.74-.97.46l-2.67-1.97-1.3 1.25c-.14.14-.26.26-.54.26l.19-2.7 4.91-4.44c.21-.19-.05-.28-.33-.1l-6.08 3.83-2.62-.86c-.57-.18-.58-.57.12-.84l10.23-3.94c.47-.18.88.11.74.7z"/>
-            </svg>
-            {t('openInTelegram')}
-          </Button>
-          
-          <Button variant="outline" className="bg-gray-50 text-gray-800 flex items-center gap-1 text-sm py-1 px-3">
-            <Star className="h-3.5 w-3.5 text-yellow-500" />
-            {t('payWithStars')}
-          </Button>
+          <h1 className="text-xl font-bold mb-1">{t('tradingSignalSubscriptionPlans')}</h1>
+          <p className="text-muted-foreground text-sm max-w-xs mx-auto">{t('professionalTradingInsights')}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 mb-8">
+        <div className="grid grid-cols-1 gap-3 mb-8">
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`border-none bg-yellow-50 rounded-lg overflow-hidden shadow-sm mb-8 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
+              className={`border-none bg-yellow-50 rounded-lg overflow-hidden shadow-sm mb-5 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
             >
               {plan.isNew && (
                 <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-tr-md">
@@ -444,15 +427,7 @@ export default function TelegramStarsMiniApp() {
                   <span className="">{plan.priceInUSD}</span>
                 </div>
                 
-                <Button
-                  className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 mb-3 flex items-center justify-center gap-1"
-                  variant="ghost"
-                >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M15 4.5l-6 6 6 6" />
-                  </svg>
-                  التبديل إلى الدولار
-                </Button>
+{/* تم إزالة زر التبديل إلى الدولار */}
                 
                 <p className="text-sm text-center mb-3">{plan.description}</p>
                 
