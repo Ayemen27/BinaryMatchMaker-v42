@@ -53,6 +53,7 @@ export default function TelegramStarsMiniApp() {
       name: t('beginner'),
       label: t('weeklyPlan'),
       price: `${planPrices.weekly.STARS}`,
+      priceInUSD: 750,
       period: t('weekly'),
       description: t('realTimeAnalysis'),
       color: 'from-amber-400 to-yellow-500',
@@ -76,6 +77,7 @@ export default function TelegramStarsMiniApp() {
       name: t('recommended'),
       label: t('monthlyPlan'),
       price: `${planPrices.monthly.STARS}`,
+      priceInUSD: 2300,
       period: t('monthly'),
       description: t('advancedTechnicalAnalysis'),
       color: 'from-amber-400 to-yellow-500',
@@ -99,6 +101,7 @@ export default function TelegramStarsMiniApp() {
       name: t('premium'),
       label: t('annualPlan'),
       price: `${planPrices.annual.STARS}`,
+      priceInUSD: 10000,
       period: t('yearly'),
       description: t('aiPoweredAnalysis'),
       color: 'from-amber-400 to-yellow-500',
@@ -122,6 +125,7 @@ export default function TelegramStarsMiniApp() {
       name: t('premiumData'),
       label: t('premiumAnnualPlan'),
       price: `${planPrices.premium.STARS}`,
+      priceInUSD: 18500,
       period: t('yearly'),
       description: t('newBinarJoinVersion'),
       color: 'from-amber-400 to-yellow-500',
@@ -415,86 +419,116 @@ export default function TelegramStarsMiniApp() {
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`border border-gray-100 bg-white rounded-lg overflow-hidden shadow-sm mb-3 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
+              className={`border-none bg-yellow-50 rounded-lg overflow-hidden shadow-sm mb-8 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
             >
               {plan.isNew && (
-                <div className="bg-green-500 text-white text-xs font-bold text-center py-1">
-                  NEW!
+                <div className="absolute top-0 left-0 bg-red-500 text-white text-xs font-bold py-1 px-2 rounded-tr-md">
+                  !NEW
                 </div>
               )}
-              <CardHeader className="pb-0 pt-3 px-3">
-                <div className="flex justify-end items-start text-right">
-                  <div>
-                    <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
-                    <CardDescription className="text-sm mt-0.5">{plan.label}</CardDescription>
-                  </div>
+              
+              <CardHeader className="pb-0 pt-4 px-4 text-center">
+                <div className="flex justify-center items-center mb-2">
+                  {plan.id === 'premium' && (
+                    <div className="bg-yellow-400 text-xs font-medium py-1 px-3 rounded-full text-black">
+                      موصى بها
+                    </div>
+                  )}
                 </div>
+                <CardTitle className="text-xl font-bold text-center mb-1">{plan.name}</CardTitle>
               </CardHeader>
               
-              <CardContent className="px-3 py-2">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-xl font-bold text-yellow-500 flex items-center">
-                    <span className="mx-1">{plan.price}</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">{plan.period}</span>
+              <CardContent className="px-4 py-2 flex flex-col items-center">
+                <div className="text-4xl font-bold text-yellow-500 flex items-center mb-3">
+                  <span className="">$</span>
+                  <span className="">{plan.priceInUSD}</span>
                 </div>
                 
-                <p className="text-sm text-right mb-3">{plan.description}</p>
+                <Button
+                  className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 mb-3 flex items-center justify-center gap-1"
+                  variant="ghost"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M15 4.5l-6 6 6 6" />
+                  </svg>
+                  التبديل إلى الدولار
+                </Button>
                 
-                <div className="mb-4">
-                  <div className="mb-3">
-                    <label className="text-sm mb-1 block text-right">{t('selectBotVersion')}:</label>
-                    <Select
-                      value={selectedBotVersions[plan.id] || plan.botVersions[0] || ''}
-                      onValueChange={(value) => handleBotVersionChange(plan.id, value)}
-                    >
-                      <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-right">
-                        <SelectValue placeholder={t('selectVersion')} />
-                      </SelectTrigger>
-                      <SelectContent dir="rtl">
-                        {plan.botVersions && plan.botVersions.map((version) => (
-                          <SelectItem key={version} value={version}>
-                            {version}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <p className="text-sm text-center mb-3">{plan.description}</p>
+                
+                <div className="w-full mb-4">
+                  <Select
+                    value={selectedBotVersions[plan.id] || plan.botVersions[0] || ''}
+                    onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+                  >
+                    <SelectTrigger className="w-full bg-white border-gray-200 text-right">
+                      <SelectValue placeholder="اختر إصدار الروبوت" />
+                    </SelectTrigger>
+                    <SelectContent dir="rtl">
+                      {plan.botVersions && plan.botVersions.map((version) => (
+                        <SelectItem key={version} value={version}>
+                          {version}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
+                {/* قسم الميزات المميزة للخطة المتميزة */}
                 {plan.id === 'premium' && (
-                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-3 rounded-lg mb-4 border border-yellow-100">
-                    <div className="text-right mb-2">
-                      <span className="inline-block text-red-500 font-bold text-sm">🔴 جديد!</span> {plan.extraDescription}
+                  <div className="bg-yellow-100 border border-yellow-200 p-3 rounded-lg mb-4 w-full">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="inline-block bg-red-500 text-white text-xs font-bold py-0.5 px-2 rounded-sm">جديد!</span>
+                      <div className="text-right font-bold text-sm">
+                        جديداً! - Binar Join Analytic V.4.1 ثورة إشارات التداول
+                      </div>
+                      <span className="text-red-500 text-xl">🔴</span>
                     </div>
-                    <ul className="text-right text-sm space-y-1">
+                    
+                    <p className="text-right text-sm mb-2">
+                      🚀 إشارات دقيقة، قرارات أكثر ذكاءً مع Binar Join Analytic V.4.1 الجديد. احصل على إشارات محدثة دقيقة ومناسبة لمساعدتك على اتخاذ قرارات استثمارية ناجحة.
+                    </p>
+                    
+                    <div className="text-right font-semibold mb-2 text-sm">لماذا Binar Join Analytic V.4.1؟</div>
+                    
+                    <ul className="text-right text-sm space-y-2">
                       <li className="flex justify-end items-center gap-2">
-                        <span>تصميم حديث وسهل الاستخدام - تجربة سلسة وسريعة على جميع الأجهزة 📱💻</span>
-                        <span className="text-green-600">✅</span>
+                        <span>تصميم حديث وسهل الاستخدام - تجربة سلسة وسريعة على جميع الأجهزة 💻 📱</span>
+                        <span className="text-green-600">✓</span>
                       </li>
                       <li className="flex justify-end items-center gap-2">
                         <span>إشارات تداول دقيقة - مبنية على تحليل في الوقت الحقيقي واتجاهات السوق 📊</span>
-                        <span className="text-green-600">✅</span>
+                        <span className="text-green-600">✓</span>
+                      </li>
+                      <li className="flex justify-end items-center gap-2">
+                        <span>متعدد المنصات - متوافق مع منصات التداول الرئيسية، بما في ذلك EQ Broker 🌐</span>
+                        <span className="text-green-600">✓</span>
+                      </li>
+                      <li className="flex justify-end items-center gap-2">
+                        <span>إشارات تحدث تلقائيًا - لا حاجة للتحديثات اليدوية! ⚡</span>
+                        <span className="text-green-600">✓</span>
                       </li>
                     </ul>
                   </div>
                 )}
                 
-                <div className="mt-3">
-                  <h4 className="text-sm font-medium text-right mb-2">ميزات الخطة</h4>
+                {/* قسم ميزات الخطة */}
+                <div className="w-full">
+                  <h4 className="text-lg font-medium text-center mb-2 border-b border-yellow-200 pb-1">ميزات متقدمة</h4>
                   {plan.features.map((feature, index) => (
-                    <div key={index} className="flex justify-end items-center py-1 gap-2 text-right">
+                    <div key={index} className="flex justify-end items-center py-1.5 text-right">
                       <span className="text-sm">
                         {feature.text}
                       </span>
-                      <Check className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
                     </div>
                   ))}
                 </div>
               </CardContent>
               
-              <CardFooter className="pt-0 pb-3 px-3 flex flex-col">
-                <div className="text-center bg-yellow-50 py-2 px-3 rounded-lg text-sm text-gray-700 w-full mb-2">
+              <CardFooter className="px-4 pb-4 pt-2 flex flex-col">
+                <div className="text-center bg-yellow-100 py-2 px-3 rounded-lg text-sm text-gray-700 w-full mb-3 flex items-center justify-center">
+                  <span className="text-yellow-600 ml-1">⚡</span>
                   {plan.idealFor}
                 </div>
                 
