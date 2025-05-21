@@ -196,6 +196,7 @@
   "advancedDataDrivenAnalysis": "Advanced data-driven analysis with AI predictions",
   
   "switchToStars": "Switch to Telegram Stars",
+  "switchToStarsWithCount": "Switch to Telegram Stars: {{count}} stars",
   "switchToUSD": "Switch to USD",
   "selectBotVersion": "Select Bot Version",
   "botVersionRequired": "Bot Version Required",

@@ -216,6 +216,7 @@
   "advancedDataDrivenAnalysis": "تحليل متقدم مدعوم بالبيانات مع توقعات ذكاء اصطناعي",
   
   "switchToStars": "التبديل إلى نجوم تيليجرام",
+  "switchToStarsWithCount": "التبديل إلى نجوم تيليجرام: {{count}} نجمة",
   "switchToUSD": "التبديل إلى الدولار",
   "selectBotVersion": "اختر إصدار الروبوت",
   "botVersionRequired": "مطلوب إصدار الروبوت",

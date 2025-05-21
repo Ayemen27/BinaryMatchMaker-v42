@@ -412,7 +412,7 @@ export default function SubscriptionPage() {
                     dir="rtl"
                   >
                     {currency === 'USD' 
-                      ? <><RefreshCw className="h-3 w-3 ml-1 icon-rotate" /> <span>{t('switchToStars', { count: planPrices[plan.id as keyof typeof planPrices].STARS })}</span></>
+                      ? <><RefreshCw className="h-3 w-3 ml-1 icon-rotate" /> <span>{t('switchToStarsWithCount', { count: planPrices[plan.id as keyof typeof planPrices].STARS })}</span></>
                       : <><RefreshCw className="h-3 w-3 ml-1 icon-rotate" /> <span>{t('switchToUSD')}</span></>
                     }
                   </button>
