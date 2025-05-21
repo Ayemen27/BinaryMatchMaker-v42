@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useTelegramMiniApp } from '@/hooks/use-telegram-mini-app';
 
 interface TelegramPaymentButtonProps {
-  planType: 'weekly' | 'monthly' | 'annual' | 'premium';
+  planType: string;
   starsAmount: number;
   userId?: number | string;
   buttonText?: string;

@@ -15,6 +15,7 @@ import {
   X, ArrowLeft, RefreshCcw, ExternalLink
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { TelegramPaymentButton } from '@/components/telegram-payment-button';
 // استيراد ملف الأنماط الخاص بصفحة الاشتراك
 import '../styles/subscription.css';
 
@@ -287,24 +288,23 @@ export default function SubscriptionPage() {
   
   /**
    * معالجة الدفع المباشر بنجوم تلجرام
-   * تتجاوز النافذة المنبثقة وتوجه المستخدم مباشرة لبوت تلجرام
-   * مع تسجيل حالة الانتظار بدلاً من محاولة الترقية الفورية
+   * تستخدم المكون الجديد لزر الدفع بتلجرام للتوجيه المباشر لبوت تلجرام
+   * يعمل بشكل أكثر تكاملاً مع التطبيق المصغر
    */
   const processTelegramStarsPayment = (planId: string) => {
     if (isProcessing) return;
-    
-    setIsProcessing(true);
     
     // إعداد بيانات الدفع
     const plan = plans.find(p => p.id === planId);
     const botVersion = selectedBotVersions[planId];
     const starsAmount = planPrices[planId as keyof typeof planPrices].STARS;
     
-    // إنشاء معرف فريد للطلب
-    const paymentId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    
-    // محاولة حفظ حالة الطلب محلياً
+    // يجب أن نحفظ الإصدار المختار وإعدادات الخطة قبل توجيه المستخدم
     try {
+      // إنشاء معرف فريد للطلب
+      const paymentId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      
+      // حفظ حالة الطلب محلياً للرجوع إليها بعد إكمال الدفع
       localStorage.setItem('pendingStarsPayment', JSON.stringify({
         paymentId,
         planId,
@@ -312,34 +312,16 @@ export default function SubscriptionPage() {
         starsAmount,
         timestamp: Date.now()
       }));
+      
+      // تخزين بيانات الخطة المحددة
+      localStorage.setItem('selectedPlan', planId);
+      localStorage.setItem('selectedBotVersion', botVersion);
+      localStorage.setItem('starsAmount', String(starsAmount));
     } catch (e) {
       console.error('فشل في حفظ حالة الطلب', e);
     }
     
-    // إنشاء رابط تلجرام باستخدام البوت الصحيح وأمر بداية بسيط مع معلومات الخطة
-    // إضافة معلومات الاشتراك إلى النص المرسل للبوت
-    const paymentMessage = encodeURIComponent(
-      `Stars Subscription Request\n\n` +
-      `Plan: ${planId}\n` +
-      `Stars: ${starsAmount}\n` +
-      `User: ${user?.username || 'Guest'}\n` +
-      `Time: ${new Date().toISOString()}`
-    );
-    
-    // استخدام اسم المستخدم الدقيق للبوت مع تمرير معلومات الدفع
-    const planType = planId.replace('_plan', ''); // تحويل "weekly_plan" إلى "weekly"
-    
-    // إضافة معلومات المستخدم كمعلمة في أمر البدء
-    const userId = user?.id || 'guest';
-    const username = encodeURIComponent(user?.username || 'guest');
-    // إنشاء رابط للبوت مع جميع المعلومات المطلوبة
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
-    
-    // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
-    localStorage.setItem('selectedPlan', planId);
-    localStorage.setItem('starsAmount', String(starsAmount));
-    
-    // إرسال إشعار للمستخدم مع تعليمات واضحة
+    // إرسال إشعار للمستخدم قبل التوجيه
     toast({
       title: t('redirectingToTelegram'),
       description: "سيتم توجيهك إلى تلجرام لإتمام عملية الدفع بالنجوم",
@@ -347,24 +329,31 @@ export default function SubscriptionPage() {
       duration: 5000,
     });
     
-    // انتظار لحظة قبل توجيه المستخدم
-    setTimeout(() => {
-      // توجيه المستخدم إلى بوت التلجرام مع كل معلومات الدفع في الرابط
-      window.location.href = telegramBotUrl;
-    }, 1000);
+    // الآن سنستخدم زر التلجرام المُحسّن الذي قمنا بإنشائه
+    // ولكن بما أننا لسنا داخل التطبيق المصغر، سنقوم بتوجيه المستخدم مباشرة إلى بوت تلجرام
     
-    // إضافة إشعار إضافي لتأكيد الإرسال
+    const planType = planId; // نستخدم نوع الخطة كما هو
+    const userId = user?.id || 'guest';
+    
+    // إنشاء رابط البوت
+    const botUsername = 'Payment_gateway_Binar_bot';
+    const startParam = `pay_${planType}_${starsAmount}_${userId}`;
+    const telegramBotUrl = `https://t.me/${botUsername}?start=${startParam}`;
+    
+    // توجيه المستخدم إلى الرابط بعد تأخير قصير
     setTimeout(() => {
-      toast({
-        title: t('paymentInitiated'),
-        description: "انقر على زر الدفع الذي سيظهر في محادثة البوت لإتمام العملية",
-        variant: 'default',
-        duration: 8000,
-      });
+      window.location.href = telegramBotUrl;
       
-      // إعادة تعيين حالة المعالجة بعد توجيه المستخدم
-      setIsProcessing(false);
-    }, 2000);
+      // إرسال إشعار إضافي للمستخدم
+      setTimeout(() => {
+        toast({
+          title: t('paymentInitiated'),
+          description: "انقر على زر الدفع الذي سيظهر في محادثة البوت لإتمام العملية",
+          variant: 'default',
+          duration: 8000,
+        });
+      }, 1000);
+    }, 1000);
   };
   
   // الحصول على المخطط الحالي للمستخدم
@@ -612,22 +601,37 @@ export default function SubscriptionPage() {
                     <span>{plan.idealFor}</span>
                   </div>
                   
-                  <Button 
-                    className="subscription-button"
-                    onClick={() => !isDisabled && handleUpgrade(plan.id)}
-                    disabled={isDisabled}
-                  >
-                    {isProcessing && selectedPlan === plan.id ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('processing')}
-                      </>
-                    ) : isPlanActive ? (
-                      t('currentPlan')
-                    ) : (
-                      plan.callToAction
-                    )}
-                  </Button>
+                  {/* زر الدفع بالدولار - يظهر فقط عند اختيار USD كعملة */}
+                  {currency === 'USD' && (
+                    <Button 
+                      className="subscription-button"
+                      onClick={() => !isDisabled && handleUpgrade(plan.id)}
+                      disabled={isDisabled}
+                    >
+                      {isProcessing && selectedPlan === plan.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {t('processing')}
+                        </>
+                      ) : isPlanActive ? (
+                        t('currentPlan')
+                      ) : (
+                        plan.callToAction
+                      )}
+                    </Button>
+                  )}
+                  
+                  {/* زر الدفع بنجوم تلجرام - يظهر فقط عند اختيار STARS كعملة */}
+                  {currency === 'STARS' && (
+                    <TelegramPaymentButton
+                      planType={plan.id as 'weekly' | 'monthly' | 'annual' | 'premium'}
+                      starsAmount={planPrices[plan.id as keyof typeof planPrices].STARS}
+                      userId={user?.id}
+                      buttonText={isPlanActive ? t('currentPlan') : plan.callToAction}
+                      className="subscription-button w-full justify-center"
+                      variant="default"
+                    />
+                  )}
                 </CardFooter>
               </Card>
             );
