@@ -12,7 +12,7 @@ import { Helmet } from 'react-helmet';
 import { 
   Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2, 
   RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award, ChevronDown,
-  X, ArrowLeft, RefreshCcw
+  X, ArrowLeft, RefreshCcw, ExternalLink
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 // استيراد ملف الأنماط الخاص بصفحة الاشتراك
@@ -427,16 +427,27 @@ export default function SubscriptionPage() {
           </Button>
           
           {currency === 'STARS' && (
-            <Button 
-              variant="default"
-              className="flex items-center gap-2 bg-[#0088cc] hover:bg-[#0077b5]"
-              onClick={() => window.open('/telegram-mini-app', '_blank')}
-            >
-              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.37 0 0 5.37 0 12c0 6.63 5.37 12 12 12s12-5.37 12-12C24 5.37 18.63 0 12 0zm5.43 8.43-1.68 7.92c-.13.59-.48.74-.97.46l-2.67-1.97-1.3 1.25c-.14.14-.26.26-.54.26l.19-2.7 4.91-4.44c.21-.19-.05-.28-.33-.1l-6.08 3.83-2.62-.86c-.57-.18-.58-.57.12-.84l10.23-3.94c.47-.18.88.11.74.7z"/>
-              </svg>
-              {t('openTelegramApp')}
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button 
+                variant="default"
+                className="flex items-center gap-2 bg-[#0088cc] hover:bg-[#0077b5]"
+                onClick={() => window.open('/telegram-mini-app', '_blank')}
+              >
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 6.63 5.37 12 12 12s12-5.37 12-12C24 5.37 18.63 0 12 0zm5.43 8.43-1.68 7.92c-.13.59-.48.74-.97.46l-2.67-1.97-1.3 1.25c-.14.14-.26.26-.54.26l.19-2.7 4.91-4.44c.21-.19-.05-.28-.33-.1l-6.08 3.83-2.62-.86c-.57-.18-.58-.57.12-.84l10.23-3.94c.47-.18.88.11.74.7z"/>
+                </svg>
+                {t('openTelegramApp')}
+              </Button>
+
+              <Button 
+                variant="default"
+                className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black"
+                onClick={() => window.open('/telegram-stars-app', '_blank')}
+              >
+                <Star className="h-3 w-3" />
+                {t('payWithStarsApp') || 'الدفع بنجوم تيليجرام'}
+              </Button>
+            </div>
           )}
         </div>
         
