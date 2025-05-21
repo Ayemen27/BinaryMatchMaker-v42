@@ -201,23 +201,7 @@ export default function SubscriptionPage() {
     }));
   };
   
-  // فتح نافذة طرق الدفع
-  const openPaymentModal = (planId: string) => {
-    if (isProcessing) return;
-    if (!selectedBotVersions[planId] || selectedBotVersions[planId] === '_default') {
-      toast({
-        title: t('botVersionRequired'),
-        description: t('pleasSelectBotVersion'),
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    setSelectedPlan(planId);
-    setIsPaymentModalOpen(true);
-    setPaymentTab('platforms');
-    setSelectedPaymentMethod(null);
-  };
+  // [تم الاستبدال بوظيفة المعالجة الذكية]
   
   // إغلاق نافذة طرق الدفع
   const closePaymentModal = () => {
@@ -268,9 +252,77 @@ export default function SubscriptionPage() {
     }, 1500);
   };
   
-  // مفوض التعامل مع ترقية الاشتراك
+  /**
+   * نظام ذكي معزز للتعامل مع طرق الدفع المختلفة
+   * تم تعديله لضمان عدم ظهور النافذة المنبثقة في وضع الدفع بالنجوم
+   * 
+   * USD: تظهر النافذة المنبثقة مع خيارات الدفع التقليدية
+   * STARS: توجّه المستخدم مباشرة لبوت تلجرام دون ظهور النافذة المنبثقة
+   */
   const handleUpgrade = (planId: string) => {
-    openPaymentModal(planId);
+    // التحقق من إصدار الروبوت المحدد أولاً
+    if (!selectedBotVersions[planId] || selectedBotVersions[planId] === '_default') {
+      toast({
+        title: t('botVersionRequired'),
+        description: t('pleasSelectBotVersion'),
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // حفظ الخطة المختارة للاستخدام في معالجة الدفع
+    setSelectedPlan(planId);
+    
+    // التسلسل المنطقي المختلف بناءً على العملة المحددة
+    if (currency === 'USD') {
+      // في حالة الدولار: استخدام النافذة المنبثقة الحالية
+      setIsPaymentModalOpen(true);
+      setPaymentTab('platforms');
+      setSelectedPaymentMethod(null);
+    } else {
+      // في حالة النجوم: تنفيذ الدفع مباشرة عبر تلجرام
+      processTelegramStarsPayment(planId);
+    }
+  };
+  
+  /**
+   * معالجة الدفع المباشر بنجوم تلجرام
+   * تتجاوز النافذة المنبثقة وتوجه المستخدم مباشرة لبوت تلجرام
+   */
+  const processTelegramStarsPayment = (planId: string) => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    
+    // إعداد بيانات الدفع
+    const plan = plans.find(p => p.id === planId);
+    const botVersion = selectedBotVersions[planId];
+    const starsAmount = planPrices[planId as keyof typeof planPrices].STARS;
+    
+    // معالجة الدفع عبر تلجرام (محاكاة)
+    setTimeout(() => {
+      // في بيئة الإنتاج، سنوجه المستخدم إلى رابط تلجرام
+      const telegramBotUrl = `https://t.me/binarjoinanalytic_bot?start=payment_${planId}_${starsAmount}_${botVersion}`;
+      
+      // إرسال إشعار للمستخدم
+      toast({
+        title: t('redirectingToTelegram'),
+        description: t('telegramRedirectDescription', { stars: starsAmount }),
+        variant: 'default',
+      });
+      
+      // توجيه المستخدم إلى تلجرام
+      window.open(telegramBotUrl, '_blank');
+      
+      // تسجيل الطلب في قاعدة البيانات
+      upgradeMutation.mutate({
+        planType: planId,
+        botVersion: botVersion,
+        paymentMethod: 'telegram_stars'
+      });
+      
+      setIsProcessing(false);
+    }, 500);
   };
   
   // الحصول على المخطط الحالي للمستخدم
