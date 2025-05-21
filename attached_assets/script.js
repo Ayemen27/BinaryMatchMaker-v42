@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // إزالة أي مستمعات أحداث سابقة
                 subscribeButton.onclick = null;
                 // تعيين حدث جديد
-                subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+                subscribeButton.setAttribute('onclick', 'handleSubscription(event)');
             }
             
             return true;
@@ -291,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const subscribeButton = planCard.querySelector('.subscribe-btn');
                     if (subscribeButton) {
                         subscribeButton.onclick = null; // إزالة أي أحداث قديمة
-                        subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+                        subscribeButton.setAttribute('onclick', 'handleSubscription(event)');
                     }
                 }
             });
@@ -580,7 +580,26 @@ document.addEventListener('DOMContentLoaded', function() {
         return window.starPaymentSystem.processTelegramPayment(event);
     };
 
-    window.showPaymentModal = function(event) {
+    /**
+     * تحسين نظام التجانب بين طرق الدفع
+     * هذه الوظيفة تتحقق من العملة الحالية قبل استدعاء النافذة المنبثقة
+     * وتوجه المستخدم مباشرة إلى تلجرام في حالة الدفع بالنجوم
+     */
+    window.handleSubscription = function(event) {
+        // الحصول على العملة الحالية
+        const currentCurrency = localStorage.getItem('currency') || 'USD';
+        
+        // إذا كانت العملة هي النجوم، استخدم معالجة نجوم تلجرام
+        if (currentCurrency === 'STARS') {
+            window.starPaymentSystem.processTelegramPayment(event);
+        } else {
+            // وإلا استخدم النافذة المنبثقة العادية
+            showPaymentModalInternal(event);
+        }
+    };
+
+    // وظيفة داخلية لعرض النافذة المنبثقة (تستخدم فقط في حالة الدفع بغير النجوم)
+    function showPaymentModalInternal(event) {
         try {
             if (!event || !event.target) return;
             
@@ -619,30 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.setItem('selectedBotVersion', 
                 botVersionSelect.options[botVersionSelect.selectedIndex]?.text || 'Unknown Version'
             );
-
-            // التحقق من طريقة الدفع المختارة
-            const currentCurrency = localStorage.getItem('currency') || 'USD';
-            
-            // إذا اختار المستخدم الدفع بنجوم تلجرام، توجه مباشرة إلى بوت تلجرام بدون ظهور النافذة المنبثقة
-            if (currentCurrency === 'STARS') {
-                // حساب عدد النجوم المطلوبة بناء على الخطة
-                let starsAmount = 750; // Default for Weekly Plan
-                if (planName === 'Monthly Plan') starsAmount = 2300;
-                if (planName === 'Annual Plan') starsAmount = 10000;
-                
-                // إعداد الرسالة التي سترسل إلى بوت تلجرام
-                const message = encodeURIComponent(
-                    `Stars Subscription Request\n\n` +
-                    `Subscription Info:\n` +
-                    `📦 Plan: ${planName}\n` +
-                    `🤖 Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
-                    `⭐ Stars Required: ${starsAmount} Stars`
-                );
-                
-                // توجيه المستخدم مباشرة إلى محادثة تلجرام
-                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
-                return; // توقف هنا وعدم إظهار النافذة المنبثقة
-            }
+        
             
             // للدفع بالطرق التقليدية، استمر بإظهار النافذة المنبثقة
             const modal = document.getElementById('paymentModal');
@@ -1058,7 +1054,7 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         } else {
             // If in regular payment mode, return to payment options
-            showPaymentModal(new Event('click'));
+            handleSubscription(new Event('click'));
         }
     }
 
