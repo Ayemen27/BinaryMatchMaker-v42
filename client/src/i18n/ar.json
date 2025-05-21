@@ -348,5 +348,20 @@
   "telegramStarsPaymentInfo": "سيتم فتح بوت الدفع بنجوم تيليجرام في نافذة جديدة",
   "useCommandInBot": "بعد فتح البوت، استخدم الأمر: {{command}} لإتمام عملية الدفع",
   "paymentPending": "عملية الدفع قيد الانتظار",
-  "completePaymentInTelegram": "يرجى إكمال عملية الدفع في تطبيق تيليجرام للاستمتاع بمزايا الاشتراك الجديد"
+  "completePaymentInTelegram": "يرجى إكمال عملية الدفع في تطبيق تيليجرام للاستمتاع بمزايا الاشتراك الجديد",
+  "payWithStarsApp": "الدفع بنجوم تيليجرام",
+  "openTelegramApp": "فتح تطبيق تيليجرام",
+  "telegramStarsOnlyInfo": "هذه الصفحة مخصصة للدفع بنجوم تيليجرام فقط. اختر خطة وإصدار الروبوت المناسب لك.",
+  "telegramStarsPaymentNote": "سيتم معالجة الدفع من خلال تطبيق تيليجرام، تأكد من امتلاكك للنجوم المطلوبة",
+  "subscriptionTermsNote": "جميع الاشتراكات تخضع لشروط وأحكام الخدمة",
+  "payWithStars": "الدفع بالنجوم",
+  "redirectingToTelegram": "جاري التوجيه إلى تيليجرام",
+  "paymentInitiated": "تم بدء عملية الدفع",
+  "paymentInitiatedDescription": "تم إرسال طلب الدفع، رجاءً أكمل العملية في تطبيق تيليجرام",
+  "errorOccurred": "حدث خطأ",
+  "paymentProcessingFailed": "فشلت معالجة الدفع، يرجى المحاولة مرة أخرى",
+  "connectionError": "خطأ في الاتصال",
+  "checkInternetConnection": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى",
+  "selectPlan": "اختر خطة للاشتراك",
+  "newPlan": "جديد"
 }
