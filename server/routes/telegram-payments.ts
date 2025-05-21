@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { TelegramPaymentService } from '../services/telegram-payment';
+import * as crypto from 'crypto';
 
 // مخطط التحقق من بيانات الدفع
 const telegramPaymentSchema = z.object({
@@ -27,9 +28,11 @@ const router = Router();
  */
 router.post('/webhook', async (req, res) => {
   try {
-    // التحقق من مصدر الطلب باستخدام رمز التحقق الموجود في الرأس (headers)
+    // التحقق من مصدر الطلب باستخدام توقيع رقمي آمن
     const authToken = req.headers['x-telegram-bot-auth'];
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const payloadSignature = req.headers['x-telegram-signature'];
+    const requestTimestamp = req.headers['x-request-timestamp'];
     
     // في بيئة الإنتاج، يجب التحقق من صحة الطلب
     if (!authToken && process.env.NODE_ENV === 'production') {
@@ -40,13 +43,51 @@ router.post('/webhook', async (req, res) => {
       });
     }
     
-    // التحقق من صحة رمز التحقق
-    if (authToken && botToken && authToken !== `Bearer ${botToken}` && process.env.NODE_ENV === 'production') {
-      console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - رمز تحقق غير صالح');
-      return res.status(403).json({
-        success: false,
-        message: 'غير مصرح بالوصول - رمز تحقق غير صالح'
-      });
+    // في بيئة الإنتاج، يجب التحقق من توقيع الطلب لمنع هجمات MITM
+    if (process.env.NODE_ENV === 'production') {
+      // التحقق من وجود توقيع وطابع زمني
+      if (!payloadSignature || !requestTimestamp) {
+        console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - بيانات توقيع ناقصة');
+        return res.status(403).json({
+          success: false,
+          message: 'غير مصرح بالوصول - بيانات التوقيع غير مكتملة'
+        });
+      }
+      
+      // التحقق من عمر الطلب (منع هجمات إعادة التشغيل)
+      const currentTime = Math.floor(Date.now() / 1000);
+      const requestTime = Number(requestTimestamp);
+      const maxAge = 300; // 5 دقائق كحد أقصى
+      
+      if (isNaN(requestTime) || currentTime - requestTime > maxAge) {
+        console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - طلب منتهي الصلاحية');
+        return res.status(403).json({
+          success: false,
+          message: 'غير مصرح بالوصول - الطلب منتهي الصلاحية'
+        });
+      }
+      
+      // التحقق من صحة التوقيع
+      if (botToken && payloadSignature) {
+        // إنشاء نص للتوقيع (يتضمن بيانات الطلب والطابع الزمني)
+        const payload = JSON.stringify(req.body);
+        const dataToSign = `${payload}.${requestTimestamp}`;
+        
+        // إنشاء توقيع HMAC باستخدام مفتاح البوت
+        const expectedSignature = crypto
+          .createHmac('sha256', botToken)
+          .update(dataToSign)
+          .digest('hex');
+        
+        // التحقق من تطابق التوقيعات
+        if (payloadSignature !== expectedSignature) {
+          console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - توقيع غير صالح');
+          return res.status(403).json({
+            success: false,
+            message: 'غير مصرح بالوصول - توقيع غير صالح'
+          });
+        }
+      }
     }
     
     // التحقق من عنوان IP للطلب (في تطبيق إنتاجي، يجب التحقق من قائمة العناوين المسموح بها)
