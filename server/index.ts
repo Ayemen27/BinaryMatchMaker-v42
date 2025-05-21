@@ -57,7 +57,7 @@ app.use((req, res, next) => {
   
   // استخدام عنوان URL الصحيح لـ Replit
   // عناوين webhook يجب أن تكون HTTPS دائمًا لتلجرام
-  const baseUrl = 'https://8dfc4395-1dca-49d3-92e3-1fd7857aef91-00-1oydqgni632tt.pike.replit.dev';
+  const baseUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://d3069587-0c8f-49bd-9cc4-74d6904d29a8-00-3k7bgesw6ce81.sisko.replit.dev';
   
   console.log(`[خادم] تسجيل البوت في العنوان: ${baseUrl}`);
   telegramBot.registerWebhook(app, baseUrl);
