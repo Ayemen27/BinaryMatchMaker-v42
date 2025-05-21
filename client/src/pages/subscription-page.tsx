@@ -326,7 +326,9 @@ export default function SubscriptionPage() {
       `Time: ${new Date().toISOString()}`
     );
     
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planId}_${starsAmount}`;
+    // استخدام اسم المستخدم الدقيق للبوت مع تمرير معلومات الدفع
+    const planType = planId.replace('_plan', ''); // تحويل "weekly_plan" إلى "weekly"
+    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}`;
     
     // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
     localStorage.setItem('selectedPlan', planId);
