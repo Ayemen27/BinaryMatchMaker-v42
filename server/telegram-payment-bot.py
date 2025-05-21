@@ -2,223 +2,179 @@ from aiogram import Router, F, Bot, Dispatcher
 import logging
 import asyncio
 import sys
-import os
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command
 from aiogram.types import (
     Message, 
     LabeledPrice, 
     PreCheckoutQuery,
+    ContentType,
+    ParseMode,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
 )
+import os
 from dotenv import load_dotenv
+import json
 
 # تحميل متغيرات البيئة
 load_dotenv()
-
-# الحصول على توكن البوت من متغيرات البيئة
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-if not TOKEN:
-    print("خطأ: لم يتم العثور على توكن البوت في ملف .env")
-    sys.exit(1)
+TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 router = Router()
+provider_token = os.getenv("STRIPE_TOKEN") # لا يلزم لدفعات النجوم
 
-# قاموس لتخزين أسعار الخطط
-PLAN_PRICES = {
-    "weekly": 750,
-    "monthly": 2300,
-    "annual": 10000,
-    "premium": 18500
+# خطط الاشتراك وأسعارها
+subscription_plans = {
+    "weekly": {
+        "name": "الخطة الأسبوعية",
+        "description": "تحليل أساسي للسوق في الوقت الحقيقي",
+        "price": 750,  # عدد النجوم
+        "period": "أسبوع واحد"
+    },
+    "monthly": {
+        "name": "الخطة الشهرية",
+        "description": "تحليل فني متقدم للسوق + إشارات تداول",
+        "price": 2300,  # عدد النجوم
+        "period": "شهر كامل"
+    },
+    "annual": {
+        "name": "الخطة السنوية",
+        "description": "تحليل مدعوم بالذكاء الاصطناعي + استراتيجيات مخصصة",
+        "price": 10000,  # عدد النجوم
+        "period": "سنة كاملة"
+    },
+    "premium": {
+        "name": "خطة BinarJoin V.4.1",
+        "description": "أحدث إصدار مع تحليل متطور وإشارات دقيقة",
+        "price": 18500,  # عدد النجوم
+        "period": "سنة كاملة"
+    }
 }
 
-@router.message(CommandStart())
-async def handle_start(msg: Message):
-    # التحقق من وجود معلمات في أمر البدء
-    start_param = msg.text.split()
-    
-    if len(start_param) > 1 and start_param[1].startswith("pay_"):
-        # استخراج معلومات الدفع من معلمة البدء
-        try:
-            _, plan_type, stars_amount = start_param[1].split("_")
-            stars_amount = int(stars_amount)
-            await process_payment(msg, plan_type, stars_amount)
-        except (ValueError, IndexError):
-            await msg.answer("حدث خطأ في معالجة معلمات الدفع. الرجاء المحاولة مرة أخرى.")
-    else:
-        # رسالة ترحيب افتراضية
-        await msg.answer(
-            "مرحبًا بك في بوت دفع النجوم لـ BinarJoin Analytics! 🌟\n\n"
-            "استخدم الأمر /pay <نوع_الخطة> <عدد_النجوم> للبدء في عملية الدفع.\n"
-            "مثال: /pay weekly 750\n\n"
-            "الخطط المتاحة:\n"
-            "- weekly: 750 نجمة\n"
-            "- monthly: 2300 نجمة\n"
-            "- annual: 10000 نجمة\n"
-            "- premium: 18500 نجمة"
-        )
-
-@router.message(Command('pay'))
-async def pay_command(msg: Message):
-    # استخراج معلومات الخطة وعدد النجوم من الأمر
-    command_parts = msg.text.split()
-    
-    if len(command_parts) < 3:
-        await msg.answer(
-            "الرجاء تحديد نوع الخطة وعدد النجوم.\n"
-            "مثال: /pay weekly 750"
-        )
-        return
-    
-    plan_type = command_parts[1].lower()
-    
+# استقبال رسائل من التطبيق المصغر
+@router.message(F.web_app_data)
+async def process_webapp_data(message: Message):
     try:
-        stars_amount = int(command_parts[2])
-    except ValueError:
-        await msg.answer("عدد النجوم يجب أن يكون رقمًا صحيحًا.")
-        return
-    
-    await process_payment(msg, plan_type, stars_amount)
-
-async def process_payment(msg: Message, plan_type: str, stars_amount: int):
-    """معالجة عملية الدفع وإرسال فاتورة للمستخدم"""
-    
-    # التحقق من صحة نوع الخطة
-    if plan_type not in PLAN_PRICES:
-        await msg.answer(
-            "نوع الخطة غير صالح. الخطط المتاحة هي:\n"
-            "- weekly\n"
-            "- monthly\n"
-            "- annual\n"
-            "- premium"
-        )
-        return
-    
-    # عناوين الخطط بالعربية
-    plan_titles = {
-        "weekly": "اشتراك أسبوعي",
-        "monthly": "اشتراك شهري",
-        "annual": "اشتراك سنوي",
-        "premium": "اشتراك بريميوم"
-    }
-    
-    # التحقق من صحة عدد النجوم
-    expected_stars = PLAN_PRICES[plan_type]
-    if stars_amount != expected_stars:
-        await msg.answer(
-            f"عدد النجوم غير صحيح للخطة {plan_type}.\n"
-            f"العدد المطلوب هو {expected_stars} نجمة."
-        )
-        return
-    
-    # إنشاء وصف الفاتورة
-    plan_description = {
-        "weekly": "اشتراك أسبوعي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة أسبوع",
-        "monthly": "اشتراك شهري في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة شهر",
-        "annual": "اشتراك سنوي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة سنة",
-        "premium": "اشتراك بريميوم في BinarJoin Analytics - جميع الميزات المتقدمة لمدة سنة"
-    }
-    
-    # إنشاء معرف فريد للدفع
-    payment_id = f"bj_{plan_type}_{msg.from_user.id}_{int(asyncio.get_event_loop().time())}"
-    
-    # إرسال فاتورة الدفع
-    try:
-        await msg.answer_invoice(
-            title=plan_titles.get(plan_type, f"اشتراك {plan_type}"),
-            description=plan_description.get(plan_type, "اشتراك في خدمة BinarJoin Analytics"),
-            payload=payment_id,
-            provider_token=TOKEN,
-            currency="XTR",  # رمز عملة نجوم تليجرام
-            prices=[
-                LabeledPrice(label=f"اشتراك {plan_type}", amount=stars_amount),
-            ],
-            start_parameter=f"payment_{plan_type}_{stars_amount}"
-        )
+        # استخراج البيانات من التطبيق المصغر
+        data = json.loads(message.web_app_data.data)
         
-        # إرسال تعليمات إضافية للمستخدم
-        await msg.answer(
-            "تم إنشاء فاتورة الدفع. يرجى إكمال عملية الدفع خلال الفاتورة أعلاه.\n"
-            "بعد إتمام الدفع، سيتم تفعيل اشتراكك تلقائيًا."
-        )
+        # التحقق من طلب الدفع
+        if data.get('action') == 'process_stars_payment':
+            plan_id = data.get('planId')
+            bot_version = data.get('botVersion')
+            
+            # التحقق من وجود الخطة
+            if plan_id in subscription_plans:
+                plan = subscription_plans[plan_id]
+                await send_payment_invoice(message.chat.id, plan, bot_version, data.get('paymentId'))
+            else:
+                await message.answer("عذراً، الخطة غير متوفرة.")
+        else:
+            await message.answer("عملية غير معروفة. الرجاء المحاولة مرة أخرى.")
+            
     except Exception as e:
-        logging.error(f"خطأ في إنشاء فاتورة الدفع: {e}")
-        await msg.answer("حدث خطأ أثناء إنشاء فاتورة الدفع. الرجاء المحاولة مرة أخرى لاحقًا.")
+        logging.error(f"خطأ في معالجة بيانات التطبيق المصغر: {e}")
+        await message.answer("حدث خطأ في معالجة طلبك. الرجاء المحاولة مرة أخرى.")
 
 
-@router.pre_checkout_query()
-async def checkout_handler(checkout_query: PreCheckoutQuery):
-    """التحقق من صحة عملية الدفع قبل إتمامها"""
-    try:
-        # يمكن إضافة تحققات إضافية هنا قبل قبول الدفع
-        
-        # قبول عملية الدفع
-        await checkout_query.answer(ok=True)
-        
-        logging.info(f"تم قبول عملية الدفع: {checkout_query.id}")
-    except Exception as e:
-        logging.error(f"خطأ في معالجة التحقق من الدفع: {e}")
-        await checkout_query.answer(ok=False, error_message="حدث خطأ أثناء معالجة الدفع. الرجاء المحاولة مرة أخرى.")
-
-
-@router.message(F.successful_payment)
-async def handle_successful_payment(msg: Message):
-    """معالجة الدفع الناجح"""
-    try:
-        payment_info = msg.successful_payment
-        payload = payment_info.invoice_payload
-        
-        # استخراج معلومات الخطة من معرف الدفع
-        _, plan_type, user_id, _ = payload.split("_")
-        
-        # إرسال تأكيد نجاح الدفع للمستخدم
-        await msg.answer(
-            f"🎉 تم استلام دفعة {payment_info.total_amount} نجمة بنجاح!\n\n"
-            f"معرف المعاملة: {payment_info.telegram_payment_charge_id}\n"
-            f"نوع الخطة: {plan_type}\n\n"
-            "سيتم تفعيل اشتراكك خلال دقائق. شكرًا لاختيارك BinarJoin Analytics!"
-        )
-        
-        # هنا يمكن إضافة منطق لتحديث اشتراك المستخدم في قاعدة البيانات
-        # مثل إرسال طلب إلى واجهة برمجة التطبيق الخاصة بالخادم
-        
-        logging.info(f"دفع ناجح: {payload} - المستخدم: {msg.from_user.id} - المبلغ: {payment_info.total_amount}")
-        
-    except Exception as e:
-        logging.error(f"خطأ في معالجة الدفع الناجح: {e}")
-        await msg.answer("تم استلام الدفع، ولكن حدث خطأ في معالجة تفعيل الاشتراك. سيتواصل فريق الدعم معك قريبًا.")
-
-
-@router.message(Command('help'))
-async def help_command(msg: Message):
-    """إرسال رسالة مساعدة"""
-    await msg.answer(
-        "📝 كيفية استخدام بوت دفع النجوم:\n\n"
-        "1. استخدم الأمر /pay <نوع_الخطة> <عدد_النجوم> للبدء في عملية الدفع.\n"
-        "   مثال: /pay weekly 750\n\n"
-        "2. اضغط على زر الدفع في الفاتورة التي سيتم إرسالها.\n\n"
-        "3. أكمل عملية الدفع باستخدام نجوم تليجرام.\n\n"
-        "4. بعد نجاح الدفع، سيتم تفعيل اشتراكك تلقائيًا.\n\n"
-        "الخطط المتاحة:\n"
-        "- weekly: 750 نجمة (أسبوعي)\n"
-        "- monthly: 2300 نجمة (شهري)\n"
-        "- annual: 10000 نجمة (سنوي)\n"
-        "- premium: 18500 نجمة (بريميوم)\n\n"
-        "إذا واجهت أي مشكلة، يرجى التواصل مع فريق الدعم."
+# إرسال فاتورة الدفع بالنجوم
+async def send_payment_invoice(chat_id, plan, bot_version, payment_id):
+    await bot.send_invoice(
+        chat_id=chat_id,
+        title=f"{plan['name']}",
+        description=f"{plan['description']}\nالإصدار: {bot_version}\nالمدة: {plan['period']}",
+        payload=f"payment_{payment_id}_{plan['name']}",
+        currency="XTR",  # XTR رمز نجوم تلجرام
+        prices=[
+            LabeledPrice(label=f"{plan['name']}", amount=plan['price']),
+        ],
     )
 
 
+@router.message(Command('start'))
+async def start_command(message: Message):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="فتح التطبيق", web_app={"url": "https://YOUR_WEB_APP_URL"})]
+    ])
+    
+    await message.answer(
+        "أهلاً بك في BinarJoin Analytics Bot! 👋\n\n"
+        "الرجاء استخدام التطبيق أدناه لاختيار خطة الاشتراك المناسبة لك.",
+        reply_markup=keyboard
+    )
+
+
+@router.message(Command('weekly'))
+async def weekly_invoice(message: Message):
+    plan = subscription_plans["weekly"]
+    await send_payment_invoice(message.chat.id, plan, "BinarJoinAnalytic Main v2.0", f"test_{message.from_user.id}")
+
+
+@router.message(Command('monthly'))
+async def monthly_invoice(message: Message):
+    plan = subscription_plans["monthly"]
+    await send_payment_invoice(message.chat.id, plan, "BinarJoinAnalytic AI v3.0", f"test_{message.from_user.id}")
+
+
+@router.message(Command('annual'))
+async def annual_invoice(message: Message):
+    plan = subscription_plans["annual"]
+    await send_payment_invoice(message.chat.id, plan, "BinarJoinAnalytic AI v3.0", f"test_{message.from_user.id}")
+
+
+@router.message(Command('premium'))
+async def premium_invoice(message: Message):
+    plan = subscription_plans["premium"]
+    await send_payment_invoice(message.chat.id, plan, "BinarJoinAnalytic V.4.1", f"test_{message.from_user.id}")
+
+
+# التحقق من الدفع
+@router.pre_checkout_query()
+async def checkout_handler(checkout_query: PreCheckoutQuery):
+    await checkout_query.answer(ok=True)
+
+
+# معالجة الدفع الناجح
+@router.message(F.successful_payment)
+async def successful_payment(message: Message):
+    payment_info = message.successful_payment
+    
+    # استخراج معلومات الدفع من الـ payload
+    payload_parts = payment_info.invoice_payload.split('_')
+    
+    await message.answer(
+        f"✅ تم الدفع بنجاح!\n\n"
+        f"💰 المبلغ: {payment_info.total_amount} نجمة\n"
+        f"📋 معرف المعاملة: {payment_info.telegram_payment_charge_id}\n\n"
+        f"سيتم تفعيل اشتراكك خلال دقائق. شكراً لك! 🌟"
+    )
+    
+    # هنا يمكنك إضافة كود لتحديث حالة المستخدم في قاعدة البيانات
+    # وتفعيل الميزات المدفوعة
+    
+    # مثال:
+    # await update_user_subscription(message.from_user.id, plan_type, payment_info.telegram_payment_charge_id)
+
+
+# وظيفة تحديث اشتراك المستخدم (مثال)
+async def update_user_subscription(user_id, plan_type, transaction_id):
+    # هنا يمكنك إضافة كود للتواصل مع قاعدة البيانات
+    # وتحديث حالة اشتراك المستخدم
+    pass
+
+
 async def main():
-    """تشغيل البوت"""
     dp.include_router(router)
     await dp.start_polling(bot)
 
 
 if __name__ == '__main__':
-    print('تم بدء تشغيل بوت دفع النجوم')
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    print('bot online - نظام دفع نجوم تلجرام جاهز للعمل')
+    logging.basicConfig(level=logging.INFO)
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print('تم إيقاف البوت')
+        print('disconnected - تم إيقاف البوت')
