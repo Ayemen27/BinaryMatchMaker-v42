@@ -12,6 +12,7 @@ import SignalHistoryPage from "@/pages/signal-history-page";
 import SignalGeneratorPage from "@/pages/signal-generator-page";
 import UnifiedSettingsPage from "@/pages/unified-settings-page"; // استخدام صفحة الإعدادات الموحدة الجديدة
 import SubscriptionPage from "@/pages/subscription-page"; // إضافة صفحة الاشتراكات
+import TelegramPaymentGuidePage from "@/pages/telegram-payment-guide"; // إضافة صفحة توجيه الدفع بنجوم تلجرام
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
