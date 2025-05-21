@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
+// للاختبار فقط - عرض سجلات المتصفح
+console.log('بيئة المتصفح:', {
+  userAgent: navigator.userAgent,
+  path: window.location.pathname,
+  search: window.location.search,
+  tgExists: typeof window.Telegram !== 'undefined'
+});
+
 interface TelegramPaymentButtonProps {
   planId: string;
   botVersion: string;
@@ -23,13 +31,39 @@ export function TelegramPaymentButton({
 
   // التحقق من وجود التطبيق في بيئة تلجرام
   useEffect(() => {
+    console.log("التحقق من بيئة تلجرام...");
+    
+    // طريقة 1: التحقق من وجود كائن Telegram.WebApp
     if (window.Telegram?.WebApp) {
+      console.log("وجدنا كائن Telegram.WebApp!");
       setIsInTelegram(true);
       setTg(window.Telegram.WebApp);
 
       // تهيئة واجهة التطبيق
-      window.Telegram.WebApp.ready();
-      window.Telegram.WebApp.expand();
+      try {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+        console.log("تم تهيئة واجهة تلجرام بنجاح");
+      } catch (error) {
+        console.error("خطأ في تهيئة واجهة تلجرام:", error);
+      }
+    } 
+    // طريقة 2: التحقق من وجود الوكيل (user-agent) الخاص بتلجرام
+    else if (navigator.userAgent.includes("Telegram") || navigator.userAgent.includes("TelegramBot")) {
+      console.log("اكتشفنا وكيل تلجرام في متصفح المستخدم");
+      setIsInTelegram(true);
+    } 
+    // طريقة 3: التحقق من وجود المعلمة tgWebAppData في URL
+    else if (window.location.search.includes("tgWebAppData")) {
+      console.log("اكتشفنا معلمات تلجرام في الرابط");
+      setIsInTelegram(true);
+    } 
+    // طريقة 4: إذا كان المسار يحتوي على "telegram" أو "tg"
+    else if (window.location.pathname.includes("telegram") || window.location.pathname.includes("tg")) {
+      console.log("اكتشفنا أن المسار يشير إلى تلجرام");
+      setIsInTelegram(true);
+    } else {
+      console.log("لم نتمكن من اكتشاف بيئة تلجرام");
     }
   }, []);
 
