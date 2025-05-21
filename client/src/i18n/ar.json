@@ -324,5 +324,24 @@
   "errorUpgradingSubscription": "خطأ في ترقية الاشتراك",
   "errorUpgradingSubscriptionDescription": "واجهنا مشكلة أثناء محاولة ترقية اشتراكك. يرجى المحاولة مرة أخرى لاحقًا.",
   "activeSubscription": "اشتراك نشط",
-  "currentPlanMessage": "خطتك الحالية هي: {{plan}}"
+  "currentPlanMessage": "خطتك الحالية هي: {{plan}}",
+
+  "choosePaymentMethod": "اختر طريقة الدفع",
+  "platforms": "المنصات",
+  "wallets": "المحافظ",
+  "traditional": "الطرق التقليدية",
+  "binance": "بينانس",
+  "okx": "أوكس",
+  "bybit": "باي بت",
+  "trustWallet": "محفظة ترست",
+  "metamask": "ميتاماسك",
+  "okxWallet": "محفظة أوكس",
+  "binanceWallet": "محفظة بينانس",
+  "mastercard": "ماستركارد",
+  "paypal": "باي بال",
+  "westernunion": "ويسترن يونيون",
+  "moneygram": "موني جرام",
+  "stars": "النجوم",
+  "paymentMethodDisabled": "طريقة الدفع غير متاحة",
+  "paymentMethodDisabledDescription": "طريقة الدفع هذه غير متاحة حاليًا. يرجى اختيار طريقة دفع أخرى."
 }
