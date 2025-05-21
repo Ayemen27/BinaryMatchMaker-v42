@@ -28,24 +28,69 @@ const router = Router();
  */
 router.post('/webhook', async (req, res) => {
   try {
-    // التحقق من مصدر الطلب باستخدام توقيع رقمي آمن
+    // طباعة محتوى الطلب للتشخيص
+    console.log('[نظام دفع تلجرام] استلام طلب:', JSON.stringify(req.body).substring(0, 200));
+    
+    // التحقق مما إذا كان هذا تحديث من بوت تلجرام
+    if (req.body && typeof req.body.update_id !== 'undefined') {
+      console.log('[نظام دفع تلجرام] تم التعرف على تحديث بوت تلجرام');
+      
+      // معالجة الرسائل من بوت تلجرام
+      if (req.body.message) {
+        const message = req.body.message;
+        const chatId = message.chat?.id;
+        const text = message.text || '';
+        
+        console.log(`[نظام دفع تلجرام] رسالة من المستخدم ${chatId}: ${text}`);
+        
+        // الرد على المستخدم
+        if (chatId) {
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          
+          if (botToken) {
+            setTimeout(() => {
+              fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text: `تم استلام رسالتك: "${text}"\nشكرًا لتواصلك مع BinarJoin Analytics.`
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('[نظام دفع تلجرام] تم إرسال الرد بنجاح:', data.ok);
+              })
+              .catch(error => {
+                console.error('[نظام دفع تلجرام] خطأ في إرسال الرد:', error);
+              });
+            }, 100);
+          }
+        }
+      }
+      
+      // يجب دائمًا إرسال استجابة 200 OK لتحديثات البوت بسرعة
+      return res.status(200).send('OK');
+    }
+    
+    // إذا وصلنا إلى هنا، فهو طلب دفع عادي وليس تحديث بوت
     const authToken = req.headers['x-telegram-bot-auth'];
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const payloadSignature = req.headers['x-telegram-signature'];
     const requestTimestamp = req.headers['x-request-timestamp'];
     
-    // في بيئة الإنتاج، يجب التحقق من صحة الطلب
-    if (!authToken && process.env.NODE_ENV === 'production') {
-      console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - لا يوجد رمز تحقق');
-      return res.status(403).json({
-        success: false,
-        message: 'غير مصرح بالوصول - رمز التحقق غير موجود'
-      });
-    }
-    
-    // في بيئة الإنتاج، يجب التحقق من توقيع الطلب لمنع هجمات MITM
+    // في بيئة الإنتاج، نقوم بالتحققات الأمنية
     if (process.env.NODE_ENV === 'production') {
-      // التحقق من وجود توقيع وطابع زمني
+      // التحقق من رمز التحقق
+      if (!authToken) {
+        console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - لا يوجد رمز تحقق');
+        return res.status(403).json({
+          success: false,
+          message: 'غير مصرح بالوصول - رمز التحقق غير موجود'
+        });
+      }
+      
+      // التحقق من التوقيع والطابع الزمني
       if (!payloadSignature || !requestTimestamp) {
         console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - بيانات توقيع ناقصة');
         return res.status(403).json({
@@ -54,7 +99,7 @@ router.post('/webhook', async (req, res) => {
         });
       }
       
-      // التحقق من عمر الطلب (منع هجمات إعادة التشغيل)
+      // التحقق من عمر الطلب
       const currentTime = Math.floor(Date.now() / 1000);
       const requestTime = Number(requestTimestamp);
       const maxAge = 300; // 5 دقائق كحد أقصى
@@ -69,17 +114,14 @@ router.post('/webhook', async (req, res) => {
       
       // التحقق من صحة التوقيع
       if (botToken && payloadSignature) {
-        // إنشاء نص للتوقيع (يتضمن بيانات الطلب والطابع الزمني)
         const payload = JSON.stringify(req.body);
         const dataToSign = `${payload}.${requestTimestamp}`;
         
-        // إنشاء توقيع HMAC باستخدام مفتاح البوت
         const expectedSignature = crypto
           .createHmac('sha256', botToken)
           .update(dataToSign)
           .digest('hex');
         
-        // التحقق من تطابق التوقيعات
         if (payloadSignature !== expectedSignature) {
           console.warn('[نظام دفع تلجرام] محاولة وصول غير مصرح بها - توقيع غير صالح');
           return res.status(403).json({
@@ -89,9 +131,6 @@ router.post('/webhook', async (req, res) => {
         }
       }
     }
-    
-    // التحقق من عنوان IP للطلب (في تطبيق إنتاجي، يجب التحقق من قائمة العناوين المسموح بها)
-    // يمكن إضافة قائمة بعناوين IP خوادم تلجرام للتحقق منها
     
     console.log('[نظام دفع تلجرام] استلام طلب دفع:', req.body);
     
