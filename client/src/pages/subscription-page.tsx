@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '@/components/layout/layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Helmet } from 'react-helmet';
 import { 
   Check, AlertCircle, CreditCard, Gem, Shield, Star, Zap, Medal, Loader2, 
-  RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award, ChevronDown
+  RefreshCw, DollarSign, LifeBuoy, Book, Smartphone, Award, ChevronDown,
+  X, ArrowLeft, RefreshCcw
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 // استيراد ملف الأنماط الخاص بصفحة الاشتراك

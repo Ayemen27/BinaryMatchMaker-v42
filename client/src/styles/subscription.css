@@ -311,6 +311,187 @@ div[role="listbox"] [data-radix-select-item]:hover {
   box-shadow: 0 4px 12px rgba(255, 216, 61, 0.3);
 }
 
+/* نافذة منبثقة لطرق الدفع */
+.payment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.payment-modal {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem 1rem 0 0;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 500px;
+  width: 90%;
+  z-index: 1001;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translate(-50%, 100%);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, 0);
+  }
+  to {
+    transform: translate(-50%, 100%);
+  }
+}
+
+.payment-modal.closing {
+  animation: slideDown 0.3s ease forwards;
+}
+
+.payment-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #777;
+  z-index: 10;
+}
+
+.payment-modal-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.payment-tabs {
+  display: flex;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.payment-tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.8rem 0;
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.payment-tab.active {
+  color: #000;
+  background-color: #ffd83d;
+}
+
+.payment-tab.active:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #ffd83d;
+}
+
+.payment-content {
+  display: none;
+}
+
+.payment-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.payment-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.payment-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem 0.5rem;
+  border: 1px solid #eee;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.payment-option:hover {
+  border-color: #ffd83d;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.payment-option img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+.payment-option div {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.payment-option.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.payment-option.disabled:hover {
+  transform: none;
+  border-color: #eee;
+  box-shadow: none;
+}
+
+.switch-currency {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.switch-currency svg {
+  margin: 0 0.5rem;
+}
+
+.switch-stars {
+  cursor: pointer;
+  color: #ffd83d;
+  font-weight: bold;
+}
+
 /* شارة التوصية */
 .recommended-badge {
   position: absolute;
