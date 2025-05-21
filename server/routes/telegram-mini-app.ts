@@ -1,139 +1,135 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { TelegramPaymentService } from '../services/telegram-payment';
+import { TelegramBotService } from '../services/telegram-bot';
 
-// إنشاء موجه للتعامل مع طلبات التطبيق المصغر لتلجرام
+// إنشاء مخطط للتحقق من بيانات الدفع
+const miniAppPaymentSchema = z.object({
+  action: z.string(),
+  paymentId: z.string(),
+  planType: z.string(),
+  starsAmount: z.number().positive(),
+  timestamp: z.number(),
+  telegramUserId: z.string().optional(),
+  telegramUsername: z.string().optional(),
+  telegramFirstName: z.string().optional(),
+  telegramLastName: z.string().optional()
+});
+
 const router = Router();
 
 /**
- * نقطة نهاية لمعالجة طلبات الدفع من التطبيق المصغر
- * هذا المسار يستقبل بيانات JSON من التطبيق المصغر لتلجرام
+ * نقطة نهاية لمعالجة بيانات الدفع من التطبيق المصغر
  */
-router.post('/process-payment', async (req, res) => {
+router.post('/process-mini-app', async (req, res) => {
   try {
-    console.log('[تطبيق تلجرام المصغر] استلام طلب دفع:', req.body);
+    console.log('[تطبيق تلجرام المصغر] استلام طلب معالجة دفع:', JSON.stringify(req.body).substring(0, 200));
     
-    // التحقق من وجود البيانات المطلوبة
-    const { paymentId, planId, starsAmount, userId } = req.body;
-    
-    if (!paymentId || !planId || !starsAmount) {
+    // التحقق من صحة البيانات
+    let paymentData;
+    try {
+      paymentData = miniAppPaymentSchema.parse(req.body);
+    } catch (error) {
+      console.error('[تطبيق تلجرام المصغر] بيانات غير صالحة:', error);
       return res.status(400).json({
         success: false,
-        message: 'بيانات غير مكتملة. يرجى توفير معرف الدفع ونوع الخطة وعدد النجوم.'
+        message: 'بيانات غير صالحة',
+        error: error instanceof z.ZodError ? error.errors : 'خطأ في التحقق من البيانات'
       });
     }
     
-    // إعداد معرف المستخدم (استخدام معرف افتراضي إذا لم يكن متوفرًا)
-    const userIdToUse = userId || 1; // يمكن تغييره وفقًا لمنطق التطبيق
-    const telegramUserId = req.body.userId ? req.body.userId.toString() : undefined;
+    // حفظ طلب الدفع في قاعدة البيانات
+    // يمكن استخدام خدمة التخزين لحفظ الطلب وسيتم معالجته عندما يكتمل الدفع من خلال بوت تلجرام
     
-    // معالجة الدفع باستخدام خدمة الدفع بالنجوم
-    const result = await TelegramPaymentService.processPayment({
-      userId: userIdToUse,
-      plan: planId,
-      starsAmount: parseInt(starsAmount, 10),
-      paymentId,
-      telegramUserId
+    // تحويل نوع الخطة إلى الصيغة الكاملة المستخدمة في النظام
+    const fullPlanType = `${paymentData.planType}_plan`;
+    
+    // إعداد رابط الدفع لبوت تلجرام
+    const botUsername = 'Payment_gateway_Binar_bot';
+    let userParams = '';
+    
+    if (paymentData.telegramUserId) {
+      userParams = `_${paymentData.telegramUserId}`;
+      if (paymentData.telegramUsername) {
+        userParams += `_${paymentData.telegramUsername}`;
+      }
+    }
+    
+    // إنشاء رابط بدء البوت مع معلمات الدفع
+    const startParam = `pay_${paymentData.planType}_${paymentData.starsAmount}${userParams}`;
+    const botUrl = `https://t.me/${botUsername}?start=${startParam}`;
+    
+    return res.status(200).json({
+      success: true,
+      message: 'تم استلام طلب الدفع بنجاح',
+      paymentId: paymentData.paymentId,
+      paymentStatus: 'pending',
+      redirectUrl: botUrl
     });
-    
-    if (result.success) {
-      console.log('[تطبيق تلجرام المصغر] تمت معالجة الدفع بنجاح:', {
-        paymentId,
-        planId,
-        subscriptionType: result.type
-      });
-      
-      return res.json({
-        success: true,
-        message: 'تمت معالجة الدفع بنجاح',
-        subscription: {
-          type: result.type,
-          endDate: result.endDate
-        }
-      });
-    } else {
-      throw new Error('فشل في معالجة الدفع');
-    }
   } catch (error) {
-    console.error('[تطبيق تلجرام المصغر] خطأ في معالجة الدفع:', error);
-    
+    console.error('[تطبيق تلجرام المصغر] خطأ في معالجة طلب الدفع:', error);
     return res.status(500).json({
       success: false,
-      message: 'حدث خطأ أثناء معالجة الدفع',
-      error: (error as Error).message
+      message: 'حدث خطأ أثناء معالجة طلب الدفع'
     });
   }
 });
 
 /**
- * نقطة نهاية للتحقق من صحة طلب الدفع
+ * نقطة نهاية للتحقق من حالة الدفع
  */
-router.get('/verify-payment/:paymentId', async (req, res) => {
+router.get('/payment-status/:paymentId', async (req, res) => {
   try {
     const { paymentId } = req.params;
     
-    if (!paymentId) {
-      return res.status(400).json({
-        success: false,
-        message: 'معرف الدفع مطلوب'
-      });
-    }
+    // التحقق من حالة الدفع باستخدام خدمة الدفع
+    const result = await TelegramPaymentService.verifyPayment(paymentId);
     
-    // التحقق من صحة الدفع
-    const verificationResult = await TelegramPaymentService.verifyPayment(paymentId);
-    
-    return res.json({
-      success: verificationResult.verified,
-      verified: verificationResult.verified,
-      message: verificationResult.verified ? 'تم التحقق من الدفع بنجاح' : 'فشل في التحقق من الدفع',
-      details: verificationResult
+    return res.status(200).json({
+      success: true,
+      verified: result.verified,
+      paymentId,
+      subscription: result.subscription,
+      message: result.verified 
+        ? 'تم التحقق من الدفع بنجاح' 
+        : 'لم يتم العثور على معاملة الدفع أو لم تكتمل بعد'
     });
   } catch (error) {
-    console.error('[تطبيق تلجرام المصغر] خطأ في التحقق من الدفع:', error);
-    
+    console.error('[تطبيق تلجرام المصغر] خطأ في التحقق من حالة الدفع:', error);
     return res.status(500).json({
       success: false,
-      message: 'حدث خطأ أثناء التحقق من الدفع',
-      error: (error as Error).message
+      message: 'حدث خطأ أثناء التحقق من حالة الدفع'
     });
   }
 });
 
 /**
- * نقطة نهاية للحصول على معلومات المستخدم لتلجرام
+ * نقطة نهاية للحصول على روابط الاشتراك
  */
-router.get('/user-info/:telegramUserId', async (req, res) => {
+router.get('/subscription-links', (req, res) => {
   try {
-    const { telegramUserId } = req.params;
+    const userId = req.user?.id || 'guest';
+    const username = req.user?.username || 'guest';
     
-    if (!telegramUserId) {
-      return res.status(400).json({
-        success: false,
-        message: 'معرف المستخدم مطلوب'
-      });
-    }
+    // إنشاء روابط الاشتراك المختلفة
+    const botUsername = 'Payment_gateway_Binar_bot';
     
-    // البحث عن المستخدم في قاعدة البيانات - هذا مثال يجب تغييره حسب هيكل البيانات
-    // يمكن استخدام معرف تلجرام للبحث عن المستخدم المرتبط في قاعدة البيانات
+    const links = {
+      weekly: `https://t.me/${botUsername}?start=pay_weekly_750_${userId}_${username}`,
+      monthly: `https://t.me/${botUsername}?start=pay_monthly_2300_${userId}_${username}`,
+      annual: `https://t.me/${botUsername}?start=pay_annual_10000_${userId}_${username}`,
+      premium: `https://t.me/${botUsername}?start=pay_premium_18500_${userId}_${username}`
+    };
     
-    // إرجاع بيانات وهمية للتجربة (يجب استبدالها ببيانات حقيقية)
-    return res.json({
+    return res.status(200).json({
       success: true,
-      user: {
-        id: 1,
-        telegramUserId,
-        subscription: {
-          type: 'free',
-          expiryDate: null
-        }
-      }
+      links
     });
   } catch (error) {
-    console.error('[تطبيق تلجرام المصغر] خطأ في الحصول على معلومات المستخدم:', error);
-    
+    console.error('[تطبيق تلجرام المصغر] خطأ في إنشاء روابط الاشتراك:', error);
     return res.status(500).json({
       success: false,
-      message: 'حدث خطأ أثناء الحصول على معلومات المستخدم',
-      error: (error as Error).message
+      message: 'حدث خطأ أثناء إنشاء روابط الاشتراك'
     });
   }
 });
