@@ -13,6 +13,7 @@ import SignalGeneratorPage from "@/pages/signal-generator-page";
 import UnifiedSettingsPage from "@/pages/unified-settings-page"; // استخدام صفحة الإعدادات الموحدة الجديدة
 import SubscriptionPage from "@/pages/subscription-page"; // إضافة صفحة الاشتراكات
 import TelegramPaymentGuidePage from "@/pages/telegram-payment-guide"; // إضافة صفحة توجيه الدفع بنجوم تلجرام
+import TelegramMiniApp from "@/pages/telegram-mini-app"; // إضافة صفحة تطبيق تلجرام المصغر
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
@@ -29,6 +30,7 @@ function Router() {
       <ProtectedRoute path="/subscriptions" component={SubscriptionPage} />
       <ProtectedRoute path="/telegram-payment-guide" component={TelegramPaymentGuidePage} />
       <ProtectedRoute path="/settings" component={UnifiedSettingsPage} />
+      <Route path="/telegram-mini-app" component={TelegramMiniApp} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
