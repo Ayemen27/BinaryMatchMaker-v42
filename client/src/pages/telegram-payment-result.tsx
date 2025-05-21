@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'wouter';
+import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoadingCircle } from '@/components/ui/loading';
+import { Loader2 } from 'lucide-react';
 import { useTelegramMiniApp } from '@/hooks/use-telegram-mini-app';
 
 type PaymentStatus = 'loading' | 'success' | 'error';
@@ -13,13 +13,14 @@ type PaymentStatus = 'loading' | 'success' | 'error';
  * تُستخدم لعرض نتيجة عملية الدفع للمستخدم
  */
 export default function TelegramPaymentResult() {
-  const [searchParams] = useSearchParams();
+  const [location] = useLocation();
   const [status, setStatus] = useState<PaymentStatus>('loading');
   const [message, setMessage] = useState('جاري التحقق من حالة الدفع...');
   const [paymentDetails, setPaymentDetails] = useState<any>(null);
   const { closeApp, showAlert } = useTelegramMiniApp();
 
   // استخراج معلومات الدفع من معلمات عنوان URL
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const paymentId = searchParams.get('payment_id');
   const planType = searchParams.get('plan');
   const starsAmount = searchParams.get('amount');
@@ -82,7 +83,7 @@ export default function TelegramPaymentResult() {
         <CardContent>
           {status === 'loading' && (
             <div className="flex flex-col items-center justify-center py-8">
-              <LoadingCircle className="w-12 h-12 mb-4" />
+              <Loader2 className="w-12 h-12 mb-4 animate-spin" />
               <p className="text-center text-muted-foreground">{message}</p>
             </div>
           )}
