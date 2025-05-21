@@ -1,6 +1,64 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { TelegramPaymentService } from '../services/telegram-payment';
+
+// وظيفة إرسال فاتورة الدفع بالنجوم
+function sendInvoice(botToken: string, chatId: number | string, options: {
+  title: string;
+  description: string;
+  payload: string;
+  currency: string;
+  prices: { label: string; amount: number }[];
+}) {
+  return fetch(`https://api.telegram.org/bot${botToken}/sendInvoice`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      title: options.title,
+      description: options.description,
+      payload: options.payload,
+      provider_token: '', // لا حاجة لـ provider_token عند استخدام عملة XTR (النجوم)
+      currency: options.currency,
+      prices: options.prices.map(p => ({ label: p.label, amount: p.amount })),
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('[نظام دفع تلجرام] تم إرسال فاتورة الدفع بنجاح:', data);
+    return data;
+  })
+  .catch(error => {
+    console.error('[نظام دفع تلجرام] خطأ في إرسال فاتورة الدفع:', error);
+    return null;
+  });
+}
+
+// وظيفة تحديث اشتراك المستخدم
+async function updateUserSubscription(userId: number | string, planType: string, amount: number, transactionId: string) {
+  // تحويل نوع الخطة إلى تنسيق مناسب
+  let plan = 'weekly_plan';
+  if (planType === 'monthly') plan = 'monthly_plan';
+  if (planType === 'annual') plan = 'annual_plan';
+  if (planType === 'premium') plan = 'annual_plan';
+
+  try {
+    // استدعاء خدمة معالجة الدفع
+    const result = await TelegramPaymentService.processPayment({
+      userId: Number(userId),
+      plan: plan as any,
+      starsAmount: amount,
+      paymentId: transactionId,
+      telegramUserId: String(userId)
+    });
+    
+    console.log('[نظام دفع تلجرام] تم تحديث اشتراك المستخدم بنجاح:', result);
+    return result;
+  } catch (error) {
+    console.error('[نظام دفع تلجرام] خطأ في تحديث اشتراك المستخدم:', error);
+    return null;
+  }
+}
 import * as crypto from 'crypto';
 
 // مخطط التحقق من بيانات الدفع
@@ -40,11 +98,123 @@ router.post('/webhook', async (req, res) => {
         const message = req.body.message;
         const chatId = message.chat?.id;
         const text = message.text || '';
+        const userId = message.from?.id;
         
         console.log(`[نظام دفع تلجرام] رسالة من المستخدم ${chatId}: ${text}`);
         
         // الرد على المستخدم
         if (chatId) {
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          
+          if (botToken) {
+            let responseText = `تم استلام رسالتك: "${text}"\nشكرًا لتواصلك مع BinarJoin Analytics.`;
+            
+            // معالجة أوامر محددة
+            if (text.startsWith('/start')) {
+              responseText = `أهلاً بك في بوت BinarJoin Analytics! 👋\n\n`
+                + `للاشتراك في خدماتنا المتميزة، يمكنك استخدام الأوامر التالية:\n`
+                + `/plans - عرض خطط الاشتراك\n`
+                + `/weekly - شراء الخطة الأسبوعية\n`
+                + `/monthly - شراء الخطة الشهرية\n`
+                + `/annual - شراء الخطة السنوية\n`
+                + `/premium - شراء خطة BinarJoin V.4.1`;
+            } else if (text.startsWith('/plans')) {
+              responseText = `📋 خطط الاشتراك المتاحة:\n\n`
+                + `🔸 الخطة الأسبوعية - 750 نجمة\n`
+                + `🔸 الخطة الشهرية - 2300 نجمة\n`
+                + `🔸 الخطة السنوية - 10000 نجمة\n`
+                + `🔸 خطة BinarJoin V.4.1 - 18500 نجمة\n\n`
+                + `للاشتراك في أي خطة، استخدم الأمر المناسب:\n`
+                + `/weekly, /monthly, /annual, /premium`;
+            } else if (text.startsWith('/weekly')) {
+              // إرسال فاتورة للخطة الأسبوعية
+              setTimeout(() => {
+                sendInvoice(botToken, chatId, {
+                  title: "الخطة الأسبوعية",
+                  description: "تحليل أساسي للسوق في الوقت الحقيقي - صالح لمدة أسبوع واحد",
+                  payload: `weekly_${userId}_${Date.now()}`,
+                  currency: "XTR",
+                  prices: [{ label: "الخطة الأسبوعية", amount: 750 }]
+                });
+              }, 500);
+              
+              responseText = `⭐ جاري إعداد فاتورة الدفع للخطة الأسبوعية...`;
+            } else if (text.startsWith('/monthly')) {
+              // إرسال فاتورة للخطة الشهرية
+              setTimeout(() => {
+                sendInvoice(botToken, chatId, {
+                  title: "الخطة الشهرية",
+                  description: "تحليل فني متقدم للسوق + إشارات تداول - صالح لمدة شهر كامل",
+                  payload: `monthly_${userId}_${Date.now()}`,
+                  currency: "XTR",
+                  prices: [{ label: "الخطة الشهرية", amount: 2300 }]
+                });
+              }, 500);
+              
+              responseText = `⭐ جاري إعداد فاتورة الدفع للخطة الشهرية...`;
+            } else if (text.startsWith('/annual')) {
+              // إرسال فاتورة للخطة السنوية
+              setTimeout(() => {
+                sendInvoice(botToken, chatId, {
+                  title: "الخطة السنوية",
+                  description: "تحليل مدعوم بالذكاء الاصطناعي + استراتيجيات مخصصة - صالح لمدة سنة كاملة",
+                  payload: `annual_${userId}_${Date.now()}`,
+                  currency: "XTR",
+                  prices: [{ label: "الخطة السنوية", amount: 10000 }]
+                });
+              }, 500);
+              
+              responseText = `⭐ جاري إعداد فاتورة الدفع للخطة السنوية...`;
+            } else if (text.startsWith('/premium')) {
+              // إرسال فاتورة للخطة المتميزة
+              setTimeout(() => {
+                sendInvoice(botToken, chatId, {
+                  title: "خطة BinarJoin V.4.1",
+                  description: "أحدث إصدار مع تحليل متطور وإشارات دقيقة - صالح لمدة سنة كاملة",
+                  payload: `premium_${userId}_${Date.now()}`,
+                  currency: "XTR",
+                  prices: [{ label: "خطة BinarJoin V.4.1", amount: 18500 }]
+                });
+              }, 500);
+              
+              responseText = `⭐ جاري إعداد فاتورة الدفع للخطة المتميزة...`;
+            }
+            
+            setTimeout(() => {
+              fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text: responseText
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('[نظام دفع تلجرام] تم إرسال الرد بنجاح:', data.ok);
+              })
+              .catch(error => {
+                console.error('[نظام دفع تلجرام] خطأ في إرسال الرد:', error);
+              });
+            }, 100);
+          }
+        }
+      }
+      
+      // معالجة الدفعات الناجحة
+      if (req.body.message && req.body.message.successful_payment) {
+        const payment = req.body.message.successful_payment;
+        const chatId = req.body.message.chat?.id;
+        const userId = req.body.message.from?.id;
+        
+        console.log(`[نظام دفع تلجرام] تم استلام دفع ناجح:`, payment);
+        
+        // استخراج معلومات الخطة من payload
+        const payloadParts = payment.invoice_payload.split('_');
+        const planType = payloadParts[0];
+        
+        // إرسال تأكيد للمستخدم
+        if (chatId && userId) {
           const botToken = process.env.TELEGRAM_BOT_TOKEN;
           
           if (botToken) {
@@ -54,15 +224,55 @@ router.post('/webhook', async (req, res) => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   chat_id: chatId,
-                  text: `تم استلام رسالتك: "${text}"\nشكرًا لتواصلك مع BinarJoin Analytics.`
+                  text: `✅ تم الدفع بنجاح!\n\n`
+                    + `💰 المبلغ: ${payment.total_amount} نجمة\n`
+                    + `📋 معرف المعاملة: ${payment.telegram_payment_charge_id}\n\n`
+                    + `🎉 سيتم تفعيل اشتراكك فوراً. شكراً لثقتك! 🌟`
                 })
               })
               .then(response => response.json())
               .then(data => {
-                console.log('[نظام دفع تلجرام] تم إرسال الرد بنجاح:', data.ok);
+                console.log('[نظام دفع تلجرام] تم إرسال تأكيد الدفع بنجاح:', data.ok);
               })
               .catch(error => {
-                console.error('[نظام دفع تلجرام] خطأ في إرسال الرد:', error);
+                console.error('[نظام دفع تلجرام] خطأ في إرسال تأكيد الدفع:', error);
+              });
+            }, 100);
+            
+            // تحديث اشتراك المستخدم في قاعدة البيانات
+            // هذا سيتم تنفيذه في وظيفة منفصلة
+            updateUserSubscription(userId, planType, payment.total_amount, payment.telegram_payment_charge_id);
+          }
+        }
+      }
+      
+      // معالجة استعلامات ما قبل الدفع
+      if (req.body.pre_checkout_query) {
+        const preCheckout = req.body.pre_checkout_query;
+        const queryId = preCheckout.id;
+        
+        console.log(`[نظام دفع تلجرام] استعلام ما قبل الدفع:`, preCheckout);
+        
+        // دائمًا نقبل استعلامات ما قبل الدفع في هذه المرحلة
+        if (queryId) {
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          
+          if (botToken) {
+            setTimeout(() => {
+              fetch(`https://api.telegram.org/bot${botToken}/answerPreCheckoutQuery`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  pre_checkout_query_id: queryId,
+                  ok: true
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('[نظام دفع تلجرام] تم الرد على استعلام ما قبل الدفع بنجاح:', data.ok);
+              })
+              .catch(error => {
+                console.error('[نظام دفع تلجرام] خطأ في الرد على استعلام ما قبل الدفع:', error);
               });
             }, 100);
           }
