@@ -55,8 +55,8 @@ app.use((req, res, next) => {
   // تسجيل وتفعيل خدمة بوت تلجرام
   const telegramBot = new TelegramBotService();
   
-  // الحصول على عنوان الموقع للويب هوك
-  const baseUrl = process.env.APP_BASE_URL || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+  // استخدام عنوان URL المقدم من المستخدم
+  const baseUrl = 'https://583d1522-d013-4168-adaa-b8e2208e8526-00-168nv6p6nrp2f.pike.replit.dev';
   telegramBot.registerWebhook(app, baseUrl);
   console.log(`[خدمة البوت] تم تسجيل خدمة بوت تلجرام مع العنوان الأساسي: ${baseUrl}`);
 
