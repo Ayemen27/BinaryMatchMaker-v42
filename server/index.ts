@@ -7,6 +7,7 @@ import { setupVite, serveStatic, log } from "./vite";
 import { runAutoRestore } from "./auto-restore-service";
 import { initializeDatabase } from "./backup-manager";
 import { TelegramBotService } from "./services/telegram-bot";
+import { setupTelegramBot } from "./telegram-integration";
 
 const app = express();
 app.use(express.json());
@@ -52,16 +53,18 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
   
-  // تسجيل وتفعيل خدمة بوت تلجرام
-  const telegramBot = new TelegramBotService();
-  
   // استخدام عنوان URL الصحيح لـ Replit
   // عناوين webhook يجب أن تكون HTTPS دائمًا لتلجرام
   const baseUrl = process.env.TELEGRAM_WEBHOOK_URL || 'https://d3069587-0c8f-49bd-9cc4-74d6904d29a8-00-3k7bgesw6ce81.sisko.replit.dev';
   
-  console.log(`[خادم] تسجيل البوت في العنوان: ${baseUrl}`);
+  // دمج النظام الموحد للبوت - النظام الجديد والمحسن
+  console.log(`[خادم] تسجيل نظام البوت الموحد في العنوان: ${baseUrl}`);
+  setupTelegramBot(app, baseUrl);
+  
+  // نبقي النظام القديم للتوافقية (يمكن إزالته لاحقاً بعد التأكد من استقرار النظام الجديد)
+  const telegramBot = new TelegramBotService();
   telegramBot.registerWebhook(app, baseUrl);
-  console.log(`[خدمة البوت] تم تسجيل خدمة بوت تلجرام مع العنوان الأساسي: ${baseUrl}`);
+  console.log(`[خدمة البوت] تم تسجيل خدمات البوت بنجاح`);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

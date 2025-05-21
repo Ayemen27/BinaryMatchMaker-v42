@@ -286,7 +286,7 @@ export default function SubscriptionPage() {
       const plan = plans.find(p => p.id === planId);
       if (!plan) return;
       
-      setIsPaymentPopupOpen(true);
+      setIsPaymentModalOpen(true);
       setSelectedPlan(planId);
     }
   };
