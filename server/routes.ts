@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
@@ -24,6 +25,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Telegram payments routes (مدفوعات نجوم تلجرام)
   app.use('/api/telegram-payments', telegramPaymentsRoutes);
+  
+  // إضافة معالج مباشر للتحديثات الواردة من بوت تليجرام
+  app.post('/api/telegram-payments/webhook', async (req, res) => {
+    try {
+      console.log('[بوت تليجرام] استلام تحديث من تليجرام:', JSON.stringify(req.body).substring(0, 200));
+      
+      // التحقق من وجود معلومات الرسالة في التحديث
+      if (req.body && req.body.message) {
+        const message = req.body.message;
+        const chatId = message.chat && message.chat.id;
+        const text = message.text || '';
+        
+        console.log(`[بوت تليجرام] استلام رسالة: ${text} من المستخدم: ${chatId}`);
+        
+        // يمكننا معالجة الرسالة هنا، أو نستخدم خدمة البوت (TelegramBotService) لمعالجة الرسالة
+        
+        // إرجاع استجابة ناجحة إلى تليجرام
+        return res.sendStatus(200);
+      }
+      
+      // إرجاع استجابة إيجابية مع ملاحظة أنه تم استلام التحديث
+      res.json({ success: true, message: 'تم استلام التحديث بنجاح' });
+    } catch (error) {
+      console.error('[بوت تليجرام] خطأ في معالجة تحديث البوت:', error);
+      res.status(500).json({ success: false, message: 'حدث خطأ في معالجة التحديث' });
+    }
+  });
 
   // API routes
   // Get signals for current user (active + user's favorites)
