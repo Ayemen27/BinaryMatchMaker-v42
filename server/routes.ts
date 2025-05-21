@@ -11,6 +11,7 @@ import userRoutes from "./routes/user";
 import telegramPaymentsRoutes from "./routes/telegram-payments";
 import telegramBotRoutes from "./routes/telegram-bot";
 import telegramMiniAppRoutes from "./routes/telegram-mini-app";
+import staticMiniAppRoutes from "./routes/static-mini-app";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -33,6 +34,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Telegram mini app routes (مسارات التطبيق المصغر لتلجرام)
   app.use('/api/telegram-mini-app', telegramMiniAppRoutes);
+  
+  // مسار التطبيق المصغر لتلجرام (الوصول المباشر)
+  app.use('/telegram-mini-app', staticMiniAppRoutes);
   
   // توجيه مسار الويب هوك القديم إلى المسار الجديد (للتوافق مع الإصدارات القديمة)
   app.post('/api/telegram-payments/webhook', express.json(), (req, res) => {
