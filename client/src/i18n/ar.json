@@ -360,8 +360,13 @@
   "paymentInitiatedDescription": "تم إرسال طلب الدفع، رجاءً أكمل العملية في تطبيق تيليجرام",
   "errorOccurred": "حدث خطأ",
   "paymentProcessingFailed": "فشلت معالجة الدفع، يرجى المحاولة مرة أخرى",
+  "loadingTelegramApp": "جاري تحميل تطبيق تيليجرام",
+  "preparingPaymentInterface": "جاري إعداد واجهة الدفع",
+  "connectingToTelegram": "جاري الاتصال بتيليجرام",
+  "guest": "زائر",
+  "newPlan": "جديد",
+  "selectVersion": "اختر الإصدار",
   "connectionError": "خطأ في الاتصال",
   "checkInternetConnection": "يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى",
-  "selectPlan": "اختر خطة للاشتراك",
-  "newPlan": "جديد"
+  "selectPlan": "اختر خطة للاشتراك"
 }
