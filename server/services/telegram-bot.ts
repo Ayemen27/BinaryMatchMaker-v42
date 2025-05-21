@@ -1,0 +1,319 @@
+import express from 'express';
+import { TelegramPaymentService } from './telegram-payment';
+
+/**
+ * خدمة بوت تلجرام للتعامل مع مدفوعات النجوم
+ * تستخدم webhook للتواصل مع API تلجرام
+ */
+export class TelegramBotService {
+  private botToken: string;
+  private botUsername: string = 'Payment_gateway_Binar_bot';
+  private webhookPath: string = '/api/telegram/webhook';
+  
+  constructor() {
+    this.botToken = process.env.TELEGRAM_BOT_TOKEN || '';
+    if (!this.botToken) {
+      console.error('[خدمة البوت] خطأ: مفتاح بوت تلجرام غير متوفر في المتغيرات البيئية');
+    }
+  }
+  
+  /**
+   * إضافة مسارات webhook للبوت إلى التطبيق
+   */
+  public registerWebhook(app: express.Application, baseUrl: string): void {
+    // التأكد من وجود مفتاح البوت
+    if (!this.botToken) {
+      console.error('[خدمة البوت] لم يتم تسجيل webhook بسبب عدم توفر مفتاح البوت');
+      return;
+    }
+    
+    console.log(`[خدمة البوت] تسجيل webhook في المسار: ${this.webhookPath}`);
+    
+    // تسجيل webhook مع تلجرام
+    this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
+      if (success) {
+        console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
+      } else {
+        console.error('[خدمة البوت] فشل في تسجيل webhook');
+      }
+    });
+    
+    // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام
+    app.post(this.webhookPath, express.json(), async (req, res) => {
+      try {
+        // التحقق من مصدر الطلب (يمكن إضافة طبقة أمان إضافية هنا)
+        const update = req.body;
+        
+        console.log('[خدمة البوت] تم استلام تحديث من تلجرام:', 
+          JSON.stringify(update, null, 2).substring(0, 200) + '...');
+        
+        // معالجة التحديث
+        await this.handleUpdate(update);
+        
+        // إرجاع استجابة فورية إلى تلجرام
+        res.sendStatus(200);
+      } catch (error) {
+        console.error('[خدمة البوت] خطأ في معالجة تحديث تلجرام:', error);
+        res.sendStatus(500);
+      }
+    });
+  }
+  
+  /**
+   * تسجيل webhook مع تلجرام API
+   */
+  private async setWebhook(url: string): Promise<boolean> {
+    try {
+      const apiUrl = `https://api.telegram.org/bot${this.botToken}/setWebhook?url=${encodeURIComponent(url)}`;
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      
+      if (data.ok) {
+        console.log('[خدمة البوت] تم تسجيل webhook بنجاح:', data.result);
+        return true;
+      } else {
+        console.error('[خدمة البوت] فشل في تسجيل webhook:', data.description);
+        return false;
+      }
+    } catch (error) {
+      console.error('[خدمة البوت] خطأ أثناء تسجيل webhook:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * معالجة تحديثات تلجرام الواردة
+   */
+  private async handleUpdate(update: any): Promise<void> {
+    // التحقق من وجود رسالة
+    if (!update.message) {
+      console.log('[خدمة البوت] تحديث بدون رسالة، تجاهل');
+      return;
+    }
+    
+    const message = update.message;
+    const chatId = message.chat.id;
+    const text = message.text || '';
+    
+    // معالجة أوامر البوت
+    if (text.startsWith('/')) {
+      await this.handleCommand(chatId, text, message.from);
+    } else {
+      // للرسائل العادية، نرسل رسالة مساعدة
+      await this.sendHelpMessage(chatId);
+    }
+  }
+  
+  /**
+   * معالجة أوامر البوت
+   */
+  private async handleCommand(chatId: number, command: string, user?: any): Promise<void> {
+    console.log(`[خدمة البوت] معالجة الأمر: ${command} من المستخدم:`, user?.id);
+    
+    // تقسيم الأمر والمعلمات
+    const parts = command.split(' ');
+    const cmd = parts[0].toLowerCase();
+    
+    switch (cmd) {
+      case '/start':
+        await this.sendMessage(chatId, 
+          'مرحبًا بك في بوت الدفع الخاص بمنصة BinarJoinAnalytic! 👋\n\n' +
+          'استخدم الأمر /pay لإتمام عملية الدفع بنجوم تلجرام.\n' +
+          'مثال: /pay weekly 750'
+        );
+        break;
+        
+      case '/help':
+        await this.sendHelpMessage(chatId);
+        break;
+        
+      case '/pay':
+        // معالجة أمر الدفع
+        if (parts.length < 3) {
+          await this.sendMessage(chatId, 
+            '⚠️ يرجى استخدام الصيغة الصحيحة للأمر:\n' +
+            '/pay <plan_type> <stars_amount>\n\n' +
+            'مثال: /pay weekly 750'
+          );
+          return;
+        }
+        
+        const planType = parts[1];
+        const starsAmount = parseInt(parts[2], 10);
+        
+        // التحقق من صحة المعلمات
+        if (!this.isValidPlan(planType) || isNaN(starsAmount) || starsAmount <= 0) {
+          await this.sendMessage(chatId, 
+            '⚠️ خطة غير صالحة أو قيمة نجوم غير صحيحة.\n' +
+            'الخطط المتاحة: weekly, monthly, annual, premium\n' +
+            'يجب أن تكون قيمة النجوم رقمًا موجبًا.'
+          );
+          return;
+        }
+        
+        // معالجة الدفع
+        await this.processPayment(chatId, planType, starsAmount, user);
+        break;
+        
+      case '/status':
+        // التحقق من حالة الاشتراك (إذا كان المستخدم مسجلاً)
+        if (user && user.id) {
+          await this.checkSubscriptionStatus(chatId, user.id);
+        } else {
+          await this.sendMessage(chatId, '⚠️ يجب أن تكون مسجلاً للتحقق من حالة الاشتراك.');
+        }
+        break;
+        
+      default:
+        await this.sendMessage(chatId, '❓ أمر غير معروف. استخدم /help لعرض الأوامر المتاحة.');
+    }
+  }
+  
+  /**
+   * إرسال رسالة مساعدة
+   */
+  private async sendHelpMessage(chatId: number): Promise<void> {
+    await this.sendMessage(chatId, 
+      '🌟 بوت الدفع الخاص بمنصة BinarJoinAnalytic 🌟\n\n' +
+      'الأوامر المتاحة:\n' +
+      '/start - بدء استخدام البوت\n' +
+      '/help - عرض هذه الرسالة\n' +
+      '/pay <plan_type> <stars_amount> - إتمام عملية الدفع\n' +
+      '/status - التحقق من حالة الاشتراك\n\n' +
+      'للدفع، استخدم الأمر التالي:\n' +
+      '/pay weekly 750\n' +
+      '/pay monthly 2300\n' +
+      '/pay annual 10000\n' +
+      '/pay premium 18500'
+    );
+  }
+  
+  /**
+   * معالجة الدفع بالنجوم
+   */
+  private async processPayment(
+    chatId: number, 
+    planType: string, 
+    starsAmount: number, 
+    user?: any
+  ): Promise<void> {
+    if (!user || !user.id) {
+      await this.sendMessage(chatId, '⚠️ لم يتم العثور على معلومات المستخدم.');
+      return;
+    }
+    
+    // إنشاء معرف فريد للمعاملة
+    const paymentId = `tg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    
+    try {
+      // إرسال رسالة قيد المعالجة
+      await this.sendMessage(chatId, '⏳ جاري معالجة الدفع...');
+      
+      // استدعاء خدمة معالجة الدفع
+      const telegramUserId = user.id.toString();
+      
+      // محاولة العثور على المستخدم أو إنشاء حساب مؤقت له
+      // هذا مجرد مثال، سيحتاج إلى تعديل وفقًا لمنطق التطبيق
+      const userId = 1; // يفترض أن هناك حساب افتراضي للتجربة
+      
+      // الاتصال بخدمة الدفع
+      const result = await TelegramPaymentService.processPayment({
+        userId,
+        plan: `${planType}_plan`, // تحويل النوع إلى الصيغة المتوافقة
+        starsAmount,
+        paymentId,
+        telegramUserId
+      });
+      
+      if (result && result.success) {
+        // إرسال رسالة نجاح
+        await this.sendMessage(chatId, 
+          '✅ تم معالجة الدفع بنجاح!\n\n' +
+          `🌟 خطة: ${this.getPlanDisplayName(planType)}\n` +
+          `⭐ عدد النجوم: ${starsAmount}\n` +
+          `📆 تاريخ الانتهاء: ${result.endDate.toLocaleDateString('ar-SA')}\n` +
+          `🆔 معرف المعاملة: ${paymentId}\n\n` +
+          '🚀 يمكنك الآن استخدام جميع ميزات الخطة التي اشتركت بها!'
+        );
+      } else {
+        throw new Error('فشل في معالجة الدفع');
+      }
+    } catch (error) {
+      console.error('[خدمة البوت] خطأ في معالجة الدفع:', error);
+      
+      await this.sendMessage(chatId, 
+        '❌ حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى لاحقًا أو التواصل مع الدعم الفني.'
+      );
+    }
+  }
+  
+  /**
+   * التحقق من حالة الاشتراك
+   */
+  private async checkSubscriptionStatus(chatId: number, telegramUserId: number): Promise<void> {
+    try {
+      // هذا مجرد مثال، يجب تعديله وفقًا لمنطق التطبيق
+      await this.sendMessage(chatId, 
+        '🔍 للتحقق من حالة اشتراكك، يرجى زيارة الموقع على:\n\n' +
+        'https://binarjoinanalytic.repl.co/dashboard'
+      );
+    } catch (error) {
+      console.error('[خدمة البوت] خطأ في التحقق من حالة الاشتراك:', error);
+      await this.sendMessage(chatId, '❌ حدث خطأ أثناء التحقق من حالة الاشتراك.');
+    }
+  }
+  
+  /**
+   * إرسال رسالة إلى المستخدم
+   */
+  private async sendMessage(chatId: number, text: string): Promise<void> {
+    try {
+      const apiUrl = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: 'HTML'
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.ok) {
+        console.error('[خدمة البوت] فشل في إرسال الرسالة:', data.description);
+      }
+    } catch (error) {
+      console.error('[خدمة البوت] خطأ أثناء إرسال الرسالة:', error);
+    }
+  }
+  
+  /**
+   * التحقق من صحة نوع الخطة
+   */
+  private isValidPlan(planType: string): boolean {
+    const validPlans = ['weekly', 'monthly', 'annual', 'premium'];
+    return validPlans.includes(planType.toLowerCase());
+  }
+  
+  /**
+   * الحصول على اسم العرض للخطة
+   */
+  private getPlanDisplayName(planType: string): string {
+    switch (planType.toLowerCase()) {
+      case 'weekly':
+        return 'الخطة الأسبوعية';
+      case 'monthly':
+        return 'الخطة الشهرية';
+      case 'annual':
+        return 'الخطة السنوية';
+      case 'premium':
+        return 'الخطة المتميزة';
+      default:
+        return planType;
+    }
+  }
+}
