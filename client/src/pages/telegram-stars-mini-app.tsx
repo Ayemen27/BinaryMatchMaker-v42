@@ -395,95 +395,69 @@ export default function TelegramStarsMiniApp() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 gap-4 mb-8">
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
-              className={`border-2 hover:shadow-md transition-all ${selectedPlan === plan.id ? 'border-primary' : 'border-border'}`}
+              className={`border border-gray-200 bg-white rounded-lg overflow-hidden shadow-sm mb-2 ${selectedPlan === plan.id ? 'ring-2 ring-yellow-500' : ''}`}
             >
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
+              <CardHeader className="pb-0 pt-3 px-3">
+                <div className="flex justify-end items-start text-right">
                   <div>
-                    <CardTitle>{plan.name}</CardTitle>
-                    <CardDescription>{plan.label}</CardDescription>
+                    <CardTitle className="text-xl font-bold">{plan.name}</CardTitle>
+                    <CardDescription className="text-sm mt-0.5">{plan.label}</CardDescription>
                   </div>
-                  {plan.isPopular && (
-                    <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
-                      {t('mostPopular')}
-                    </Badge>
-                  )}
-                  {plan.isNew && (
-                    <Badge variant="outline" className="border-green-500 text-green-600">
-                      {t('newPlan')}
-                    </Badge>
-                  )}
                 </div>
               </CardHeader>
               
-              <CardContent className="pb-2">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="text-xl font-bold text-primary flex items-center">
-                    <Star className="h-5 w-5 mr-1 text-yellow-500" />
-                    {plan.price} <span className="text-sm mr-1">{t('stars')}</span>
+              <CardContent className="px-3 py-2">
+                <p className="text-sm text-right mb-2">{plan.description}</p>
+                
+                <div className="flex justify-between items-center mb-3 border-b border-gray-100 pb-2">
+                  <div className="text-xl font-bold text-yellow-500 flex items-center">
+                    <span className="text-yellow-500">{t('stars')}</span>
+                    <span className="mx-1">{plan.price}</span>
+                    <Star className="h-5 w-5 text-yellow-500" />
                   </div>
-                  <div className="text-xs text-muted-foreground">{plan.period}</div>
+                  <span className="text-xs text-muted-foreground">{plan.period}</span>
                 </div>
                 
-                <p className="text-sm font-medium mb-2">{plan.description}</p>
-                
-                {plan.extraDescription && (
-                  <p className="text-xs text-muted-foreground mb-3">{plan.extraDescription}</p>
-                )}
-                
-                {plan.id === 'premium' && (
-                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-3 rounded-lg mb-4 border border-yellow-100 dark:border-yellow-800">
-                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300 mb-2">
-                      <Medal className="h-4 w-4 inline-block mr-1" /> {t('exclusiveAccess')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{t('v41ExtraDescription')}</p>
+                <div className="mb-3">
+                  <div className="mb-3">
+                    <label className="text-sm mb-1 block text-right">{t('selectBotVersion')}:</label>
+                    <Select
+                      value={selectedBotVersions[plan.id] || plan.botVersions[0] || ''}
+                      onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+                    >
+                      <SelectTrigger className="w-full bg-gray-50 border-gray-200 text-right">
+                        <SelectValue placeholder={t('selectVersion')} />
+                      </SelectTrigger>
+                      <SelectContent dir="rtl">
+                        {plan.botVersions && plan.botVersions.map((version) => (
+                          <SelectItem key={version} value={version}>
+                            {version}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-                
-                <div className="mb-4">
-                  <label className="text-sm font-medium mb-1 block">{t('selectBotVersion')}:</label>
-                  <Select
-                    value={selectedBotVersions[plan.id] || plan.botVersions[0] || ''}
-                    onValueChange={(value) => handleBotVersionChange(plan.id, value)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('selectVersion')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {plan.botVersions && plan.botVersions.map((version) => (
-                        <SelectItem key={version} value={version}>
-                          {version}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
                 
-                <ul className="space-y-2 mb-4">
+                <div className="mt-1">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <Check className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <div key={index} className="flex justify-end items-center py-1 gap-2 text-right">
                       <span className="text-sm">
                         {feature.text}
                       </span>
-                    </li>
+                      <Check className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                    </div>
                   ))}
-                </ul>
+                </div>
               </CardContent>
               
-              <CardFooter className="pt-2 pb-4 px-3 flex flex-col">
-                <div className="ideal-for mb-3 flex items-center justify-center text-center text-sm">
-                  {plan.id === 'monthly' && (
-                    <Zap className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
-                  )}
-                  {plan.id === 'premium' && (
-                    <Star className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
-                  )}
-                  <span>{plan.idealFor}</span>
+              <CardFooter className="pt-0 pb-3 px-3">
+                <div className="text-center bg-yellow-50 py-2 px-3 rounded-lg text-sm text-gray-700 w-full mb-2">
+                  {plan.idealFor}
                 </div>
                 
                 <Button 
