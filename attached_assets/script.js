@@ -118,10 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update prices for this specific plan
             const planCard = toggleButton.closest('.plan-card');
             const priceElement = planCard.querySelector('.price');
+            let starsAmount = planName === 'Weekly Plan' ? 750 : planName === 'Monthly Plan' ? 2300 : 10000;
             
             if (newCurrency === 'USD') {
                 toggleButton.classList.remove('stars-active');
-                let starsAmount = planName === 'Weekly Plan' ? 750 : planName === 'Monthly Plan' ? 2300 : 10000;
                 
                 // Set USD prices
                 if (planName === 'Weekly Plan') priceElement.textContent = '9.99';
@@ -132,6 +132,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="fas fa-exchange-alt"></i>
                     <span>Switch to Stars (${starsAmount})</span>
                 `;
+                
+                // تغيير سلوك زر الاشتراك لاستخدام النافذة المنبثقة للدفع عند استخدام العملة التقليدية
+                const subscribeButton = planCard.querySelector('.subscribe-btn');
+                if (subscribeButton) {
+                    subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+                }
             } else {
                 toggleButton.classList.add('stars-active');
                 
@@ -144,6 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <i class="fas fa-dollar-sign"></i>
                     <span>Switch to USD</span>
                 `;
+                
+                // تغيير سلوك زر الاشتراك للذهاب مباشرة إلى تلجرام عند استخدام نجوم تلجرام
+                const subscribeButton = planCard.querySelector('.subscribe-btn');
+                if (subscribeButton) {
+                    subscribeButton.setAttribute('onclick', 'redirectToTelegramStars(event)');
+                }
             }
         }
     };
@@ -157,6 +169,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas fa-dollar-sign"></i>
                 <span>Switch to USD</span>
             `;
+            
+            // تغيير سلوك أزرار الاشتراك للذهاب مباشرة إلى تلجرام عند استخدام طريقة الدفع بالنجوم
+            const planCard = button.closest('.plan-card');
+            if (planCard) {
+                const subscribeButton = planCard.querySelector('.subscribe-btn');
+                if (subscribeButton) {
+                    subscribeButton.setAttribute('onclick', 'redirectToTelegramStars(event)');
+                }
+                
+                // تحديث أسعار النجوم لكل خطة
+                const planName = planCard.querySelector('h2')?.textContent?.trim();
+                const priceElement = planCard.querySelector('.price');
+                
+                if (planName === 'Weekly Plan' && priceElement) {
+                    priceElement.textContent = '750 Stars';
+                } else if (planName === 'Monthly Plan' && priceElement) {
+                    priceElement.textContent = '2300 Stars';
+                } else if (planName === 'Annual Plan' && priceElement) {
+                    priceElement.textContent = '10000 Stars';
+                }
+            }
+        });
+    } else {
+        // تأكد من أن كل أزرار الاشتراك تستخدم النوافذ المنبثقة عند الدفع بالعملات التقليدية
+        document.querySelectorAll('.plan-card').forEach(planCard => {
+            const subscribeButton = planCard.querySelector('.subscribe-btn');
+            if (subscribeButton) {
+                subscribeButton.setAttribute('onclick', 'showPaymentModal(event)');
+            }
         });
     }
     
@@ -327,6 +368,69 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Modify functions to handle potential undefined scenarios
+    // دالة جديدة للتوجيه المباشر إلى تلجرام عند اختيار الدفع بالنجوم
+    window.redirectToTelegramStars = function(event) {
+        try {
+            if (!event || !event.target) return;
+            
+            const planCard = event.target.closest('.plan-card');
+            if (!planCard) return;
+
+            const botVersionSelect = planCard.querySelector('.bot-version');
+            const errorMessage = planCard.querySelector('.error-message');
+            
+            if (!botVersionSelect) return;
+
+            const selectedVersion = botVersionSelect.value;
+            if (!selectedVersion) {
+                // إظهار رسالة الخطأ مع التأثير المتحرك
+                botVersionSelect.classList.add('highlight-select', 'shake');
+                if (errorMessage) errorMessage.classList.add('visible');
+                
+                // إزالة التأثيرات بعد اكتمالها
+                setTimeout(() => {
+                    botVersionSelect.classList.remove('shake');
+                }, 500);
+                
+                setTimeout(() => {
+                    botVersionSelect.classList.remove('highlight-select');
+                    if (errorMessage) errorMessage.classList.remove('visible');
+                }, 3000);
+                return;
+            }
+
+            // استخراج تفاصيل الخطة بطريقة آمنة مع قيم افتراضية
+            const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
+            const planPrice = planCard.querySelector('.price')?.textContent?.trim() || '0 Stars';
+
+            // تخزين المعلومات المختارة
+            localStorage.setItem('selectedPlan', planName);
+            localStorage.setItem('selectedPrice', planPrice);
+            localStorage.setItem('selectedBotVersion', 
+                botVersionSelect.options[botVersionSelect.selectedIndex]?.text || 'Unknown Version'
+            );
+
+            // حساب عدد النجوم المطلوبة بناء على الخطة
+            let starsAmount = 750; // القيمة الافتراضية للخطة الأسبوعية
+            if (planName === 'Monthly Plan') starsAmount = 2300;
+            if (planName === 'Annual Plan') starsAmount = 10000;
+            
+            // إعداد الرسالة التي سترسل إلى بوت تلجرام
+            const message = encodeURIComponent(
+                `Stars Subscription Request\n\n` +
+                `Subscription Info:\n` +
+                `📦 Plan: ${planName}\n` +
+                `🤖 Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                `⭐ Stars Required: ${starsAmount} Stars`
+            );
+            
+            // توجيه المستخدم مباشرة إلى محادثة تلجرام
+            window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+        } catch (error) {
+            console.error('Telegram stars redirect error:', error);
+        }
+    };
+
     window.showPaymentModal = function(event) {
         try {
             if (!event || !event.target) return;
