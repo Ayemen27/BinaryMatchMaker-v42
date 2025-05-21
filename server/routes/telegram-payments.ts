@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import { storage } from '../storage';
-import { subscriptionTypeEnum } from '@shared/schema';
 import { z } from 'zod';
+import { TelegramPaymentService } from '../services/telegram-payment';
 
 // مخطط التحقق من بيانات الدفع
 const telegramPaymentSchema = z.object({
@@ -50,7 +49,7 @@ router.post('/webhook', async (req, res) => {
     let userId = paymentData.userId;
     
     if (!userId && paymentData.email) {
-      const user = await storage.getUserByEmail(paymentData.email);
+      const user = await TelegramPaymentService.findUserByEmail(paymentData.email);
       if (user) {
         userId = user.id;
       }
@@ -58,7 +57,7 @@ router.post('/webhook', async (req, res) => {
     
     // البحث عن المستخدم بواسطة اسم المستخدم إذا كان متوفرًا
     if (!userId && paymentData.username) {
-      const user = await storage.getUserByUsername(paymentData.username);
+      const user = await TelegramPaymentService.findUserByUsername(paymentData.username);
       if (user) {
         userId = user.id;
       }
@@ -75,80 +74,23 @@ router.post('/webhook', async (req, res) => {
       });
     }
     
-    // تحديد نوع الاشتراك بناءً على الخطة المختارة
-    let subscriptionType: "free" | "basic" | "pro" | "vip" = "free";
-    let durationInDays = 0;
-    
-    switch(paymentData.plan) {
-      case 'weekly_plan':
-        subscriptionType = "basic";
-        durationInDays = 7;
-        break;
-      case 'monthly_plan':
-        subscriptionType = "pro";
-        durationInDays = 30;
-        break;
-      case 'annual_plan':
-        subscriptionType = "vip";
-        durationInDays = 365;
-        break;
-    }
-    
     // التحقق من حالة الدفع
     if (paymentData.paymentStatus === 'completed' && paymentData.isVerified) {
-      // حساب تاريخ انتهاء الاشتراك
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + durationInDays);
-      
-      // التحقق من وجود اشتراك حالي
-      const existingSubscription = await storage.getUserSubscription(userId);
-      
-      if (existingSubscription) {
-        // تحديث الاشتراك الحالي
-        await storage.updateSubscription(existingSubscription.id, {
-          type: subscriptionType,
-          startDate,
-          endDate,
-          isActive: true,
-          paymentMethod: 'telegram_stars',
-          amount: paymentData.starsAmount,
-          currency: 'STARS',
-          transactionId: paymentData.paymentId
-        });
-      } else {
-        // إنشاء اشتراك جديد
-        await storage.createSubscription({
-          userId,
-          type: subscriptionType,
-          startDate,
-          endDate,
-          isActive: true,
-          paymentMethod: 'telegram_stars',
-          amount: paymentData.starsAmount,
-          currency: 'STARS',
-          transactionId: paymentData.paymentId
-        });
-      }
-      
-      // تحديث مستوى اشتراك المستخدم في جدول المستخدمين
-      await storage.updateUserSubscriptionLevel(userId, subscriptionType, endDate);
-      
-      // إرسال إشعار للمستخدم
-      await storage.createNotification({
+      // معالجة الدفع باستخدام خدمة تلجرام
+      const result = await TelegramPaymentService.processPayment({
         userId,
-        type: 'subscription',
-        title: 'تم تفعيل الاشتراك',
-        message: `تم تفعيل اشتراكك بنجاح (${subscriptionType}) حتى تاريخ ${endDate.toLocaleDateString('ar-SA')}`,
-        read: false
+        plan: paymentData.plan,
+        starsAmount: paymentData.starsAmount,
+        paymentId: paymentData.paymentId,
+        telegramUserId: paymentData.telegramUserId
       });
       
       return res.status(200).json({
         success: true,
         status: 'activated',
         userId,
-        subscriptionType,
-        endDate,
+        subscriptionType: result.type,
+        endDate: result.endDate,
         message: 'تم تفعيل الاشتراك بنجاح'
       });
     } else {
@@ -187,12 +129,12 @@ router.get('/verify/:paymentId', async (req, res) => {
     
     // التحقق من دور المستخدم (يجب أن يكون مسؤولاً) - سيتم تنفيذه لاحقًا
     
-    // البحث عن الدفع في قاعدة البيانات (سيتم إضافته لاحقًا)
-    // في الوقت الحالي نفترض أنه تم التحقق بنجاح
+    // التحقق من الدفع باستخدام خدمة تلجرام
+    const result = await TelegramPaymentService.verifyPayment(paymentId);
     
     return res.status(200).json({
       success: true,
-      verified: true,
+      verified: result.verified,
       paymentId,
       message: 'تم التحقق من الدفع بنجاح'
     });
@@ -211,32 +153,13 @@ router.get('/verify/:paymentId', async (req, res) => {
 router.post('/complete/:paymentId', async (req, res) => {
   try {
     const { paymentId } = req.params;
-    const { userId, plan } = req.body;
+    const { userId, plan, starsAmount = 0 } = req.body;
     
     if (!req.isAuthenticated()) {
       return res.status(401).json({
         success: false,
         message: 'غير مصرح لك بالوصول'
       });
-    }
-    
-    // تحديد نوع الاشتراك بناءً على الخطة المختارة
-    let subscriptionType: "free" | "basic" | "pro" | "vip" = "free";
-    let durationInDays = 0;
-    
-    switch(plan) {
-      case 'weekly_plan':
-        subscriptionType = "basic";
-        durationInDays = 7;
-        break;
-      case 'monthly_plan':
-        subscriptionType = "pro";
-        durationInDays = 30;
-        break;
-      case 'annual_plan':
-        subscriptionType = "vip";
-        durationInDays = 365;
-        break;
     }
     
     if (!userId || !plan) {
@@ -246,55 +169,20 @@ router.post('/complete/:paymentId', async (req, res) => {
       });
     }
     
-    // حساب تاريخ انتهاء الاشتراك
-    const startDate = new Date();
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + durationInDays);
-    
-    // التحقق من وجود اشتراك حالي
-    const existingSubscription = await storage.getUserSubscription(userId);
-    
-    if (existingSubscription) {
-      // تحديث الاشتراك الحالي
-      await storage.updateSubscription(existingSubscription.id, {
-        type: subscriptionType,
-        startDate,
-        endDate,
-        isActive: true,
-        paymentMethod: 'telegram_stars',
-        transactionId: paymentId
-      });
-    } else {
-      // إنشاء اشتراك جديد
-      await storage.createSubscription({
-        userId,
-        type: subscriptionType,
-        startDate,
-        endDate,
-        isActive: true,
-        paymentMethod: 'telegram_stars',
-        transactionId: paymentId
-      });
-    }
-    
-    // تحديث مستوى اشتراك المستخدم في جدول المستخدمين
-    await storage.updateUserSubscriptionLevel(userId, subscriptionType, endDate);
-    
-    // إرسال إشعار للمستخدم
-    await storage.createNotification({
+    // معالجة الدفع باستخدام خدمة تلجرام
+    const result = await TelegramPaymentService.processPayment({
       userId,
-      type: 'subscription',
-      title: 'تم تفعيل الاشتراك',
-      message: `تم تفعيل اشتراكك بنجاح (${subscriptionType}) حتى تاريخ ${endDate.toLocaleDateString('ar-SA')}`,
-      read: false
+      plan,
+      starsAmount,
+      paymentId
     });
     
     return res.status(200).json({
       success: true,
       activated: true,
       userId,
-      subscriptionType,
-      endDate,
+      subscriptionType: result.type,
+      endDate: result.endDate,
       message: 'تم تفعيل الاشتراك بنجاح'
     });
   } catch (error) {

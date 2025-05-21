@@ -7,6 +7,7 @@ import { z } from "zod";
 import signalGeneratorRoutes from "./routes/signal-generator";
 import settingsRoutes from "./routes/settings";
 import userRoutes from "./routes/user";
+import telegramPaymentsRoutes from "./routes/telegram-payments";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -20,6 +21,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Settings routes (إعدادات موحدة)
   app.use('/api/settings', settingsRoutes);
+  
+  // Telegram payments routes (مدفوعات نجوم تلجرام)
+  app.use('/api/telegram-payments', telegramPaymentsRoutes);
 
   // API routes
   // Get signals for current user (active + user's favorites)
