@@ -15,6 +15,7 @@ import SubscriptionPage from "@/pages/subscription-page"; // إضافة صفحة
 import TelegramPaymentGuidePage from "@/pages/telegram-payment-guide"; // إضافة صفحة توجيه الدفع بنجوم تلجرام
 import TelegramMiniApp from "@/pages/telegram-mini-app"; // إضافة صفحة تطبيق تلجرام المصغر
 import TelegramStarsMiniApp from "@/pages/telegram-stars-mini-app"; // إضافة صفحة تطبيق تلجرام المصغر للدفع بالنجوم
+import TelegramPaymentResult from "@/pages/telegram-payment-result"; // إضافة صفحة نتيجة الدفع بنجوم تلجرام
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 import { ThemeProvider } from "next-themes";
@@ -33,6 +34,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={UnifiedSettingsPage} />
       <Route path="/telegram-mini-app" component={TelegramMiniApp} />
       <Route path="/telegram-stars-app" component={TelegramStarsMiniApp} />
+      <Route path="/telegram-payment-result" component={TelegramPaymentResult} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
