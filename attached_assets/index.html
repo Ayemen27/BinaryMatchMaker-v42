@@ -170,9 +170,33 @@
                     <div class="ideal-for">
                         <i class="fas fa-rocket"></i> Perfect for active traders seeking advanced tools
                     </div>
-                    <button class="btn subscribe-btn" onclick="handleSubscription(event)">
+                    <button class="btn subscribe-btn" id="monthly-subscribe-btn">
                         Upgrade My Trading
                     </button>
+                    <script>
+                        document.getElementById('monthly-subscribe-btn').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            var currentCurrency = localStorage.getItem('currency') || 'USD';
+                            if (currentCurrency === 'STARS') {
+                                // توجيه مباشر إلى تلجرام بدون نافذة منبثقة
+                                var planName = 'Monthly Plan';
+                                var botVersionSelect = document.querySelector('.monthly-plan .bot-version');
+                                var selectedVersion = botVersionSelect.options[botVersionSelect.selectedIndex].text;
+                                var starsAmount = 2300;
+                                var message = encodeURIComponent(
+                                    `Stars Subscription Request\n\n` +
+                                    `Subscription Info:\n` +
+                                    `📦 Plan: ${planName}\n` +
+                                    `🤖 Bot Version: ${selectedVersion}\n` +
+                                    `⭐ Stars Required: ${starsAmount} Stars`
+                                );
+                                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                            } else {
+                                // الاستمرار بالطريقة العادية
+                                showPaymentModal(event);
+                            }
+                        });
+                    </script>
                 </div>
             </div>
 
@@ -214,9 +238,33 @@
                     <div class="ideal-for">
                         <i class="fas fa-crown"></i> Designed for professional traders
                     </div>
-                    <button class="btn subscribe-btn" onclick="handleSubscription(event)">
+                    <button class="btn subscribe-btn" id="annual-subscribe-btn">
                         Unlock Pro Trading
                     </button>
+                    <script>
+                        document.getElementById('annual-subscribe-btn').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            var currentCurrency = localStorage.getItem('currency') || 'USD';
+                            if (currentCurrency === 'STARS') {
+                                // توجيه مباشر إلى تلجرام بدون نافذة منبثقة
+                                var planName = 'Annual Plan';
+                                var botVersionSelect = document.querySelector('.annual-plan .bot-version');
+                                var selectedVersion = botVersionSelect.options[botVersionSelect.selectedIndex].text;
+                                var starsAmount = 10000;
+                                var message = encodeURIComponent(
+                                    `Stars Subscription Request\n\n` +
+                                    `Subscription Info:\n` +
+                                    `📦 Plan: ${planName}\n` +
+                                    `🤖 Bot Version: ${selectedVersion}\n` +
+                                    `⭐ Stars Required: ${starsAmount} Stars`
+                                );
+                                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                            } else {
+                                // الاستمرار بالطريقة العادية
+                                showPaymentModal(event);
+                            }
+                        });
+                    </script>
                 </div>
             </div>
         </div>
