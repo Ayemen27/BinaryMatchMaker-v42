@@ -24,7 +24,7 @@ const TelegramPaymentGuidePage = () => {
   const telegramBotUrl = `https://t.me/${botUsername}`;
   
   // تعديل اسم البوت - استخدام البوت الرسمي للمنصة
-  const alternativeBotUsername = 'binarjoinanalytic_bot';
+  const alternativeBotUsername = 'Payment_gateway_Binar_bot';
   const alternativeTelegramBotUrl = `https://t.me/${alternativeBotUsername}`;
   
   // نسخ الأمر إلى الحافظة
