@@ -581,25 +581,30 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     /**
-     * تحسين نظام التجانب بين طرق الدفع
-     * هذه الوظيفة تتحقق من العملة الحالية قبل استدعاء النافذة المنبثقة
-     * وتوجه المستخدم مباشرة إلى تلجرام في حالة الدفع بالنجوم
+     * نظام ذكي للتعامل مع طرق الدفع المختلفة
+     * هذه الوظيفة تقوم بفحص نوع العملة المختارة وتوجيه المستخدم للطريقة المناسبة
+     * USD: تظهر النافذة المنبثقة مع خيارات الدفع التقليدية
+     * STARS: توجّه المستخدم مباشرة لبوت تلجرام دون ظهور النافذة المنبثقة
      */
     window.handleSubscription = function(event) {
         // الحصول على العملة الحالية
         const currentCurrency = localStorage.getItem('currency') || 'USD';
         
-        // إذا كانت العملة هي النجوم، استخدم معالجة نجوم تلجرام
+        // التحقق من نوع العملة
         if (currentCurrency === 'STARS') {
+            // استخدام نظام دفع نجوم تلجرام مباشرة بدون نوافذ منبثقة
             window.starPaymentSystem.processTelegramPayment(event);
         } else {
-            // وإلا استخدم النافذة المنبثقة العادية
-            showPaymentModalInternal(event);
+            // استخدام النافذة المنبثقة للدفع التقليدي
+            showPaymentModal(event);
         }
     };
 
-    // وظيفة داخلية لعرض النافذة المنبثقة (تستخدم فقط في حالة الدفع بغير النجوم)
-    function showPaymentModalInternal(event) {
+    /**
+     * النافذة المنبثقة للدفع التقليدي (USD)
+     * تستخدم فقط في حالة الدفع بغير النجوم
+     */
+    window.showPaymentModal = function(event) {
         try {
             if (!event || !event.target) return;
             
