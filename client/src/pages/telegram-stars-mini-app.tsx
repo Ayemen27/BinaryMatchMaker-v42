@@ -231,7 +231,7 @@ export default function TelegramStarsMiniApp() {
     }));
   };
   
-  // اختيار خطة
+  // اختيار خطة - آلية جديدة مباشرة
   const handlePlanSelect = (planId: string) => {
     setSelectedPlan(planId);
     
@@ -245,21 +245,16 @@ export default function TelegramStarsMiniApp() {
       return;
     }
     
-    // إيجاد الخطة المحددة
-    const plan = plans.find(p => p.id === planId);
-    if (!plan) return;
+    // مباشرة معالجة الدفع بدون نافذة منبثقة
+    handlePayment(planId);
     
-    // تخزين الخطة للاستخدام في النافذة المنبثقة
-    setPaymentPlan(plan);
-    
-    // فتح النافذة المنبثقة للتأكيد
-    setIsPaymentPopupOpen(true);
-    
-    // تحديث زر تلجرام الرئيسي (سيتم استخدامه للفتح/إغلاق النافذة المنبثقة)
+    // تحديث زر تلجرام الرئيسي كإشارة بصرية فقط
     if (telegramWebApp?.MainButton) {
-      telegramWebApp.MainButton.setText(t('showPaymentOptions') || `${t('payWithStars')} (${plan.price} ${t('stars')})`);
-      telegramWebApp.MainButton.show();
-      telegramWebApp.MainButton.onClick(() => setIsPaymentPopupOpen(true));
+      const plan = plans.find(p => p.id === planId);
+      if (plan) {
+        telegramWebApp.MainButton.setText(`${t('payWithStars')} (${plan.price} ⭐)`);
+        telegramWebApp.MainButton.show();
+      }
     }
   };
   
@@ -410,16 +405,7 @@ export default function TelegramStarsMiniApp() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Helmet>
       
-      {/* النافذة المنبثقة للتأكيد */}
-      <PaymentPopup
-        isOpen={isPaymentPopupOpen}
-        onClose={handleClosePaymentPopup}
-        plan={paymentPlan}
-        botVersion={paymentPlan ? selectedBotVersions[paymentPlan.id] || '' : ''}
-        telegramUser={telegramUser}
-        onConfirm={handlePaymentConfirmation}
-        isProcessing={isProcessing}
-      />
+      {/* تم إزالة النافذة المنبثقة واستبدالها بتجربة دفع مباشرة */}
       
       {/* شريط علوي */}
       <TelegramHeader telegramUser={telegramUser} i18n={i18n} t={t} />
