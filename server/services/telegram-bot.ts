@@ -379,21 +379,23 @@ export class TelegramBotService {
   /**
    * إرسال رسالة إلى المستخدم
    */
-  private async sendMessage(chatId: number, text: string): Promise<void> {
+  private async sendMessage(chatId: number, text: string): Promise<boolean> {
     try {
       console.log(`[خدمة البوت] محاولة إرسال رسالة إلى المستخدم ${chatId}: ${text.substring(0, 50)}...`);
       
       const apiUrl = `https://api.telegram.org/bot${this.botToken}/sendMessage`;
-      console.log(`[خدمة البوت] استخدام API URL: ${apiUrl.split('/bot')[0]}/bot***`);
+      
+      // تحقق إذا كان النص يحتوي على تنسيق ماركداون
+      const containsMarkdown = text.includes('*') || text.includes('_') || text.includes('`') || text.includes('[');
       
       const payload = {
         chat_id: chatId,
         text,
-        parse_mode: 'HTML'
+        parse_mode: containsMarkdown ? 'MarkdownV2' : 'HTML',
+        disable_web_page_preview: false
       };
       
-      console.log(`[خدمة البوت] بيانات الرسالة:`, JSON.stringify(payload).substring(0, 100) + '...');
-      
+      // محاولة إرسال الرسالة
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -406,11 +408,38 @@ export class TelegramBotService {
       
       if (data.ok) {
         console.log(`[خدمة البوت] تم إرسال الرسالة بنجاح إلى المستخدم ${chatId}`);
+        return true;
       } else {
-        console.error('[خدمة البوت] فشل في إرسال الرسالة:', data.description, data);
+        console.error('[خدمة البوت] فشل في إرسال الرسالة:', data.description);
+        
+        // إذا فشل بسبب خطأ في التنسيق، حاول مرة أخرى بدون تنسيق
+        if (containsMarkdown && (data.description || '').includes('parse')) {
+          console.log('[خدمة البوت] محاولة إرسال الرسالة بدون تنسيق');
+          
+          // إرسال بدون تنسيق
+          const plainPayload = {
+            chat_id: chatId,
+            text,
+            parse_mode: ''
+          };
+          
+          const plainResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(plainPayload)
+          });
+          
+          const plainData = await plainResponse.json();
+          return plainData.ok;
+        }
+        
+        return false;
       }
     } catch (error) {
       console.error('[خدمة البوت] خطأ أثناء إرسال الرسالة:', error);
+      return false;
     }
   }
   
