@@ -10,7 +10,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
  */
 export class TelegramBotService {
   private botToken: string;
-  private botUsername: string = 'binarjoinanalytic_bot'; // تحديث اسم المستخدم ليتوافق مع رسائل التحويل
+  private botUsername: string = 'Payment_gateway_Binar_bot'; // اسم بوت الدفع الصحيح
   private webhookPath: string = '/api/telegram/webhook';
   
   constructor() {
