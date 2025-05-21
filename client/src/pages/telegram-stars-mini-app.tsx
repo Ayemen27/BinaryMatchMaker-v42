@@ -22,6 +22,86 @@ interface TelegramUser {
   language_code?: string;
 }
 
+// مكون صفحة التحميل الاحترافية
+function LoadingScreen({ text = 'جاري التحميل...', t }: { text?: string, t: any }) {
+  return (
+    <div 
+      className="telegram-loader-container"
+    >
+      <div className="telegram-loader-icon">
+        <div className="telegram-loader-icon-pulse"></div>
+        <div className="telegram-loader-icon-inner"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Star className="h-12 w-12 text-primary" />
+        </div>
+      </div>
+      
+      <h2 className="text-2xl font-bold mb-2 text-center">{t('loadingTelegramApp')}</h2>
+      <p className="text-muted-foreground text-center max-w-xs">{t('preparingPaymentInterface')}</p>
+      
+      <div className="telegram-loader-progress">
+        <div className="telegram-loader-progress-bar"></div>
+      </div>
+      <p className="text-sm text-muted-foreground mt-2">{t('connectingToTelegram')}</p>
+    </div>
+  );
+}
+
+// مكون الشريط العلوي
+function TelegramHeader({ 
+  telegramUser, 
+  i18n, 
+  t 
+}: { 
+  telegramUser: TelegramUser | null, 
+  i18n: any,
+  t: any
+}) {
+  return (
+    <header className="telegram-app-header">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center">
+          <Menu className="h-5 w-5 mr-2 md:hidden" />
+          <h1 className="text-lg font-bold">BinarJoin Analytics</h1>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-white hover:bg-primary-800"
+            onClick={() => {
+              const newLang = i18n.language === 'ar' ? 'en' : 'ar';
+              i18n.changeLanguage(newLang);
+              localStorage.setItem('language', newLang);
+              document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
+            }}
+          >
+            <Globe className="h-4 w-4 mr-1" />
+            <span className="text-sm">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
+          </Button>
+          
+          <div className="flex items-center border-l border-white/20 pl-3">
+            {telegramUser ? (
+              <div className="flex items-center">
+                <div className="telegram-user-avatar">
+                  {telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}
+                </div>
+                <span className="text-sm hidden md:inline-block">{telegramUser.first_name || t('guest')}</span>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-1" />
+                <span className="text-sm">{t('guest')}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 export default function TelegramStarsMiniApp() {
   const { t, i18n } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -29,6 +109,7 @@ export default function TelegramStarsMiniApp() {
   const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
   const [telegramWebApp, setTelegramWebApp] = useState<any>(null);
   const [selectedBotVersions, setSelectedBotVersions] = useState<{[key: string]: string}>({});
+  const [isLoading, setIsLoading] = useState(true);
   
   // أسعار الخطط المختلفة - نستخدم فقط أسعار النجوم هنا
   const planPrices = {
@@ -171,6 +252,11 @@ export default function TelegramStarsMiniApp() {
     } else {
       console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
     }
+    
+    // محاكاة التحميل
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
   }, [t]);
   
   // تعيين الإصدارات الافتراضية للروبوت
@@ -214,6 +300,9 @@ export default function TelegramStarsMiniApp() {
         telegramWebApp.MainButton.show();
         telegramWebApp.MainButton.onClick(() => handlePayment(planId));
       }
+    } else {
+      // اذا لم يكن التطبيق يعمل داخل تيليجرام، نقوم بتنفيذ الدفع مباشرة
+      handlePayment(planId);
     }
   };
   
@@ -328,6 +417,18 @@ export default function TelegramStarsMiniApp() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
+        <Helmet>
+          <title>BinarJoin Analytics | {t('loading')}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        </Helmet>
+        <LoadingScreen t={t} />
+      </div>
+    );
+  }
+
   return (
     <div dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
       <Helmet>
@@ -337,47 +438,7 @@ export default function TelegramStarsMiniApp() {
       </Helmet>
       
       {/* شريط علوي */}
-      <header className="bg-primary text-white p-3 sticky top-0 z-50 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <Menu className="h-5 w-5 mr-2 md:hidden" />
-            <h1 className="text-lg font-bold">BinarJoin Analytics</h1>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-white hover:bg-primary-800"
-              onClick={() => {
-                const newLang = i18n.language === 'ar' ? 'en' : 'ar';
-                i18n.changeLanguage(newLang);
-                localStorage.setItem('language', newLang);
-                document.documentElement.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-              }}
-            >
-              <Globe className="h-4 w-4 mr-1" />
-              <span className="text-sm">{i18n.language === 'ar' ? 'English' : 'العربية'}</span>
-            </Button>
-            
-            <div className="flex items-center border-l border-white/20 pl-3">
-              {telegramUser ? (
-                <div className="flex items-center">
-                  <div className="h-7 w-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold mr-2">
-                    {telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}
-                  </div>
-                  <span className="text-sm hidden md:inline-block">{telegramUser.first_name || t('guest')}</span>
-                </div>
-              ) : (
-                <div className="flex items-center">
-                  <User className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{t('guest')}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <TelegramHeader telegramUser={telegramUser} i18n={i18n} t={t} />
       
       <div className="container max-w-4xl mx-auto py-6 px-4">
         <div className="mb-6 text-center">
@@ -385,138 +446,125 @@ export default function TelegramStarsMiniApp() {
           <p className="text-muted-foreground max-w-2xl mx-auto">{t('professionalTradingInsights')}</p>
         </div>
 
-      {telegramUser && (
-        <div className="bg-accent/30 rounded-lg p-4 mb-6">
-          <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-              <span className="text-lg font-bold">{telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}</span>
-            </div>
-            <div>
-              <p className="font-medium">
-                {telegramUser.first_name || ''} {telegramUser.last_name || ''}
-              </p>
-              {telegramUser.username && <p className="text-sm text-muted-foreground">@{telegramUser.username}</p>}
+        {telegramUser && (
+          <div className="bg-accent/30 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
+                <span className="text-lg font-bold">{telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}</span>
+              </div>
+              <div>
+                <p className="font-medium">
+                  {telegramUser.first_name || ''} {telegramUser.last_name || ''}
+                </p>
+                {telegramUser.username && <p className="text-sm text-muted-foreground">@{telegramUser.username}</p>}
+              </div>
             </div>
           </div>
+        )}
+        
+        <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 flex items-start">
+          <Info className="h-5 w-5 text-yellow-500 mt-0.5 mr-2" />
+          <div>
+            <p className="text-sm">{t('telegramStarsOnlyInfo')}</p>
+          </div>
         </div>
-      )}
-      
-      <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 flex items-start">
-        <Info className="h-5 w-5 text-yellow-500 mt-0.5 mr-2" />
-        <div>
-          <p className="text-sm">{t('telegramStarsOnlyInfo')}</p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {plans.map((plan) => (
-          <Card 
-            key={plan.id} 
-            className={`border-2 hover:shadow-md transition-all ${selectedPlan === plan.id ? 'border-primary' : 'border-border'}`}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.label}</CardDescription>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {plans.map((plan) => (
+            <Card 
+              key={plan.id} 
+              className={`border-2 hover:shadow-md transition-all ${selectedPlan === plan.id ? 'border-primary' : 'border-border'}`}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <CardTitle>{plan.name}</CardTitle>
+                    <CardDescription>{plan.label}</CardDescription>
+                  </div>
+                  {plan.isPopular && (
+                    <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
+                      {t('mostPopular')}
+                    </Badge>
+                  )}
+                  {plan.isNew && (
+                    <Badge variant="outline" className="border-green-500 text-green-600">
+                      {t('newPlan')}
+                    </Badge>
+                  )}
                 </div>
-                {plan.isPopular && (
-                  <Badge variant="default" className="bg-yellow-500 hover:bg-yellow-600">
-                    {t('mostPopular')}
-                  </Badge>
-                )}
-                {plan.isNew && (
-                  <Badge variant="outline" className="border-green-500 text-green-600">
-                    {t('newPlan')}
-                  </Badge>
-                )}
-              </div>
-            </CardHeader>
-            
-            <CardContent className="pb-2">
-              <div className="mb-4 flex items-center">
-                <div className="text-2xl font-bold text-primary flex items-center">
-                  <Star className="h-5 w-5 mr-1 text-yellow-500" />
-                  {plan.price} <span className="text-sm mr-1">{t('stars')}</span>
+              </CardHeader>
+              
+              <CardContent className="pb-2">
+                <div className="mb-4 flex items-center">
+                  <div className="text-2xl font-bold text-primary flex items-center">
+                    <Star className="h-5 w-5 mr-1 text-yellow-500" />
+                    {plan.price} <span className="text-sm mr-1">{t('stars')}</span>
+                  </div>
                 </div>
-                <span className="text-sm text-muted-foreground mr-auto">{`/${plan.period}`}</span>
-              </div>
+                
+                <p className="text-sm mb-2 font-medium">{plan.description}</p>
+                
+                {plan.extraDescription && (
+                  <p className="text-xs text-muted-foreground mb-3">{plan.extraDescription}</p>
+                )}
+                
+                <div className="mb-4">
+                  <label className="text-sm font-medium mb-1 block">{t('selectBotVersion')}:</label>
+                  <Select
+                    value={selectedBotVersions[plan.id] || ''}
+                    onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('selectVersion')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {plan.botVersions.map((version) => (
+                        <SelectItem key={version} value={version}>
+                          {version}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  {plan.features.map((feature, index) => (
+                    <div key={index} className="flex items-start">
+                      <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2" />
+                      <span className="text-sm">{feature.text}</span>
+                    </div>
+                  ))}
+                </div>
+                
+                <p className="text-xs text-muted-foreground">{plan.idealFor}</p>
+              </CardContent>
               
-              <p className="text-muted-foreground mb-4">{plan.description}</p>
-              {plan.extraDescription && (
-                <p className="text-sm text-muted-foreground mb-4 italic">{plan.extraDescription}</p>
-              )}
-              
-              <div className="mb-4">
-                <label className="text-sm font-medium mb-1 block">{t('selectBotVersion')}</label>
-                <Select
-                  value={selectedBotVersions[plan.id] || ''}
-                  onValueChange={(value) => handleBotVersionChange(plan.id, value)}
+              <CardFooter>
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => handlePlanSelect(plan.id)}
+                  disabled={isProcessing}
                 >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder={t('selectVersion')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {plan.botVersions.map((version) => (
-                      <SelectItem key={version} value={version}>
-                        {version}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <ul className="space-y-2 mb-4">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start">
-                    <Check className="h-4 w-4 text-yellow-500 mr-2 mt-0.5 flex-shrink-0" />
-                    <span className="feature-text">
-                      {feature.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            
-            <CardFooter className="pt-2 pb-4 px-6 flex flex-col">
-              <div className="ideal-for mb-3 flex items-center justify-center text-center text-sm text-muted-foreground">
-                {plan.id === 'monthly' && (
-                  <Zap className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
-                )}
-                {plan.id === 'premium' && (
-                  <Star className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0" />
-                )}
-                <span>{plan.idealFor}</span>
-              </div>
-              
-              <Button 
-                className="w-full bg-amber-400 hover:bg-amber-500 text-black"
-                onClick={() => handlePlanSelect(plan.id)}
-                disabled={isProcessing}
-              >
-                {isProcessing && selectedPlan === plan.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  <>
-                    <Star className="h-4 w-4 mr-2" />
-                    {plan.callToAction}
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-
-      <div className="note text-center text-sm text-muted-foreground mb-6">
-        <div className="flex items-center justify-center mb-2">
-          <AlertCircle className="h-4 w-4 mr-1 text-yellow-500" />
-          <p>{t('telegramStarsPaymentNote')}</p>
+                  {isProcessing && selectedPlan === plan.id ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('processing')}
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="mr-2 h-4 w-4" />
+                      {plan.callToAction}
+                    </>
+                  )}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
-        <p>{t('subscriptionTermsNote')}</p>
+        
+        <div className="text-xs text-muted-foreground text-center mt-6">
+          <p>{t('subscriptionTermsNote')}</p>
+        </div>
       </div>
     </div>
   );
