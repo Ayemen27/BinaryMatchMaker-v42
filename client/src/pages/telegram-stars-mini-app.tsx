@@ -142,6 +142,14 @@ export default function TelegramStarsMiniApp() {
   
   // تحميل واجهة برمجة تطبيقات تلجرام
   useEffect(() => {
+    // محاكاة التحميل عند التصفح العادي - تظهر صفحة التحميل فوراً
+    document.addEventListener('DOMContentLoaded', () => {
+      // تأخير لإظهار صفحة التحميل بشكل كافٍ
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2500);
+    });
+    
     const tgWebApp = (window as any).Telegram?.WebApp;
     
     if (tgWebApp) {
@@ -168,14 +176,19 @@ export default function TelegramStarsMiniApp() {
       if (tgWebApp.colorScheme === 'dark') {
         document.body.classList.add('dark');
       }
+      
+      // إخفاء شاشة التحميل بعد تهيئة تطبيق تيليجرام بنجاح
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     } else {
       console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
+      
+      // في حالة عدم وجود SDK تيليجرام، نعرض الصفحة بعد فترة للمستخدمين العاديين
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2500);
     }
-    
-    // محاكاة التحميل
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
   }, [t]);
   
   // تعيين الإصدارات الافتراضية للروبوت

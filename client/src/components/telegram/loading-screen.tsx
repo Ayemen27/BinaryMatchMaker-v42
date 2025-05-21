@@ -16,13 +16,17 @@ export function LoadingScreen({ text, t }: LoadingScreenProps) {
         </div>
       </div>
       
-      <h2 className="text-2xl font-bold mb-2 text-center">{t('loadingTelegramApp')}</h2>
-      <p className="text-muted-foreground text-center max-w-xs">{t('preparingPaymentInterface')}</p>
-      
-      <div className="telegram-loader-progress">
-        <div className="telegram-loader-progress-bar"></div>
+      <div>
+        <h2 className="text-2xl font-bold mb-2 text-center">{t('loadingTelegramApp')}</h2>
+        <p className="text-muted-foreground text-center max-w-xs">{t('preparingPaymentInterface')}</p>
       </div>
-      <p className="text-sm text-muted-foreground mt-2">{text || t('connectingToTelegram')}</p>
+      
+      <div className="w-full max-w-[192px] mt-8">
+        <div className="telegram-loader-progress">
+          <div className="telegram-loader-progress-bar"></div>
+        </div>
+        <p className="text-sm text-muted-foreground mt-2 text-center">{text || t('connectingToTelegram')}</p>
+      </div>
     </div>
   );
 }
