@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { runAutoRestore } from "./auto-restore-service";
 import { initializeDatabase } from "./backup-manager";
+import { TelegramBotService } from "./services/telegram-bot";
 
 const app = express();
 app.use(express.json());
@@ -50,6 +51,14 @@ app.use((req, res, next) => {
   await runAutoRestore();
   
   const server = await registerRoutes(app);
+  
+  // تسجيل وتفعيل خدمة بوت تلجرام
+  const telegramBot = new TelegramBotService();
+  
+  // الحصول على عنوان الموقع للويب هوك
+  const baseUrl = process.env.APP_BASE_URL || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+  telegramBot.registerWebhook(app, baseUrl);
+  console.log(`[خدمة البوت] تم تسجيل خدمة بوت تلجرام مع العنوان الأساسي: ${baseUrl}`);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

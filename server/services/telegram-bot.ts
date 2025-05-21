@@ -29,16 +29,24 @@ export class TelegramBotService {
     
     console.log(`[خدمة البوت] تسجيل webhook في المسار: ${this.webhookPath}`);
     
-    // تسجيل webhook مع تلجرام
-    this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
-      if (success) {
-        console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
-      } else {
-        console.error('[خدمة البوت] فشل في تسجيل webhook');
-      }
-    });
+    // التحقق من بيئة التشغيل
+    const isDevelopment = process.env.NODE_ENV === 'development';
     
-    // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام
+    if (!isDevelopment) {
+      // في بيئة الإنتاج، نقوم بتسجيل webhook مع تلجرام
+      this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
+        if (success) {
+          console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
+        } else {
+          console.error('[خدمة البوت] فشل في تسجيل webhook');
+        }
+      });
+    } else {
+      // في بيئة التطوير، نتخطى تسجيل webhook لأن العنوان المحلي غير قابل للوصول من الإنترنت
+      console.log('[خدمة البوت] تخطي تسجيل webhook في بيئة التطوير، سيتم تسجيل مسار الاستقبال فقط');
+    }
+    
+    // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام (في كلتا البيئتين)
     app.post(this.webhookPath, express.json(), async (req, res) => {
       try {
         // التحقق من مصدر الطلب (يمكن إضافة طبقة أمان إضافية هنا)
@@ -57,6 +65,40 @@ export class TelegramBotService {
         res.sendStatus(500);
       }
     });
+    
+    // إضافة مسار للاختبار في بيئة التطوير
+    if (isDevelopment) {
+      app.get('/api/telegram/test', (req, res) => {
+        res.json({
+          status: 'success',
+          message: 'خدمة بوت تلجرام تعمل بشكل صحيح في وضع التطوير',
+          botUsername: this.botUsername,
+          webhookPath: this.webhookPath
+        });
+      });
+      
+      // إضافة مسار لمحاكاة تحديثات تلجرام (للاختبار في بيئة التطوير)
+      app.post('/api/telegram/simulate', express.json(), async (req, res) => {
+        try {
+          const simulatedUpdate = req.body;
+          console.log('[خدمة البوت] محاكاة تحديث تلجرام:', JSON.stringify(simulatedUpdate, null, 2));
+          
+          // معالجة التحديث المحاكي
+          await this.handleUpdate(simulatedUpdate);
+          
+          res.json({
+            status: 'success',
+            message: 'تمت معالجة التحديث المحاكي بنجاح'
+          });
+        } catch (error) {
+          console.error('[خدمة البوت] خطأ في معالجة التحديث المحاكي:', error);
+          res.status(500).json({
+            status: 'error',
+            message: 'فشل في معالجة التحديث المحاكي'
+          });
+        }
+      });
+    }
   }
   
   /**
