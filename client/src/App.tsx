@@ -25,6 +25,7 @@ function Router() {
       <ProtectedRoute path="/signal-generator" component={SignalGeneratorPage} />
       <ProtectedRoute path="/market-analysis" component={MarketAnalysisPage} />
       <ProtectedRoute path="/signal-history" component={SignalHistoryPage} />
+      <ProtectedRoute path="/subscriptions" component={SubscriptionPage} />
       <ProtectedRoute path="/settings" component={UnifiedSettingsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
