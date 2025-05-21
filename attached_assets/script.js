@@ -597,34 +597,50 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     /**
-     * نظام ذكي للتعامل مع طرق الدفع المختلفة
-     * هذه الوظيفة تقوم بفحص نوع العملة المختارة وتوجيه المستخدم للطريقة المناسبة
+     * نظام ذكي معزز للتعامل مع طرق الدفع المختلفة
+     * تم تعديله لضمان عدم ظهور النافذة المنبثقة في وضع الدفع بالنجوم
+     * 
      * USD: تظهر النافذة المنبثقة مع خيارات الدفع التقليدية
      * STARS: توجّه المستخدم مباشرة لبوت تلجرام دون ظهور النافذة المنبثقة
      */
     window.handleSubscription = function(event) {
-        // الحصول على العملة الحالية
+        // منع السلوك الافتراضي للزر
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        // الحصول على العملة الحالية - هذا أهم جزء في الوظيفة
         const currentCurrency = localStorage.getItem('currency') || 'USD';
         
         // تسجيل بيانات عملية الدفع للتتبع والتحليل
         console.log('[PaymentSystem] Payment attempt with currency:', currentCurrency);
         
         // العثور على معلومات الخطة
-        const planCard = event.target.closest('.plan-card');
-        if (planCard) {
-            const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
-            console.log('[PaymentSystem] Plan selected:', planName);
+        const planCard = event.target ? event.target.closest('.plan-card') : null;
+        if (!planCard) {
+            console.log('[PaymentSystem] Error: Plan card not found');
+            return false;
         }
         
-        // التحقق من نوع العملة
+        const planName = planCard.querySelector('h2')?.textContent?.trim() || 'Unknown Plan';
+        console.log('[PaymentSystem] Plan selected:', planName);
+        
+        // خطوة حاسمة: التحقق من نوع العملة
         if (currentCurrency === 'STARS') {
-            console.log('[PaymentSystem] Using Telegram Stars payment - direct redirect without popup');
-            // استخدام نظام دفع نجوم تلجرام مباشرة بدون نوافذ منبثقة
+            console.log('[PaymentSystem] Using Telegram Stars payment - direct redirect WITHOUT popup');
+            
+            // استخدام نظام دفع نجوم تلجرام مباشرة - تجاوز النافذة المنبثقة تماماً
+            // نستخدم هنا نظام نجوم تلجرام مباشرة دون أي وسيط
             window.starPaymentSystem.processTelegramPayment(event);
+            
+            // منع أي معالجة إضافية
+            return false;
         } else {
             console.log('[PaymentSystem] Using USD payment - showing payment popup');
             // استخدام النافذة المنبثقة للدفع التقليدي
             showPaymentModal(event);
+            return true;
         }
     };
 
