@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { TelegramPaymentButton } from '@/components/telegram-payment-button';
+import { PaymentPopup } from '@/components/payment-popup';
 // استيراد ملف الأنماط الخاص بصفحة الاشتراك
 import '../styles/subscription.css';
 
@@ -255,10 +256,10 @@ export default function SubscriptionPage() {
   
   /**
    * نظام ذكي معزز للتعامل مع طرق الدفع المختلفة
-   * تم تعديله لضمان عدم ظهور النافذة المنبثقة في وضع الدفع بالنجوم
+   * تم تعديله ليظهر نافذة منبثقة مشابهة لتطبيق durger-king
    * 
    * USD: تظهر النافذة المنبثقة مع خيارات الدفع التقليدية
-   * STARS: توجّه المستخدم مباشرة لبوت تلجرام دون ظهور النافذة المنبثقة
+   * STARS: تظهر نافذة منبثقة جديدة مع خيارات الدفع بنجوم تلجرام
    */
   const handleUpgrade = (planId: string) => {
     // التحقق من إصدار الروبوت المحدد أولاً
@@ -274,15 +275,19 @@ export default function SubscriptionPage() {
     // حفظ الخطة المختارة للاستخدام في معالجة الدفع
     setSelectedPlan(planId);
     
-    // التسلسل المنطقي المختلف بناءً على العملة المحددة
+    // استخدام النافذة المنبثقة المناسبة بناءً على العملة المحددة
     if (currency === 'USD') {
       // في حالة الدولار: استخدام النافذة المنبثقة الحالية
       setIsPaymentModalOpen(true);
       setPaymentTab('platforms');
       setSelectedPaymentMethod(null);
     } else {
-      // في حالة النجوم: تنفيذ الدفع مباشرة عبر تلجرام
-      processTelegramStarsPayment(planId);
+      // في حالة النجوم: عرض النافذة المنبثقة الجديدة
+      const plan = plans.find(p => p.id === planId);
+      if (!plan) return;
+      
+      setIsPaymentPopupOpen(true);
+      setSelectedPlan(planId);
     }
   };
   
