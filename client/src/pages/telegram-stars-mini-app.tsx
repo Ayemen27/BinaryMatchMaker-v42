@@ -146,14 +146,6 @@ export default function TelegramStarsMiniApp() {
   
   // تحميل واجهة برمجة تطبيقات تلجرام
   useEffect(() => {
-    // محاكاة التحميل عند التصفح العادي - تظهر صفحة التحميل فوراً
-    document.addEventListener('DOMContentLoaded', () => {
-      // تأخير لإظهار صفحة التحميل بشكل كافٍ
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 2500);
-    });
-    
     const tgWebApp = (window as any).Telegram?.WebApp;
     
     if (tgWebApp) {
@@ -166,6 +158,18 @@ export default function TelegramStarsMiniApp() {
       // الحصول على معلومات المستخدم
       if (tgWebApp.initDataUnsafe?.user) {
         setTelegramUser(tgWebApp.initDataUnsafe.user);
+        // حفظ اسم المستخدم في التخزين المحلي للاستخدام عند إعادة التحميل
+        localStorage.setItem('telegramUser', JSON.stringify(tgWebApp.initDataUnsafe.user));
+      } else {
+        // محاولة استرجاع البيانات من التخزين المحلي إذا لم تكن متوفرة من تلجرام
+        const savedUser = localStorage.getItem('telegramUser');
+        if (savedUser) {
+          try {
+            setTelegramUser(JSON.parse(savedUser));
+          } catch (e) {
+            console.error('خطأ في قراءة بيانات المستخدم المخزنة', e);
+          }
+        }
       }
       
       // تكوين سلوك الزر الرئيسي
@@ -184,14 +188,33 @@ export default function TelegramStarsMiniApp() {
       // إخفاء شاشة التحميل بعد تهيئة تطبيق تيليجرام بنجاح
       setTimeout(() => {
         setIsLoading(false);
-      }, 2000);
+      }, 1500);
     } else {
       console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
       
-      // في حالة عدم وجود SDK تيليجرام، نعرض الصفحة بعد فترة للمستخدمين العاديين
+      // عرض رسالة تحذيرية للمستخدمين الذين يحاولون الوصول من خارج تلجرام
+      // نبحث عن البيانات المحفوظة أولاً
+      const savedUser = localStorage.getItem('telegramUser');
+      if (savedUser) {
+        try {
+          setTelegramUser(JSON.parse(savedUser));
+        } catch (e) {
+          console.error('خطأ في قراءة بيانات المستخدم المخزنة', e);
+        }
+      }
+      
+      // في حالة عدم وجود SDK تيليجرام، نعرض الصفحة بعد فترة قصيرة
       setTimeout(() => {
         setIsLoading(false);
-      }, 2500);
+        
+        // عرض رسالة للمستخدم
+        toast({
+          title: t('telegramAppRecommended'),
+          description: t('forBestExperienceUseTelegram'),
+          variant: 'default',
+          duration: 5000
+        });
+      }, 1500);
     }
   }, [t]);
   
