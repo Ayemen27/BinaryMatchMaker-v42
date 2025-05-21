@@ -354,8 +354,8 @@ export default function SubscriptionPage() {
       });
     }, 1000);
     
-    // توجيه المستخدم إلى تلجرام
-    window.open(telegramBotUrl, '_blank');
+    // بدلاً من التوجيه المباشر إلى تلجرام، سنوجه المستخدم أولاً إلى صفحة توجيه الدفع
+    window.location.href = `/telegram-payment-guide?plan=${planType}&stars=${starsAmount}`;
     
     // بدلاً من محاولة الترقية الآن، نعرض على المستخدم رسالة توضيحية
     toast({
