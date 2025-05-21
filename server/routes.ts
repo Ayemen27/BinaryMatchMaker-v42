@@ -9,6 +9,7 @@ import signalGeneratorRoutes from "./routes/signal-generator";
 import settingsRoutes from "./routes/settings";
 import userRoutes from "./routes/user";
 import telegramPaymentsRoutes from "./routes/telegram-payments";
+import telegramBotRoutes from "./routes/telegram-bot";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -26,30 +27,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Telegram payments routes (مدفوعات نجوم تلجرام)
   app.use('/api/telegram-payments', telegramPaymentsRoutes);
   
-  // إضافة معالج مباشر للتحديثات الواردة من بوت تليجرام
-  app.post('/api/telegram-payments/webhook', async (req, res) => {
+  // مسار مخصص لتلقي التحديثات من تليجرام بدون المرور عبر مسارات المدفوعات
+  app.post('/api/telegram-payments/webhook', express.json(), (req, res) => {
+    // ارسال استجابة 200 فوراً لتفادي إعادة الإرسال من طرف تليجرام
+    res.status(200).send("OK");
+    
+    console.log('[بوت تليجرام] استلام تحديث جديد');
+    
     try {
-      console.log('[بوت تليجرام] استلام تحديث من تليجرام:', JSON.stringify(req.body).substring(0, 200));
-      
-      // التحقق من وجود معلومات الرسالة في التحديث
-      if (req.body && req.body.message) {
-        const message = req.body.message;
-        const chatId = message.chat && message.chat.id;
-        const text = message.text || '';
-        
-        console.log(`[بوت تليجرام] استلام رسالة: ${text} من المستخدم: ${chatId}`);
-        
-        // يمكننا معالجة الرسالة هنا، أو نستخدم خدمة البوت (TelegramBotService) لمعالجة الرسالة
-        
-        // إرجاع استجابة ناجحة إلى تليجرام
-        return res.sendStatus(200);
+      // طباعة البيانات المستلمة للتشخيص
+      if (req.body) {
+        console.log('[بوت تليجرام] محتوى الطلب:');
+        console.log(JSON.stringify(req.body, null, 2).substring(0, 500));
       }
       
-      // إرجاع استجابة إيجابية مع ملاحظة أنه تم استلام التحديث
-      res.json({ success: true, message: 'تم استلام التحديث بنجاح' });
+      // إذا كانت هناك رسالة في التحديث
+      if (req.body && req.body.message) {
+        const message = req.body.message;
+        const chatId = message.chat?.id;
+        const text = message.text || '';
+        
+        console.log(`[بوت تليجرام] رسالة من ${chatId}: ${text}`);
+        
+        // إرسال رد بسيط إلى المستخدم
+        if (chatId) {
+          const botToken = process.env.TELEGRAM_BOT_TOKEN;
+          
+          if (botToken) {
+            setTimeout(() => {
+              fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: chatId,
+                  text: `تم استلام رسالتك: "${text}"\nشكرًا لتواصلك معنا.`
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                console.log('[بوت تليجرام] تم إرسال الرد بنجاح:', data.ok);
+              })
+              .catch(error => {
+                console.error('[بوت تليجرام] فشل في إرسال الرد:', error);
+              });
+            }, 500); // تأخير بسيط لضمان استجابة سريعة للويب هوك أولاً
+          }
+        }
+      }
     } catch (error) {
       console.error('[بوت تليجرام] خطأ في معالجة تحديث البوت:', error);
-      res.status(500).json({ success: false, message: 'حدث خطأ في معالجة التحديث' });
     }
   });
 
