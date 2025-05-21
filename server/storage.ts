@@ -20,10 +20,12 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserProfile(id: number, data: Partial<User>): Promise<User>;
   updateUserLanguage(id: number, language: string): Promise<User>;
   updateUserLastLogin(id: number): Promise<void>;
+  updateUserSubscriptionLevel(userId: number, level: string, expiryDate?: Date): Promise<User>;
   
   // User settings methods
   getUserSettings(userId: number): Promise<UserSettings | undefined>;
@@ -37,8 +39,14 @@ export interface IStorage {
   
   // Subscription methods
   getUserSubscription(userId: number): Promise<Subscription | undefined>;
-  createUserSubscription(subscription: InsertSubscription): Promise<Subscription>;
-  updateUserSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription>;
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription>;
+  createUserSubscription(subscription: InsertSubscription): Promise<Subscription>; // لغرض التوافق مع القديم
+  updateUserSubscription(id: number, subscription: Partial<Subscription>): Promise<Subscription>; // لغرض التوافق مع القديم
+  
+  // Telegram Payments methods
+  processStarsPayment(userId: number, plan: string, starsAmount: number, paymentId: string): Promise<Subscription>;
+  verifyStarsPayment(paymentId: string): Promise<boolean>;
   
   // Signal methods - Public Signals (Admin Created)
   getSignals(): Promise<Signal[]>;
