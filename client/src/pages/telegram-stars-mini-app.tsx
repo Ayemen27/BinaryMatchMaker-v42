@@ -345,10 +345,12 @@ export default function TelegramStarsMiniApp() {
         <div className="bg-accent/30 rounded-lg p-4 mb-6">
           <div className="flex items-center">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mr-3">
-              <span className="text-lg font-bold">{telegramUser.first_name?.charAt(0)}</span>
+              <span className="text-lg font-bold">{telegramUser.first_name ? telegramUser.first_name.charAt(0) : 'U'}</span>
             </div>
             <div>
-              <p className="font-medium">{telegramUser.first_name} {telegramUser.last_name}</p>
+              <p className="font-medium">
+                {telegramUser.first_name || ''} {telegramUser.last_name || ''}
+              </p>
               {telegramUser.username && <p className="text-sm text-muted-foreground">@{telegramUser.username}</p>}
             </div>
           </div>
