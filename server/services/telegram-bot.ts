@@ -254,7 +254,7 @@ export class TelegramBotService {
   }
   
   /**
-   * معالجة الدفع بالنجوم (باستخدام واجهة فواتير تليجرام)
+   * معالجة الدفع بالنجوم (النظام المباشر)
    */
   private async processPayment(
     chatId: number, 
@@ -272,69 +272,35 @@ export class TelegramBotService {
     const telegramUserId = user.id.toString();
     
     try {
-      // إعداد عناوين الخطط
-      const planTitles: {[key: string]: string} = {
-        'weekly': 'اشتراك أسبوعي',
-        'monthly': 'اشتراك شهري',
-        'annual': 'اشتراك سنوي',
-        'premium': 'اشتراك بريميوم'
-      };
-
-      // إعداد وصف الخطط
-      const planDescriptions: {[key: string]: string} = {
-        'weekly': 'اشتراك أسبوعي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة أسبوع',
-        'monthly': 'اشتراك شهري في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة شهر',
-        'annual': 'اشتراك سنوي في BinarJoin Analytics - تحليلات متقدمة وإشارات تداول لمدة سنة',
-        'premium': 'اشتراك بريميوم في BinarJoin Analytics - جميع الميزات المتقدمة لمدة سنة'
-      };
+      // إنشاء زر الدفع بالنجوم
+      const buttonUrl = `https://t.me/${this.botUsername}?start=donate_${starsAmount}_${planType}`;
       
-      // إنشاء فاتورة دفع بنجوم تليجرام
-      const invoiceUrl = `https://api.telegram.org/bot${this.botToken}/sendInvoice`;
+      // رسالة الدفع
+      await this.sendMessage(chatId, 
+        `🌟 *طلب الدفع بنجوم تلجرام* 🌟\n\n` +
+        `📦 الخطة: *${this.getPlanDisplayName(planType)}*\n` +
+        `⭐ عدد النجوم المطلوبة: *${starsAmount}*\n\n` +
+        `للدفع بالنجوم، يرجى استخدام الزر أدناه أو إتباع الخطوات التالية:\n\n` +
+        `1. قم بفتح خيارات الدردشة (النقاط الثلاث ⋮ في الزاوية)\n` +
+        `2. اختر "إرسال هدية"\n` +
+        `3. حدد ${starsAmount} نجمة\n` +
+        `4. أكد الإرسال\n\n` +
+        `بعد إرسال النجوم، سيتم تفعيل اشتراكك تلقائياً.`
+      );
       
-      // بيانات الفاتورة
-      const invoiceData = {
-        chat_id: chatId,
-        title: planTitles[planType] || `اشتراك ${planType}`,
-        description: planDescriptions[planType] || 'اشتراك في منصة BinarJoin Analytics للتحليلات المتقدمة',
-        payload: `${paymentId}_${planType}_${telegramUserId}`,
-        provider_token: process.env.TELEGRAM_PAYMENT_TOKEN || '284685063:TEST:ODg3MWM5ZTZlNTRl', // استخدام توكن مخصص للمدفوعات
-        currency: 'XTR', // عملة نجوم تليجرام
-        prices: [
-          {
-            label: `اشتراك ${planType}`,
-            amount: starsAmount
-          }
-        ],
-        start_parameter: `payment_${planType}_${starsAmount}`
-      };
+      // إرسال رسالة متابعة مع تعليمات واضحة
+      await this.sendMessage(chatId, 
+        `هل تريد المساعدة؟\n\n` +
+        `📱 يمكنك أيضاً استخدام التطبيق الرسمي على الموقع:\n` +
+        `🔗 https://binarjoinanalytic.repl.co/telegram-mini-app\n\n` +
+        `للتواصل مع الدعم الفني أو الإبلاغ عن مشكلة، استخدم الأمر /help`
+      );
       
-      console.log('[خدمة البوت] محاولة إرسال فاتورة دفع:', JSON.stringify(invoiceData, null, 2).substring(0, 200));
+      // تسجيل طلب الدفع في السجلات
+      console.log(`[خدمة البوت] تم إنشاء طلب دفع جديد: ${paymentId} للمستخدم ${telegramUserId} - الخطة: ${planType} - النجوم: ${starsAmount}`);
       
-      // إرسال فاتورة الدفع
-      const response = await fetch(invoiceUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(invoiceData)
-      });
+      // هنا يمكن إضافة كود لحفظ طلب الدفع في قاعدة البيانات لمتابعته لاحقاً
       
-      const result = await response.json();
-      
-      if (result.ok) {
-        console.log('[خدمة البوت] تم إرسال فاتورة الدفع بنجاح:', result.result.message_id);
-        
-        // إرسال تعليمات إضافية
-        await this.sendMessage(chatId, 
-          '📋 تم إنشاء فاتورة الدفع أعلاه. يرجى إكمال عملية الدفع خلال الفاتورة.\n\n' +
-          '✅ بعد إتمام الدفع، سيتم تفعيل اشتراكك تلقائيًا.'
-        );
-      } else {
-        console.error('[خدمة البوت] فشل في إرسال فاتورة الدفع:', result);
-        
-        // استخدام طريقة الدفع التقليدية في حال فشل إرسال الفاتورة
-        await this.legacyPaymentProcess(chatId, planType, starsAmount, user, paymentId);
-      }
     } catch (error) {
       console.error('[خدمة البوت] خطأ في معالجة الدفع:', error);
       
