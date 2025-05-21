@@ -17,20 +17,23 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, var(--primary) 0%, #ffad00 100%);
 }
 
 .telegram-user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   margin-right: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .telegram-loader-container {
@@ -39,7 +42,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to bottom, rgba(255, 205, 0, 0.05), transparent);
+  background: linear-gradient(135deg, rgba(255, 205, 0, 0.1), rgba(255, 173, 0, 0.05));
 }
 
 .telegram-loader-icon {
@@ -53,8 +56,9 @@
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background-color: rgba(255, 205, 0, 0.2);
+  background-color: rgba(255, 205, 0, 0.3);
   animation: pulse 2s infinite;
+  box-shadow: 0 0 20px rgba(255, 205, 0, 0.4);
 }
 
 .telegram-loader-icon-inner {
@@ -94,4 +98,62 @@
     transform: scale(0.95);
     opacity: 0.7;
   }
+}
+
+/* تنسيق بطاقات الاشتراك */
+.subscription-card {
+  transition: all 0.3s ease;
+  border-width: 2px !important;
+  overflow: hidden;
+}
+
+.subscription-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.subscription-card.selected {
+  border-color: var(--primary) !important;
+  background-color: rgba(255, 205, 0, 0.05);
+}
+
+.subscription-card-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.subscription-card-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 205, 0, 0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.subscription-card:hover .subscription-card-header::after {
+  opacity: 1;
+}
+
+.subscription-price {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.subscription-feature {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.subscription-feature-icon {
+  color: #22c55e;
+  margin-right: 8px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
