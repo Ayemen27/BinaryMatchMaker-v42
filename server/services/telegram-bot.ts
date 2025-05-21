@@ -1,13 +1,16 @@
 import express from 'express';
 import { TelegramPaymentService } from './telegram-payment';
 
+// التحقق من بيئة التشغيل
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 /**
  * خدمة بوت تلجرام للتعامل مع مدفوعات النجوم
  * تستخدم webhook للتواصل مع API تلجرام
  */
 export class TelegramBotService {
   private botToken: string;
-  private botUsername: string = 'Payment_gateway_Binar_bot';
+  private botUsername: string = 'binarjoinanalytic_bot'; // تحديث اسم المستخدم ليتوافق مع رسائل التحويل
   private webhookPath: string = '/api/telegram/webhook';
   
   constructor() {
@@ -19,6 +22,7 @@ export class TelegramBotService {
   
   /**
    * إضافة مسارات webhook للبوت إلى التطبيق
+   * تستخدم webhook فقط (بدون polling) للعمل على منفذ واحد مع التطبيق
    */
   public registerWebhook(app: express.Application, baseUrl: string): void {
     // التأكد من وجود مفتاح البوت
@@ -28,22 +32,18 @@ export class TelegramBotService {
     }
     
     console.log(`[خدمة البوت] تسجيل webhook في المسار: ${this.webhookPath}`);
+    console.log(`[خدمة البوت] استخدام URL الأساسي: ${baseUrl}`);
     
-    // محاولة تفعيل البوت وتسجيل webhook في كل الأحوال
-    console.log('[خدمة البوت] محاولة تسجيل webhook وتفعيل البوت...');
-    
-    // تسجيل webhook مع تلجرام بغض النظر عن بيئة التشغيل
+    // محاولة تسجيل webhook مع تلجرام (هذا هو الحل 1 - استخدام webhook بدلاً من polling)
     this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
       if (success) {
-        console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
+        console.log('[خدمة البوت] تم تسجيل webhook بنجاح مع API تلجرام');
       } else {
-        console.error('[خدمة البوت] فشل في تسجيل webhook، محاولة تفعيل البوت محلياً...');
-        // محاولة بديلة لتفعيل البوت بطريقة محلية
-        this.setupLocalPolling();
+        console.error('[خدمة البوت] فشل في تسجيل webhook مع API تلجرام - يرجى التحقق من توكن البوت والإنترنت');
       }
     });
     
-    // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام (في كلتا البيئتين)
+    // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام
     app.post(this.webhookPath, express.json(), async (req, res) => {
       try {
         // التحقق من مصدر الطلب (يمكن إضافة طبقة أمان إضافية هنا)
