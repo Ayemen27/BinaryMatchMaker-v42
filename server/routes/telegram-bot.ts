@@ -113,7 +113,8 @@ router.get('/status', async (req, res) => {
 router.post('/reset-webhook', async (req, res) => {
   try {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const baseUrl = req.body.baseUrl || 'https://8dfc4395-1dca-49d3-92e3-1fd7857aef91-00-1oydqgni632tt.pike.replit.dev';
+    // استخدام المتغير البيئي الجديد أو القيمة المقدمة في الطلب أو القيمة الافتراضية
+    const baseUrl = req.body.baseUrl || process.env.TELEGRAM_WEBHOOK_URL || 'https://d3069587-0c8f-49bd-9cc4-74d6904d29a8-00-3k7bgesw6ce81.sisko.replit.dev';
     
     if (!botToken) {
       return res.status(500).json({
@@ -136,6 +137,7 @@ router.post('/reset-webhook', async (req, res) => {
     
     // إعادة تعيين الويب هوك
     const webhookUrl = `${baseUrl}/api/telegram-bot/webhook`;
+    console.log(`[بوت تلجرام] تعيين الويب هوك على الرابط: ${webhookUrl}`);
     const setResponse = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook?url=${encodeURIComponent(webhookUrl)}`);
     const setData = await setResponse.json();
     
