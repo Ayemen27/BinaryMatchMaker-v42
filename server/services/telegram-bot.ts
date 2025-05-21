@@ -29,22 +29,19 @@ export class TelegramBotService {
     
     console.log(`[خدمة البوت] تسجيل webhook في المسار: ${this.webhookPath}`);
     
-    // التحقق من بيئة التشغيل
-    const isDevelopment = process.env.NODE_ENV === 'development';
+    // محاولة تفعيل البوت وتسجيل webhook في كل الأحوال
+    console.log('[خدمة البوت] محاولة تسجيل webhook وتفعيل البوت...');
     
-    if (!isDevelopment) {
-      // في بيئة الإنتاج، نقوم بتسجيل webhook مع تلجرام
-      this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
-        if (success) {
-          console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
-        } else {
-          console.error('[خدمة البوت] فشل في تسجيل webhook');
-        }
-      });
-    } else {
-      // في بيئة التطوير، نتخطى تسجيل webhook لأن العنوان المحلي غير قابل للوصول من الإنترنت
-      console.log('[خدمة البوت] تخطي تسجيل webhook في بيئة التطوير، سيتم تسجيل مسار الاستقبال فقط');
-    }
+    // تسجيل webhook مع تلجرام بغض النظر عن بيئة التشغيل
+    this.setWebhook(`${baseUrl}${this.webhookPath}`).then(success => {
+      if (success) {
+        console.log('[خدمة البوت] تم تسجيل webhook بنجاح');
+      } else {
+        console.error('[خدمة البوت] فشل في تسجيل webhook، محاولة تفعيل البوت محلياً...');
+        // محاولة بديلة لتفعيل البوت بطريقة محلية
+        this.setupLocalPolling();
+      }
+    });
     
     // إضافة مسار webhook للتعامل مع التحديثات القادمة من تلجرام (في كلتا البيئتين)
     app.post(this.webhookPath, express.json(), async (req, res) => {
