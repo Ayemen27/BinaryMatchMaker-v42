@@ -604,6 +604,17 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createUserSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    return this.createSubscription(subscription);
+  }
+  
+  async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    console.log('[اشتراكات] إنشاء اشتراك جديد:', {
+      userId: subscription.userId,
+      type: subscription.type,
+      startDate: subscription.startDate,
+      endDate: subscription.endDate,
+    });
+    
     const [createdSubscription] = await db
       .insert(subscriptions)
       .values({
