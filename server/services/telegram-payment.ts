@@ -1,6 +1,7 @@
 import { db } from '../db';
 import { subscriptions, users, notifications } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { storage } from '../storage';
 
 /**
  * خدمة التعامل مع مدفوعات نجوم تلجرام
