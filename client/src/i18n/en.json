@@ -195,7 +195,7 @@
   "aiPoweredAnalysis": "Comprehensive market analysis powered by AI and strategy",
   "advancedDataDrivenAnalysis": "Advanced data-driven analysis with AI predictions",
   
-  "switchToStars": "Switch to Telegram Stars ({{count}})",
+  "switchToStars": "Switch to Telegram Stars: {{count}} stars",
   "switchToUSD": "Switch to USD",
   "selectBotVersion": "Select Bot Version",
   "botVersionRequired": "Bot Version Required",

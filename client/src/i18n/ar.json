@@ -215,7 +215,7 @@
   "aiPoweredAnalysis": "تحليل شامل للسوق مدعوم بالذكاء الاصطناعي واستراتيجية",
   "advancedDataDrivenAnalysis": "تحليل متقدم مدعوم بالبيانات مع توقعات ذكاء اصطناعي",
   
-  "switchToStars": "التبديل إلى نجوم تيليجرام ({{count}})",
+  "switchToStars": "التبديل إلى نجوم تيليجرام: {{count}} نجمة",
   "switchToUSD": "التبديل إلى الدولار",
   "selectBotVersion": "اختر إصدار الروبوت",
   "botVersionRequired": "مطلوب إصدار الروبوت",
