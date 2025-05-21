@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Helmet } from 'react-helmet';
 import { 
-  Check, Star, Shield, Award, Medal, Loader2, Zap, RefreshCw,
-  Info, ArrowLeft, ExternalLink, AlertCircle
+  Check, Star, Shield, Award, Medal, Loader2, Zap, 
+  AlertCircle, Info
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import '../styles/subscription.css';
