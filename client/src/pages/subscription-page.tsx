@@ -326,7 +326,7 @@ export default function SubscriptionPage() {
           >
             {currency === 'USD' ? <Star className="h-3 w-3" /> : <DollarSign className="h-3 w-3" />}
             {currency === 'USD' 
-              ? t('switchToStars').replace('{{count}}', '750') 
+              ? t('switchToStars')
               : t('switchToUSD')
             }
             <RefreshCw className="h-3 w-3 mr-1" />
