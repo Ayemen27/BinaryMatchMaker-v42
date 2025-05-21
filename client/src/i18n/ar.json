@@ -344,5 +344,8 @@
   "moneygram": "موني جرام",
   "stars": "نجوم تيليجرام",
   "paymentMethodDisabled": "طريقة الدفع غير متاحة",
-  "paymentMethodDisabledDescription": "طريقة الدفع هذه غير متاحة حاليًا. يرجى اختيار طريقة دفع أخرى."
+  "paymentMethodDisabledDescription": "طريقة الدفع هذه غير متاحة حاليًا. يرجى اختيار طريقة دفع أخرى.",
+  "telegramStarsPaymentInfo": "سيتم فتح بوت الدفع بنجوم تيليجرام في نافذة جديدة",
+  "paymentPending": "عملية الدفع قيد الانتظار",
+  "completePaymentInTelegram": "يرجى إكمال عملية الدفع في تطبيق تيليجرام للاستمتاع بمزايا الاشتراك الجديد"
 }
