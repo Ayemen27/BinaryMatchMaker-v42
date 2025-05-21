@@ -303,5 +303,24 @@
   "errorUpgradingSubscription": "Error Upgrading Subscription",
   "errorUpgradingSubscriptionDescription": "We encountered an issue while trying to upgrade your subscription. Please try again later.",
   "activeSubscription": "Active Subscription",
-  "currentPlanMessage": "Your current plan is: {{plan}}"
+  "currentPlanMessage": "Your current plan is: {{plan}}",
+
+  "choosePaymentMethod": "Choose Payment Method",
+  "platforms": "Platforms",
+  "wallets": "Wallets",
+  "traditional": "Traditional",
+  "binance": "Binance",
+  "okx": "OKX",
+  "bybit": "Bybit",
+  "trustWallet": "Trust Wallet",
+  "metamask": "MetaMask",
+  "okxWallet": "OKX Wallet",
+  "binanceWallet": "Binance Wallet",
+  "mastercard": "Mastercard",
+  "paypal": "PayPal",
+  "westernunion": "Western Union",
+  "moneygram": "MoneyGram",
+  "stars": "Stars",
+  "paymentMethodDisabled": "Payment Method Disabled",
+  "paymentMethodDisabledDescription": "This payment method is currently not available. Please choose another payment method."
 }
