@@ -1,353 +1,230 @@
-// بيانات الخطط
-const PLANS = {
-  weekly_plan: {
-    id: 'weekly_plan',
-    title: 'الخطة الأسبوعية',
-    description: 'تحليلات متقدمة وإشارات تداول لمدة أسبوع',
-    price: 750,
-    badge: null,
-    features: [
-      '10 إشارات يوميًا',
-      'تحليل سوق الفوركس',
-      'دعم الخيارات الثنائية',
-      'تنبيهات أساسية'
-    ]
-  },
-  monthly_plan: {
-    id: 'monthly_plan',
-    title: 'الخطة الشهرية',
-    description: 'تحليلات متقدمة وإشارات تداول لمدة شهر',
-    price: 2300,
-    badge: { text: 'الأكثر شعبية', class: 'popular-badge' },
-    features: [
-      '25 إشارة يوميًا',
-      'تحليل سوق الفوركس والعملات الرقمية',
-      'دعم الخيارات الثنائية',
-      'تنبيهات فورية',
-      'تحليلات السوق الأسبوعية'
-    ]
-  },
-  annual_plan: {
-    id: 'annual_plan',
-    title: 'الخطة السنوية',
-    description: 'تحليلات متقدمة وإشارات تداول لمدة سنة',
-    price: 10000,
-    badge: { text: 'أفضل قيمة', class: 'best-value-badge' },
-    features: [
-      '50 إشارة يوميًا',
-      'تحليل جميع الأسواق',
-      'دعم الخيارات الثنائية والعقود',
-      'تنبيهات فورية',
-      'دعم فني على مدار الساعة',
-      'تقارير تحليلية شهرية',
-      'استراتيجيات متقدمة'
-    ]
-  },
-  premium_plan: {
-    id: 'premium_plan',
-    title: 'الخطة المتميزة',
-    description: 'جميع الميزات المتقدمة لمدة سنة',
-    price: 18500,
-    badge: null,
-    features: [
-      'إشارات غير محدودة',
-      'تحليل متقدم لجميع الأسواق',
-      'روبوت تداول آلي',
-      'دعم فني مخصص',
-      'تدريب شخصي',
-      'استراتيجيات خاصة',
-      'تقارير مخصصة',
-      'مجتمع المتداولين المميزين'
-    ]
-  }
-};
-
-// المتغيرات العامة
-let selectedPlan = null;
-let telegramUser = null;
-let telegramWebApp = null;
-let isDarkMode = false;
-
-// تهيئة التطبيق
-document.addEventListener('DOMContentLoaded', () => {
-  // محاولة الحصول على كائن Telegram.WebApp
-  telegramWebApp = window.Telegram?.WebApp;
+// تهيئة تطبيق تلجرام المصغر
+document.addEventListener('DOMContentLoaded', function() {
+  const tg = window.Telegram?.WebApp;
   
-  // التحقق مما إذا كان التطبيق يعمل داخل تطبيق تلجرام
-  if (telegramWebApp) {
-    console.log('تم اكتشاف Telegram WebApp SDK');
+  // إعداد نظام التسجيل للأحداث
+  function logEvent(category, action, data = {}) {
+    console.log(`[${category}] ${action}`, data);
     
-    // إخبار تطبيق تلجرام أن التطبيق جاهز
-    telegramWebApp.ready();
-    
-    // التحقق من وضع السمة (داكن أو فاتح)
-    isDarkMode = telegramWebApp.colorScheme === 'dark';
-    if (isDarkMode) {
-      document.body.classList.add('dark-mode');
-    }
-    
-    // استخراج معلومات المستخدم من كائن initDataUnsafe
-    if (telegramWebApp.initDataUnsafe?.user) {
-      telegramUser = telegramWebApp.initDataUnsafe.user;
-      
-      // عرض معلومات المستخدم
-      displayUserInfo(telegramUser);
-      console.log('تم استخراج معلومات المستخدم:', telegramUser);
-    } else {
-      console.warn('لم يتم العثور على معلومات المستخدم في WebApp');
-    }
-    
-    // تكوين زر الرجوع لإخفائه
-    telegramWebApp.BackButton.hide();
-    
-    // تكوين سلوك الزر الرئيسي
-    telegramWebApp.MainButton.setParams({
-      text: 'اختر خطة للاشتراك',
-      color: telegramWebApp.themeParams.button_color || '#50a8eb',
-      text_color: telegramWebApp.themeParams.button_text_color || '#ffffff',
-      is_visible: false
-    });
-  } else {
-    console.warn('Telegram WebApp SDK غير متاح. ربما التطبيق لا يعمل داخل تطبيق تلجرام.');
-    
-    // عرض تنبيه للمستخدم
-    const container = document.querySelector('.container');
-    const alert = document.createElement('div');
-    alert.style.backgroundColor = '#fff3cd';
-    alert.style.color = '#856404';
-    alert.style.padding = '12px';
-    alert.style.borderRadius = '8px';
-    alert.style.marginBottom = '16px';
-    alert.style.textAlign = 'center';
-    alert.innerHTML = 'يرجى فتح هذه الصفحة من خلال تطبيق تلجرام للحصول على أفضل تجربة.';
-    container.insertBefore(alert, container.firstChild);
-  }
-  
-  // عرض بطاقات الخطط
-  displayPlans();
-});
-
-// عرض معلومات المستخدم
-function displayUserInfo(user) {
-  const userInfoElement = document.getElementById('user-info');
-  
-  if (!user) {
-    userInfoElement.style.display = 'none';
-    return;
-  }
-  
-  // إنشاء صورة المستخدم أو الحرف الأول من اسمه
-  const firstLetter = user.first_name ? user.first_name.charAt(0).toUpperCase() : '?';
-  
-  // إعداد HTML لعرض معلومات المستخدم
-  userInfoElement.innerHTML = `
-    <div class="user-avatar">${firstLetter}</div>
-    <div class="user-details">
-      <p class="user-name">${user.first_name || ''} ${user.last_name || ''}</p>
-      ${user.username ? `<p class="user-username">@${user.username}</p>` : ''}
-    </div>
-  `;
-}
-
-// عرض بطاقات الخطط
-function displayPlans() {
-  const plansContainer = document.getElementById('plans-container');
-  
-  // إنشاء HTML لكل خطة
-  Object.values(PLANS).forEach(plan => {
-    const planCard = document.createElement('div');
-    planCard.className = 'plan-card';
-    planCard.dataset.planId = plan.id;
-    
-    // إضافة شارة إذا كانت موجودة
-    if (plan.badge) {
-      planCard.innerHTML += `<div class="badge ${plan.badge.class}">${plan.badge.text}</div>`;
-    }
-    
-    // إضافة معلومات الخطة
-    planCard.innerHTML += `
-      <div class="plan-header">
-        <h3 class="plan-title">${plan.title}</h3>
-        <p class="plan-description">${plan.description}</p>
-      </div>
-      <div class="plan-price">
-        <i class="fas fa-star"></i> ${plan.price} نجمة
-      </div>
-      <div class="plan-features">
-        <h4 class="features-title">المميزات:</h4>
-        <ul class="features-list">
-          ${plan.features.map(feature => `<li>${feature}</li>`).join('')}
-        </ul>
-      </div>
-      <div class="plan-footer">
-        <button class="btn" onclick="selectPlan('${plan.id}')">اختر هذه الخطة</button>
-      </div>
-    `;
-    
-    plansContainer.appendChild(planCard);
-  });
-}
-
-// اختيار خطة
-function selectPlan(planId) {
-  const plan = PLANS[planId];
-  if (!plan) return;
-  
-  // تحديث المتغير العام
-  selectedPlan = planId;
-  
-  // إزالة التحديد من جميع البطاقات
-  document.querySelectorAll('.plan-card').forEach(card => {
-    card.classList.remove('selected');
-    
-    // تحديث نص الزر
-    const button = card.querySelector('.btn');
-    if (button) {
-      button.textContent = 'اختر هذه الخطة';
-      button.className = 'btn btn-outline';
-    }
-  });
-  
-  // تحديد البطاقة المختارة
-  const selectedCard = document.querySelector(`.plan-card[data-plan-id="${planId}"]`);
-  if (selectedCard) {
-    selectedCard.classList.add('selected');
-    
-    // تحديث نص الزر
-    const button = selectedCard.querySelector('.btn');
-    if (button) {
-      button.textContent = '✓ الخطة المختارة';
-      button.className = 'btn';
-    }
-  }
-  
-  // تحديث الزر الرئيسي في تطبيق تلجرام
-  if (telegramWebApp?.MainButton) {
-    telegramWebApp.MainButton.setText(`الدفع (${plan.price} نجمة)`);
-    telegramWebApp.MainButton.show();
-    
-    // تعيين السلوك عند النقر على الزر
-    telegramWebApp.MainButton.onClick(handlePayment);
-  } else {
-    // في حالة عدم وجود SDK تلجرام، نعرض زر الدفع أسفل الصفحة
-    let paymentButton = document.getElementById('payment-button');
-    
-    if (!paymentButton) {
-      paymentButton = document.createElement('button');
-      paymentButton.id = 'payment-button';
-      paymentButton.className = 'btn';
-      paymentButton.style.marginTop = '20px';
-      paymentButton.style.display = 'block';
-      paymentButton.style.width = '100%';
-      document.querySelector('.container').appendChild(paymentButton);
-    }
-    
-    paymentButton.textContent = `الدفع (${plan.price} نجمة)`;
-    paymentButton.onclick = handlePayment;
-  }
-}
-
-// معالجة عملية الدفع
-function handlePayment() {
-  if (!selectedPlan) {
-    alert('الرجاء اختيار خطة أولاً');
-    return;
-  }
-  
-  const plan = PLANS[selectedPlan];
-  
-  // إظهار شاشة التحميل
-  document.getElementById('loading').classList.remove('hidden');
-  
-  console.log('بدء معالجة الدفع للخطة:', selectedPlan);
-  
-  // إنشاء معرف فريد للدفع
-  const paymentId = `tgmini_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-  
-  // تحويل نوع الخطة إلى الصيغة المطلوبة (weekly_plan -> weekly)
-  const planType = selectedPlan.replace('_plan', '');
-  
-  if (telegramWebApp) {
+    // إرسال بيانات التتبع إلى التطبيق الرئيسي
     try {
-      // طريقة 1: استخدام openTelegramLink لفتح بوت الدفع مباشرة
-      const botUsername = 'Payment_gateway_Binar_bot';
-      
-      // إعداد معلمات البوت
-      let userParams = '';
-      if (telegramUser) {
-        userParams = `_${telegramUser.id}`;
-        if (telegramUser.username) {
-          userParams += `_${telegramUser.username}`;
-        }
-      }
-      
-      // إنشاء رابط بدء البوت مع معلمات الدفع
-      const startParam = `pay_${planType}_${plan.price}${userParams}`;
-      const botUrl = `https://t.me/${botUsername}?start=${startParam}`;
-      
-      console.log('فتح رابط بوت الدفع:', botUrl);
-      
-      // إخفاء شاشة التحميل
-      document.getElementById('loading').classList.add('hidden');
-      
-      // استخدام المنصة لفتح البوت (إذا أمكن)
-      if (telegramWebApp.platform && ['android', 'ios', 'macos', 'tdesktop'].includes(telegramWebApp.platform)) {
-        // في منصات الموبايل وسطح المكتب، نفتح البوت مباشرة
-        telegramWebApp.openTelegramLink(botUrl);
-      } else {
-        // طريقة 2: إرسال البيانات إلى التطبيق الأم لمعالجتها
-        // تجهيز بيانات الدفع
-        const paymentData = {
-          action: 'process_stars_payment',
-          paymentId,
-          planId: selectedPlan,
-          planType: planType,
-          starsAmount: plan.price,
-          timestamp: Date.now()
-        };
-        
-        // إضافة معلومات المستخدم إذا كانت متاحة
-        if (telegramUser) {
-          paymentData.userId = telegramUser.id;
-          paymentData.username = telegramUser.username;
-          paymentData.firstName = telegramUser.first_name;
-          paymentData.lastName = telegramUser.last_name;
-        }
-        
-        console.log('إرسال بيانات الدفع للتطبيق الأم:', paymentData);
-        
-        // إرسال البيانات إلى الصفحة الأم
-        telegramWebApp.sendData(JSON.stringify(paymentData));
-        
-        // إظهار رسالة للمستخدم
-        if (telegramWebApp.showAlert) {
-          telegramWebApp.showAlert('تم إرسال طلب الدفع بنجاح. سيتم تحويلك إلى بوت الدفع.');
-        }
-      }
-    } catch (error) {
-      console.error('خطأ في معالجة الدفع:', error);
-      document.getElementById('loading').classList.add('hidden');
-      
-      if (telegramWebApp?.showAlert) {
-        telegramWebApp.showAlert('حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى.');
-      } else {
-        alert('حدث خطأ أثناء معالجة الدفع. يرجى المحاولة مرة أخرى.');
-      }
+      const eventElement = document.createElement('div');
+      eventElement.className = 'telegram-event-log';
+      eventElement.dataset.category = category;
+      eventElement.dataset.action = action;
+      eventElement.dataset.timestamp = Date.now();
+      eventElement.dataset.data = JSON.stringify(data);
+      eventElement.style.display = 'none';
+      document.body.appendChild(eventElement);
+    } catch (e) {
+      console.error('فشل في تسجيل الحدث:', e);
     }
-  } else {
-    // محاكاة الدفع عندما نكون خارج تطبيق تلجرام
-    console.log('محاكاة الدفع في وضع التجربة');
-    
-    // إنشاء رابط البوت للاختبار
-    const botUsername = 'Payment_gateway_Binar_bot';
-    const startParam = `pay_${planType}_${plan.price}`;
-    const botUrl = `https://t.me/${botUsername}?start=${startParam}`;
-    
-    console.log('رابط محاكاة البوت:', botUrl);
-    
-    setTimeout(() => {
-      document.getElementById('loading').classList.add('hidden');
-      alert(`تمت محاكاة الدفع بنجاح للخطة: ${plan.title}\nالمبلغ: ${plan.price} نجمة\nيمكنك الدفع عبر الرابط: ${botUrl}`);
-    }, 1500);
   }
-}
+  
+  // تهيئة واجهة التطبيق المصغر
+  function initTelegramMiniApp() {
+    if (!tg) {
+      // نحن لسنا في بيئة تطبيق تلجرام المصغر
+      console.warn('تطبيق تلجرام المصغر غير متاح. قد تكون تتصفح الصفحة خارج تطبيق تلجرام.');
+      document.body.classList.add('not-telegram-app');
+      
+      // إظهار رسالة للمستخدم
+      const infoElement = document.getElementById('non-telegram-info');
+      if (infoElement) {
+        infoElement.style.display = 'block';
+      }
+      
+      // تطبيق المظهر الافتراضي
+      document.body.classList.add('light-theme');
+      return false;
+    }
+    
+    // إعلام تلجرام أن التطبيق جاهز
+    tg.ready();
+    
+    // توسيع شاشة العرض
+    tg.expand();
+    
+    // تطبيق المظهر المناسب
+    if (tg.colorScheme === 'dark') {
+      document.body.classList.add('dark-theme');
+    } else {
+      document.body.classList.add('light-theme');
+    }
+    
+    // تحديث معلومات المستخدم في الواجهة
+    updateUserInfo();
+    
+    // تسجيل الحدث
+    logEvent('app', 'initialized', { 
+      platform: tg.platform,
+      version: tg.version,
+      colorScheme: tg.colorScheme
+    });
+    
+    return true;
+  }
+  
+  // تحديث معلومات المستخدم
+  function updateUserInfo() {
+    if (!tg || !tg.initDataUnsafe || !tg.initDataUnsafe.user) {
+      return;
+    }
+    
+    const user = tg.initDataUnsafe.user;
+    const userInfoElement = document.getElementById('user-info');
+    
+    if (userInfoElement) {
+      userInfoElement.innerHTML = `
+        <div class="user-avatar">
+          <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(user.first_name)}&background=random" alt="${user.first_name}">
+        </div>
+        <div class="user-details">
+          <div class="user-name">${user.first_name} ${user.last_name || ''}</div>
+          ${user.username ? `<div class="user-username">@${user.username}</div>` : ''}
+        </div>
+      `;
+    }
+    
+    logEvent('user', 'info_updated', { 
+      user_id: user.id,
+      username: user.username
+    });
+  }
+  
+  // معالجة النقر على زر الاشتراك لبدء عملية الدفع
+  function handleSubscriptionClick(planType, starsAmount) {
+    logEvent('subscription', 'button_clicked', { planType, starsAmount });
+    
+    // الحصول على معرف المستخدم إذا كان متاحًا
+    let userId = 'guest';
+    if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id;
+    }
+    
+    // إنشاء معرف فريد للدفع
+    const paymentId = `pay_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+    
+    // تخزين تفاصيل الطلب في التخزين المحلي للاستخدام اللاحق
+    try {
+      localStorage.setItem('pendingPayment', JSON.stringify({
+        paymentId,
+        planType,
+        starsAmount,
+        userId,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      console.error('فشل في تخزين تفاصيل الدفع:', e);
+    }
+    
+    // إنشاء معلمة البدء للبوت
+    const startParam = `pay_${planType}_${starsAmount}_${userId}`;
+    
+    // فتح بوت الدفع
+    const botUsername = 'Payment_gateway_Binar_bot';
+    
+    logEvent('payment', 'opening_bot', { 
+      botUsername, 
+      startParam,
+      paymentId
+    });
+    
+    // استخدام تلجرام لفتح رابط البوت إذا كان متاحًا
+    if (tg && tg.openTelegramLink) {
+      tg.openTelegramLink(`https://t.me/${botUsername}?start=${startParam}`);
+    } else {
+      // احتياطيًا، فتح الرابط في نافذة جديدة
+      window.open(`https://t.me/${botUsername}?start=${startParam}`, '_blank');
+    }
+  }
+  
+  // تسجيل مستمعات الأحداث لأزرار الاشتراك
+  function setupSubscriptionButtons() {
+    // إيجاد جميع أزرار الاشتراك
+    const subscriptionButtons = document.querySelectorAll('.subscription-button');
+    
+    subscriptionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const planType = button.dataset.plan;
+        const starsAmount = parseInt(button.dataset.stars, 10);
+        
+        if (planType && starsAmount) {
+          handleSubscriptionClick(planType, starsAmount);
+        } else {
+          console.error('بيانات الخطة أو النجوم مفقودة:', button.dataset);
+        }
+      });
+    });
+    
+    logEvent('app', 'subscription_buttons_setup', { 
+      buttonCount: subscriptionButtons.length 
+    });
+  }
+  
+  // تغيير العملة بين USD و STARS
+  function setupCurrencyToggle() {
+    const currencyToggle = document.getElementById('currency-toggle');
+    
+    if (currencyToggle) {
+      currencyToggle.addEventListener('click', () => {
+        document.body.classList.toggle('show-stars');
+        document.body.classList.toggle('show-usd');
+        
+        const isShowingStars = document.body.classList.contains('show-stars');
+        logEvent('ui', 'currency_toggled', { 
+          currency: isShowingStars ? 'STARS' : 'USD' 
+        });
+        
+        // تحديث نص الزر
+        currencyToggle.textContent = isShowingStars 
+          ? 'عرض الأسعار بالدولار'
+          : 'عرض الأسعار بنجوم تلجرام';
+      });
+      
+      // تعيين العملة الافتراضية (نجوم تلجرام)
+      document.body.classList.add('show-stars');
+      document.body.classList.remove('show-usd');
+    }
+  }
+  
+  // تبديل المظهر (فاتح / داكن)
+  function setupThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+    
+    if (themeToggle) {
+      themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-theme');
+        document.body.classList.toggle('light-theme');
+        
+        const isDarkTheme = document.body.classList.contains('dark-theme');
+        logEvent('ui', 'theme_toggled', { 
+          theme: isDarkTheme ? 'dark' : 'light' 
+        });
+        
+        // تحديث نص الزر
+        themeToggle.textContent = isDarkTheme 
+          ? 'المظهر الفاتح'
+          : 'المظهر الداكن';
+      });
+    }
+  }
+  
+  // بدء التطبيق
+  const isInTelegramApp = initTelegramMiniApp();
+  setupSubscriptionButtons();
+  setupCurrencyToggle();
+  setupThemeToggle();
+  
+  // تصدير الدوال العامة للاستخدام العالمي
+  window.telegramMiniApp = {
+    logEvent,
+    handleSubscriptionClick
+  };
+  
+  // تسجيل جاهزية التطبيق
+  logEvent('app', 'ready', { 
+    isInTelegramApp,
+    timestamp: Date.now()
+  });
+});
