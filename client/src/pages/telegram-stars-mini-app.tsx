@@ -314,6 +314,21 @@ export default function TelegramStarsMiniApp() {
             telegramWebApp.MainButton.hide();
           }
         }, 1500);
+      } else if (process.env.NODE_ENV === 'development') {
+        // وضع تجريبي في بيئة التطوير
+        console.log('وضع التطوير: محاكاة إرسال البيانات', paymentData);
+        
+        // إظهار رسالة نجاح تجريبية
+        toast({
+          title: 'تمت محاكاة الدفع بنجاح',
+          description: 'هذه رسالة تجريبية فقط في بيئة التطوير. في البيئة الحقيقية، سيتم إرسال البيانات إلى تلجرام.',
+        });
+        
+        // إعادة تعيين حالة المعالجة
+        setTimeout(() => {
+          setIsProcessing(false);
+          setSelectedPlan(null);
+        }, 1500);
       } else {
         // في حالة عدم وجود SDK تلجرام، نعرض رسالة خطأ
         console.error('لم يتم العثور على Telegram SDK');
