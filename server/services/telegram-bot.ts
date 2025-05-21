@@ -158,6 +158,32 @@ export class TelegramBotService {
     
     switch (cmd) {
       case '/start':
+        // التحقق مما إذا كان هناك معلمات إضافية في أمر البدء (مثلاً: /start pay_weekly_750)
+        if (parts.length > 1 && parts[1].startsWith('pay_')) {
+          // استخراج معلومات الدفع من المعلمة
+          const paymentInfo = parts[1].substring(4); // إزالة 'pay_' من البداية
+          const paymentParts = paymentInfo.split('_');
+          
+          if (paymentParts.length >= 2) {
+            const planType = paymentParts[0];
+            const starsAmount = parseInt(paymentParts[1], 10);
+            
+            // التحقق من صحة المعلمات
+            if (this.isValidPlan(planType) && !isNaN(starsAmount) && starsAmount > 0) {
+              // إظهار معلومات الدفع مباشرة
+              await this.sendMessage(chatId, 
+                `🌟 طلب الدفع بنجوم تلجرام 🌟\n\n` +
+                `📦 الخطة: ${this.getPlanDisplayName(planType)}\n` +
+                `⭐ عدد النجوم المطلوبة: ${starsAmount}\n\n` +
+                `للمتابعة، يرجى استخدام الأمر التالي للدفع:\n` +
+                `/pay ${planType} ${starsAmount}`
+              );
+              return;
+            }
+          }
+        }
+        
+        // الرسالة الافتراضية إذا لم تكن هناك معلمات أو كانت غير صالحة
         await this.sendMessage(chatId, 
           'مرحبًا بك في بوت الدفع الخاص بمنصة BinarJoinAnalytic! 👋\n\n' +
           'استخدم الأمر /pay لإتمام عملية الدفع بنجوم تلجرام.\n' +
