@@ -215,7 +215,7 @@
   "aiPoweredAnalysis": "تحليل شامل للسوق مدعوم بالذكاء الاصطناعي واستراتيجية",
   "advancedDataDrivenAnalysis": "تحليل متقدم مدعوم بالبيانات مع توقعات ذكاء اصطناعي",
   
-  "switchToStars": "التبديل إلى النجوم ({{count}})",
+  "switchToStars": "التبديل إلى نجوم تيليجرام ({{count}})",
   "switchToUSD": "التبديل إلى الدولار",
   "selectBotVersion": "اختر إصدار الروبوت",
   "botVersionRequired": "مطلوب إصدار الروبوت",
@@ -341,7 +341,7 @@
   "paypal": "باي بال",
   "westernunion": "ويسترن يونيون",
   "moneygram": "موني جرام",
-  "stars": "النجوم",
+  "stars": "نجوم تيليجرام",
   "paymentMethodDisabled": "طريقة الدفع غير متاحة",
   "paymentMethodDisabledDescription": "طريقة الدفع هذه غير متاحة حاليًا. يرجى اختيار طريقة دفع أخرى."
 }
