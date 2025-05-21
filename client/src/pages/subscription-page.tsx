@@ -664,7 +664,7 @@ export default function SubscriptionPage() {
                         <path d="m63.31 63.31 24.6-24.59 7.83 7.82-16.78 16.77 16.78 16.78-7.83 7.83-24.6-24.61"/>
                       </svg>
                     </div>
-                    <div>Binance</div>
+                    <div>{t('binance')}</div>
                   </div>
                   
                   <div className="payment-option" onClick={() => selectPaymentMethod('okx')}>
@@ -674,7 +674,7 @@ export default function SubscriptionPage() {
                         <path fillRule="evenodd" clipRule="evenodd" d="M8.37292 9.82427L10.5281 12.0001L8.37292 14.1759L6.21777 12.0001L8.37292 9.82427ZM12.0001 5.49963L14.1553 7.6755L12.0001 9.85043L9.8449 7.6755L12.0001 5.49963ZM15.6284 9.82578L17.7836 12.0016L15.6284 14.1774L13.4732 12.0016L15.6284 9.82578ZM12.0001 14.1503L14.1553 16.3253L12.0001 18.5002L9.8449 16.3253L12.0001 14.1503Z" fill="white"/>
                       </svg>
                     </div>
-                    <div>OKX</div>
+                    <div>{t('okx')}</div>
                   </div>
                   
                   <div className="payment-option" onClick={() => selectPaymentMethod('bybit')}>
@@ -684,7 +684,7 @@ export default function SubscriptionPage() {
                         <path fillRule="evenodd" clipRule="evenodd" d="M21.9791 9.00037L20.2588 10.7207V10.7213L21.9799 12.4423L23.7008 10.7213L21.9791 9.00037ZM13.7395 9.00037L13.7397 9.00046L13.7397 9.00044L13.7395 9.00037ZM9.00002 13.7397L10.7209 15.4607L12.4419 13.7397L10.7203 12.0182L9.00002 13.7397ZM12.4384 24.0001L14.1593 22.2792L12.4384 20.5583L10.7174 22.2792L12.4384 24.0001ZM22.0168 24.0001L23.7378 22.2792L22.0168 20.5583L20.2959 22.2792L22.0168 24.0001ZM16.5005 19.9177L13.7395 17.1568L16.5005 14.3958L19.2614 17.1568L16.5005 19.9177Z" fill="white"/>
                       </svg>
                     </div>
-                    <div>BYBIT</div>
+                    <div>{t('bybit')}</div>
                   </div>
                 </div>
               </div>
@@ -711,7 +711,7 @@ export default function SubscriptionPage() {
                         <path d="M73.5 137.5c4.2 28.2 27.4 50.1 56.3 52.6 28.9 2.5 55.3-15.7 64.2-43.5l.6-1.8H71.2l2.3 4.2c0-3.8 0-7.7.5-11.5h-8.4c.3 5.1.9 9.9 1.8 14.5l6.1-14.5z" fill="#fff"/>
                       </svg>
                     </div>
-                    <div>Trust Wallet</div>
+                    <div>{t('trustWallet')}</div>
                   </div>
                   
                   <div className="payment-option" onClick={() => selectPaymentMethod('metamask')}>
@@ -748,7 +748,7 @@ export default function SubscriptionPage() {
                         <path d="M20.8797 22.205L21.3569 13.77L23.9188 8.11597H16.082L18.6361 13.77L19.1173 22.205L19.3027 24.3965L19.3105 30.8689H20.6885L20.6963 24.3965L20.8797 22.205Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                    <div>MetaMask</div>
+                    <div>{t('metamask')}</div>
                   </div>
                   
                   <div className="payment-option" onClick={() => selectPaymentMethod('okx-wallet')}>
@@ -758,7 +758,7 @@ export default function SubscriptionPage() {
                         <path fillRule="evenodd" clipRule="evenodd" d="M8.37292 9.82427L10.5281 12.0001L8.37292 14.1759L6.21777 12.0001L8.37292 9.82427ZM12.0001 5.49963L14.1553 7.6755L12.0001 9.85043L9.8449 7.6755L12.0001 5.49963ZM15.6284 9.82578L17.7836 12.0016L15.6284 14.1774L13.4732 12.0016L15.6284 9.82578ZM12.0001 14.1503L14.1553 16.3253L12.0001 18.5002L9.8449 16.3253L12.0001 14.1503Z" fill="white"/>
                       </svg>
                     </div>
-                    <div>OKX Wallet</div>
+                    <div>{t('okxWallet')}</div>
                   </div>
                   
                   <div className="payment-option" onClick={() => selectPaymentMethod('binance-wallet')}>
@@ -771,7 +771,7 @@ export default function SubscriptionPage() {
                         <path d="m63.31 63.31 24.6-24.59 7.83 7.82-16.78 16.77 16.78 16.78-7.83 7.83-24.6-24.61"/>
                       </svg>
                     </div>
-                    <div>Binance Wallet</div>
+                    <div>{t('binanceWallet')}</div>
                   </div>
                 </div>
               </div>
