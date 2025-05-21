@@ -333,45 +333,38 @@ export default function SubscriptionPage() {
     const userId = user?.id || 'guest';
     const username = encodeURIComponent(user?.username || 'guest');
     // إنشاء رابط للبوت مع جميع المعلومات المطلوبة
-    const telegramBotUrl = `https://t.me/Payment_gateway_Binar_bot?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
+    const telegramBotUrl = `https://t.me/OXG_OXG?start=pay_${planType}_${starsAmount}_${userId}_${username}`;
     
     // تخزين بيانات الخطة في المتصفح للاستخدام اللاحق
     localStorage.setItem('selectedPlan', planId);
     localStorage.setItem('starsAmount', String(starsAmount));
     
-    // إرسال إشعار للمستخدم مع تعليمات إضافية وواضحة
+    // إرسال إشعار للمستخدم مع تعليمات واضحة
     toast({
       title: t('redirectingToTelegram'),
-      description: t('useCommandInBot', { command: `/pay ${planType} ${starsAmount}` }),
+      description: "سيتم توجيهك إلى تلجرام لإتمام عملية الدفع بالنجوم",
       variant: 'default',
-      duration: 8000,
+      duration: 5000,
     });
     
-    // إضافة إشعار إضافي بتعليمات الدفع المفصلة
+    // انتظار لحظة قبل توجيه المستخدم
     setTimeout(() => {
-      toast({
-        title: 'كيفية الدفع بنجوم تلجرام',
-        description: `1. انتظر فتح البوت وظهور رسالة البدء
-2. استخدم الأمر: /pay ${planType} ${starsAmount} 
-3. اتبع تعليمات البوت لإكمال عملية الدفع`,
-        duration: 15000,
-        variant: 'default',
-      });
+      // توجيه المستخدم إلى بوت التلجرام مع كل معلومات الدفع في الرابط
+      window.location.href = telegramBotUrl;
     }, 1000);
     
-    // توجيه المستخدم مباشرة إلى بوت التلجرام مع أمر الدفع
-    window.location.href = telegramBotUrl;
-    
-    // بدلاً من محاولة الترقية الآن، نعرض على المستخدم رسالة توضيحية
-    toast({
-      title: t('paymentPending'),
-      description: t('completePaymentInTelegram'),
-      variant: 'default',
-      duration: 10000, // إظهار الرسالة لمدة أطول
-    });
-    
-    // إعادة تعيين حالة المعالجة
-    setIsProcessing(false);
+    // إضافة إشعار إضافي لتأكيد الإرسال
+    setTimeout(() => {
+      toast({
+        title: t('paymentInitiated'),
+        description: "انقر على زر الدفع الذي سيظهر في محادثة البوت لإتمام العملية",
+        variant: 'default',
+        duration: 8000,
+      });
+      
+      // إعادة تعيين حالة المعالجة بعد توجيه المستخدم
+      setIsProcessing(false);
+    }, 2000);
   };
   
   // الحصول على المخطط الحالي للمستخدم
