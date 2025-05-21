@@ -288,6 +288,7 @@ export default function SubscriptionPage() {
   /**
    * معالجة الدفع المباشر بنجوم تلجرام
    * تتجاوز النافذة المنبثقة وتوجه المستخدم مباشرة لبوت تلجرام
+   * مع تسجيل حالة الانتظار بدلاً من محاولة الترقية الفورية
    */
   const processTelegramStarsPayment = (planId: string) => {
     if (isProcessing) return;
@@ -299,30 +300,45 @@ export default function SubscriptionPage() {
     const botVersion = selectedBotVersions[planId];
     const starsAmount = planPrices[planId as keyof typeof planPrices].STARS;
     
-    // معالجة الدفع عبر تلجرام (محاكاة)
-    setTimeout(() => {
-      // في بيئة الإنتاج، سنوجه المستخدم إلى رابط تلجرام
-      const telegramBotUrl = `https://t.me/binarjoinanalytic_bot?start=payment_${planId}_${starsAmount}_${botVersion}`;
-      
-      // إرسال إشعار للمستخدم
-      toast({
-        title: t('redirectingToTelegram'),
-        description: t('telegramRedirectDescription', { stars: starsAmount }),
-        variant: 'default',
-      });
-      
-      // توجيه المستخدم إلى تلجرام
-      window.open(telegramBotUrl, '_blank');
-      
-      // تسجيل الطلب في قاعدة البيانات
-      upgradeMutation.mutate({
-        planType: planId,
-        botVersion: botVersion,
-        paymentMethod: 'telegram_stars'
-      });
-      
-      setIsProcessing(false);
-    }, 500);
+    // إنشاء معرف فريد للطلب
+    const paymentId = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    
+    // محاولة حفظ حالة الطلب محلياً
+    try {
+      localStorage.setItem('pendingStarsPayment', JSON.stringify({
+        paymentId,
+        planId,
+        botVersion,
+        starsAmount,
+        timestamp: Date.now()
+      }));
+    } catch (e) {
+      console.error('فشل في حفظ حالة الطلب', e);
+    }
+    
+    // إنشاء رابط تلجرام مع معرف الطلب
+    const telegramBotUrl = `https://t.me/binarjoinanalytic_bot?start=payment_${paymentId}_${planId}_${starsAmount}_${botVersion}`;
+    
+    // إرسال إشعار للمستخدم
+    toast({
+      title: t('redirectingToTelegram'),
+      description: t('telegramStarsPaymentInfo'),
+      variant: 'default',
+    });
+    
+    // توجيه المستخدم إلى تلجرام
+    window.open(telegramBotUrl, '_blank');
+    
+    // بدلاً من محاولة الترقية الآن، نعرض على المستخدم رسالة توضيحية
+    toast({
+      title: t('paymentPending'),
+      description: t('completePaymentInTelegram'),
+      variant: 'default',
+      duration: 10000, // إظهار الرسالة لمدة أطول
+    });
+    
+    // إعادة تعيين حالة المعالجة
+    setIsProcessing(false);
   };
   
   // الحصول على المخطط الحالي للمستخدم
