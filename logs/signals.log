@@ -1,0 +1,28 @@
+[2025-05-19 13:09:47] [ERROR] User: 1 {"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 13:09:57] [ERROR] User: 1 {"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 13:38:03] [ERROR] User: 1 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 13:38:08] [GENERATE] User: 1 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 13:40:05] [ERROR] User: 1 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 15:00:54] [ERROR] User: 1 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 15:01:00] [GENERATE] User: 1 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 16:47:38] [ERROR] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 16:47:45] [GENERATE] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 16:47:54] [GENERATE] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 16:48:07] [GENERATE] User: 2 {"platform":"IQ Option","pair":"ETH/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 16:48:21] [GENERATE] User: 2 {"platform":"IQ Option","pair":"BNB/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 16:48:39] [GENERATE] User: 2 {"platform":"IQ Option","pair":"SOL/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 18:01:09] [GENERATE] User: 2 {"platform":"IQ Option","pair":"ETH/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 18:01:23] [GENERATE] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 18:12:57] [GENERATE] User: 2 {"platform":"IQ Option","pair":"SOL/USD","timeframe":"1d","success":true,"method":"algorithmic"}
+[2025-05-19 19:22:11] [ERROR] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}
+[2025-05-19 19:24:57] [GENERATE] User: 2 {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 19:37:39] [GENERATE] User: 2 {"platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 20:44:35] [GENERATE] User: 2 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 21:02:04] [GENERATE] User: 2 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 21:02:14] [GENERATE] User: 2 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 21:03:09] [GENERATE] User: 2 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 21:06:30] [GENERATE] User: 2 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 22:31:49] [GENERATE] User: 1 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"5m","success":true,"method":"algorithmic"}
+[2025-05-19 22:48:05] [GENERATE] User: 1 {"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-19 22:54:05] [GENERATE] User: 1 {"platform":"Olymp Trade","pair":"SOL/USD","timeframe":"1m","success":true,"method":"algorithmic"}
+[2025-05-20 17:33:03] [ERROR] User: 2 {"platform":"IQ Option","pair":"BNB/USD","timeframe":"1m","error":"429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.","service":"openai"}

@@ -1,0 +1,161 @@
+
+1. اختبار دالة تغيير كلمة المرور:
+تأكد من أن دالة البحث updateUserProfileمع البحث العلمي بشكل صحيح. يمكنك
+const
+ userId = 
+'user-id-example'
+;
+const
+ updatedData = {
+    
+username
+: 
+'newUsername'
+,
+    
+email
+: 
+'newEmail@example.com'
+,
+    
+fullName
+: 
+'New Full Name'
+,
+    
+password
+: 
+'newPassword123'
+ 
+// تأكد من معالجة كلمة المرور
+
+};
+try
+ {
+    
+await
+ updateUserProfile(userId, updatedData);
+    
+console
+.log(
+'Password updated successfully'
+);
+} 
+catch
+ (error) {
+    
+console
+.error(
+'Error updating password:'
+, error);
+}
+
+2. اختبار دالة إعدادات الإخطارات:
+تأكد من أن دالة updateUserNotificationSettingsتعمل بشكل صحيح.
+const
+ userId = 
+'user-id-example'
+;
+const
+ notificationSettings = {
+    
+emailNotifications
+: 
+true
+,
+    
+smsNotifications
+: 
+false
+,
+};
+try
+ {
+    
+await
+ updateUserNotificationSettings(userId, notificationSettings);
+    
+console
+.log(
+'Notification settings updated successfully'
+);
+} 
+catch
+ (error) {
+    
+console
+.error(
+'Error updating notification settings:'
+, error);
+}
+
+3. اختبار دالة مفاتيح API:
+تأكد من أن دالة updateApiKeysتعمل بشكل صحيح.
+const
+ userId = 
+'user-id-example'
+;
+const
+ newApiKey = 
+'new-api-key-example'
+;
+try
+ {
+    
+await
+ updateApiKeys(userId, newApiKey);
+    
+console
+.log(
+'API key updated successfully'
+);
+} 
+catch
+ (error) {
+    
+console
+.error(
+'Error updating API key:'
+, error);
+}
+
+4. اختبار دالة تحديث اللغة:
+تأكد من أن دالة updateLanguageتعمل بشكل صحيح.
+const
+ userId = 
+'user-id-example'
+;
+const
+ newLanguage = 
+'en'
+; 
+// أو أي لغة أخرى
+
+try
+ {
+    
+await
+ updateLanguage(userId, newLanguage);
+    
+console
+.log(
+'Language updated successfully'
+);
+} 
+catch
+ (error) {
+    
+console
+.error(
+'Error updating language:'
+, error);
+}
+
+طريقة الاختبار:
+تأكد من أن قاعدة البيانات تعمل: تأكد من أن قاعدة البيانات مضمونة صحياً.
+يجب أن يسمح لها باستخدام: استخدام بيئة تطوير محلية أو بيئة تم اختبارها لتشغيل الكود.
+التحقق من النتائج: التحقق من أن كل دالة تعمل كما هو متوقع وأن البيانات مصححة في قاعدة البيانات.
+إذا وجدت أي أخطاء أثناء الاختبار، يمكنك مشاركة تفاصيل الخطأ وستكون سعيدًا بمساعدتك في حلها!
+
+
+الرد على المساعد...

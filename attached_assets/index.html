@@ -1,0 +1,1265 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BinarJoinAnalytic - Trading Signals & Analysis</title>
+    
+    <!-- Normalize CSS for consistent rendering across browsers -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    
+    <!-- Intl Tel Input CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/css/intlTelInput.css">
+    
+    <!-- Custom CSS Files - IMPORTANT: Specify the correct order -->
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/style.css">
+    
+    <!-- نظام تتبع وتسجيل للتشخيص -->
+    <script src="/debug-log.js"></script>
+    
+    <!-- Fallback for potential missing files -->
+    <style>
+        /* Basic reset and fallback styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <img src="/icon.png" alt="BinarJoinAnalytic">
+            <h1>BinarJoinAnalytic</h1>
+        </a>
+        <button class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <div class="sidebar">
+        <button class="sidebar-close" onclick="toggleSidebar()">
+            <i class="fas fa-times"></i>
+        </button>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="#" class="nav-link"><i class="fas fa-dollar-sign"></i> Subscription Plans</a></li>
+            <li><a href="#" class="nav-link"><i class="fas fa-credit-card"></i> Payment Methods</a></li>
+            <li><a href="#" class="nav-link"><i class="fas fa-headset"></i> Technical Support</a></li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <header class="header">
+            <h1 style="margin-bottom: 0.2rem;">Trading Signal Subscription Plans</h1>
+            <p style="line-height: 1.1;">Professional Trading Insights Tailored to Your Needs</p>
+        </header>
+
+        <div class="plans">
+            <div class="plan-card weekly-plan">
+                <div class="plan-header">
+                    <span class="plan-badge">Beginner</span>
+                    <h2>Weekly Plan</h2>
+                    <div class="price">9.99</div>
+                    <button class="plan-currency-toggle" onclick="toggleCurrency('Weekly Plan')">
+                        <i class="fas fa-exchange-alt"></i> 
+                        <span>Switch to Stars (750)</span>
+                    </button>
+                    <p class="plan-description">Real-time fundamental market analysis for precise decisions</p>
+                    
+                    <div class="select-container">
+                        <select class="bot-version">
+                            <option value="">Select Bot Version</option>
+                            <option value="v1">BinarJoinAnalytic v1.0</option>
+                            <option value="v2">BinarJoinAnalytic Main v2.0</option>
+                        </select>
+                        <div class="error-message">Please select a bot version</div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h3>Plan Highlights</h3>
+                    <ul>
+                        <li><i class="fas fa-chart-line"></i> Real-time fundamental market analysis</li>
+                        <li><i class="fas fa-signal"></i> Key trading signals for major pairs</li>
+                        <li><i class="fas fa-newspaper"></i> Daily financial market updates</li>
+                        <li><i class="fas fa-book-reader"></i> Beginner-friendly analytical tools</li>
+                        <li><i class="fab fa-telegram-plane"></i> Private Telegram channel access</li>
+                        <li><i class="fas fa-calendar-day"></i> Priority customer support</li>
+                    </ul>
+                </div>
+
+                <div class="plan-footer">
+                    <div class="ideal-for">
+                        <i class="fas fa-bullseye"></i> Ideal for new traders exploring trading signals
+                    </div>
+                    <button class="btn subscribe-btn" id="weekly-subscribe-btn">
+                        Subscribe Now
+                    </button>
+                    <script>
+                        document.getElementById('weekly-subscribe-btn').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            var currentCurrency = localStorage.getItem('currency') || 'USD';
+                            if (currentCurrency === 'STARS') {
+                                // توجيه مباشر إلى تلجرام بدون نافذة منبثقة
+                                var planName = 'Weekly Plan';
+                                var botVersionSelect = document.querySelector('.weekly-plan .bot-version');
+                                var selectedVersion = botVersionSelect.options[botVersionSelect.selectedIndex].text;
+                                var starsAmount = 750;
+                                var message = encodeURIComponent(
+                                    `Stars Subscription Request\n\n` +
+                                    `Subscription Info:\n` +
+                                    `📦 Plan: ${planName}\n` +
+                                    `🤖 Bot Version: ${selectedVersion}\n` +
+                                    `⭐ Stars Required: ${starsAmount} Stars`
+                                );
+                                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                            } else {
+                                // الاستمرار بالطريقة العادية
+                                showPaymentModal(event);
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="plan-card monthly-plan">
+                <div class="plan-header">
+                    <span class="plan-badge recommended">Recommended</span>
+                    <h2>Monthly Plan</h2>
+                    <div class="price">29.99</div>
+                    <button class="plan-currency-toggle" onclick="toggleCurrency('Monthly Plan')">
+                        <i class="fas fa-exchange-alt"></i> 
+                        <span>Switch to Stars (2300)</span>
+                    </button>
+                    <p class="plan-description">Advanced technical analysis with professional market insights</p>
+                    
+                    <div class="select-container">
+                        <select class="bot-version">
+                            <option value="">Select Bot Version</option>
+                            <option value="v1">BinarJoinAnalytic v1.0</option>
+                            <option value="v2">BinarJoinAnalytic Main v2.0</option>
+                            <option value="v3">BinarJoinAnalytic AI v3.0</option>
+                        </select>
+                        <div class="error-message">Please select a bot version</div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h3>Advanced Features</h3>
+                    <ul>
+                        <li><i class="fas fa-chart-line"></i> Professional technical analysis</li>
+                        <li><i class="fas fa-bell"></i> Instant market alerts</li>
+                        <li><i class="fas fa-chart-pie"></i> Custom pair analysis request</li>
+                        <li><i class="fas fa-file-alt"></i> Weekly performance reports</li>
+                        <li><i class="fas fa-video"></i> Educational content access</li>
+                        <li><i class="fas fa-user-tie"></i> Direct expert support</li>
+                    </ul>
+                </div>
+
+                <div class="plan-footer">
+                    <div class="ideal-for">
+                        <i class="fas fa-rocket"></i> Perfect for active traders seeking advanced tools
+                    </div>
+                    <button class="btn subscribe-btn" id="monthly-subscribe-btn">
+                        Upgrade My Trading
+                    </button>
+                    <script>
+                        document.getElementById('monthly-subscribe-btn').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            var currentCurrency = localStorage.getItem('currency') || 'USD';
+                            if (currentCurrency === 'STARS') {
+                                // توجيه مباشر إلى تلجرام بدون نافذة منبثقة
+                                var planName = 'Monthly Plan';
+                                var botVersionSelect = document.querySelector('.monthly-plan .bot-version');
+                                var selectedVersion = botVersionSelect.options[botVersionSelect.selectedIndex].text;
+                                var starsAmount = 2300;
+                                var message = encodeURIComponent(
+                                    `Stars Subscription Request\n\n` +
+                                    `Subscription Info:\n` +
+                                    `📦 Plan: ${planName}\n` +
+                                    `🤖 Bot Version: ${selectedVersion}\n` +
+                                    `⭐ Stars Required: ${starsAmount} Stars`
+                                );
+                                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                            } else {
+                                // الاستمرار بالطريقة العادية
+                                showPaymentModal(event);
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="plan-card annual-plan">
+                <div class="plan-header">
+                    <span class="plan-badge premium">Premium</span>
+                    <h2>Annual Plan</h2>
+                    <div class="price">149.99</div>
+                    <button class="plan-currency-toggle" onclick="toggleCurrency('Annual Plan')">
+                        <i class="fas fa-exchange-alt"></i> 
+                        <span>Switch to Stars (10000)</span>
+                    </button>
+                    <p class="plan-description">AI-powered comprehensive market analysis and strategy</p>
+                    
+                    <div class="select-container">
+                        <select class="bot-version">
+                            <option value="">Select Bot Version</option>
+                            <option value="v1">BinarJoinAnalytic v1.0</option>
+                            <option value="v2">BinarJoinAnalytic Main v2.0</option>
+                            <option value="v3">BinarJoinAnalytic AI v3.0</option>
+                        </select>
+                        <div class="error-message">Please select a bot version</div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h3>Exclusive Professional Features</h3>
+                    <ul>
+                        <li><i class="fas fa-brain"></i> AI-powered trend prediction</li>
+                        <li><i class="fas fa-magic"></i> Custom trading strategies</li>
+                        <li><i class="fas fa-chart-bar"></i> Advanced market reports</li>
+                        <li><i class="fas fa-headset"></i> 24/7 VIP support</li>
+                        <li><i class="fas fa-undo-alt"></i> Partial refund guarantee</li>
+                        <li><i class="fas fa-tools"></i> Advanced trading tools</li>
+                    </ul>
+                </div>
+
+                <div class="plan-footer">
+                    <div class="ideal-for">
+                        <i class="fas fa-crown"></i> Designed for professional traders
+                    </div>
+                    <button class="btn subscribe-btn" id="annual-subscribe-btn">
+                        Unlock Pro Trading
+                    </button>
+                    <script>
+                        document.getElementById('annual-subscribe-btn').addEventListener('click', function(event) {
+                            event.preventDefault();
+                            var currentCurrency = localStorage.getItem('currency') || 'USD';
+                            if (currentCurrency === 'STARS') {
+                                // توجيه مباشر إلى تلجرام بدون نافذة منبثقة
+                                var planName = 'Annual Plan';
+                                var botVersionSelect = document.querySelector('.annual-plan .bot-version');
+                                var selectedVersion = botVersionSelect.options[botVersionSelect.selectedIndex].text;
+                                var starsAmount = 10000;
+                                var message = encodeURIComponent(
+                                    `Stars Subscription Request\n\n` +
+                                    `Subscription Info:\n` +
+                                    `📦 Plan: ${planName}\n` +
+                                    `🤖 Bot Version: ${selectedVersion}\n` +
+                                    `⭐ Stars Required: ${starsAmount} Stars`
+                                );
+                                window.open(`https://t.me/binarjoinanelytic_bot?text=${message}`, '_blank');
+                            } else {
+                                // الاستمرار بالطريقة العادية
+                                showPaymentModal(event);
+                            }
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+
+        <div class="floating-buttons">
+            <a href="https://t.me/binarjoinanalytic_bot" class="floating-btn telegram">
+                <img src="/telegram.png" alt="Telegram" class="floating-icon">
+                <img src="/telegram.png" alt="Telegram" class="floating-icon-visible">
+                <span class="floating-btn-text">Telegram</span>
+            </a>
+            <a href="https://whatsapp.com/channel/0029VauwAhTDeON0dKoq4h0i" class="floating-btn whatsapp">
+                <img src="/whatsapp.png" alt="WhatsApp" class="floating-icon">
+                <img src="/whatsapp.png" alt="WhatsApp" class="floating-icon-visible">
+                <span class="floating-btn-text">WhatsApp</span>
+            </a>
+            <a href="https://youtube.com/@binarjoinanalytic?si=qRC_t36XbceqXTHf" class="floating-btn youtube">
+                <img src="/youtube.png" alt="YouTube" class="floating-icon">
+                <img src="/youtube.png" alt="YouTube" class="floating-icon-visible">
+                <span class="floating-btn-text">YouTube</span>
+            </a>
+            <div class="floating-btn dark-mode-toggle" onclick="toggleDarkMode()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="currentColor" id="darkModeIcon" class="floating-icon">
+                    <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"/>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" fill="currentColor" class="floating-icon-visible">
+                    <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.905 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"/>
+                </svg>
+                <span class="floating-btn-text">Dark Mode</span>
+            </div>
+        </div>
+
+        <div id="paymentModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&#xd7;</span>
+                <h2>Choose Payment Method</h2>
+                
+                <div class="tabs-container">
+                    <div class="payment-tab active" onclick="showTab('platforms')">Platforms</div>
+                    <div class="payment-tab" onclick="showTab('wallets')">Wallets</div>
+                    <div class="payment-tab" onclick="showTab('traditional')">Traditional</div>
+                </div>
+
+                <div id="platforms" class="payment-section active">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('binance')">
+                            <img src="images/binance.png" alt="Binance">
+                            <div>Binance</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx')">
+                            <img src="images/okx.png" alt="OKX">
+                            <div>OKX</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit')">
+                            <img src="images/bybit.png" alt="BYBIT">
+                            <div>BYBIT</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wallets" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('trustwallet')">
+                            <img src="images/trustwallet.png" alt="Trust Wallet">
+                            <div>Trust Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('metamask')">
+                            <img src="images/metamask.png" alt="MetaMask">
+                            <div>MetaMask</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx-wallet')">
+                            <img src="images/okx-wallet.png" alt="OKX Wallet">
+                            <div>OKX Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('binance-wallet')">
+                            <img src="images/binance-wallet.png" alt="Binance Wallet">
+                            <div>Binance Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit-wallet')">
+                            <img src="images/bybit-wallet.png" alt="BYBIT Wallet">
+                            <div>BYBIT Wallet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="traditional" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option disabled" onclick="showDisabledMessage('mastercard')">
+                            <img src="images/mastercard.png" alt="Mastercard">
+                            <div>Mastercard</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('googleplay')">
+                            <img src="images/googleplay.png" alt="Google Play">
+                            <div>Google Play</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('paypal')">
+                            <img src="images/paypal.png" alt="PayPal">
+                            <div>PayPal</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('westernunion')">
+                            <img src="images/westernunion.png" alt="Western Union">
+                            <div>Western Union</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('moneygram')">
+                            <img src="images/moneygram.png" alt="MoneyGram">
+                            <div>MoneyGram</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/intlTelInput.min.js"></script>
+    <script src="https://cdn.botpress.cloud/webchat/v2.3/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2025/02/27/15/20250227150358-JMSY12J3.js"></script>
+
+    <script>
+        function showPaymentModal(event) {
+            if (!event || !event.target) return;
+            
+            const planCard = event.target.closest('.plan-card');
+            if (!planCard) return;
+
+            const botVersionSelect = planCard.querySelector('.bot-version');
+            const errorMessage = planCard.querySelector('.error-message');
+            
+            if (!botVersionSelect) return;
+
+            const selectedVersion = botVersionSelect.value;
+            if (!selectedVersion) {
+                // Show error notification with animation
+                botVersionSelect.classList.add('highlight-select', 'shake');
+                if (errorMessage) errorMessage.classList.add('visible');
+                
+                // Remove animations after they complete
+                setTimeout(() => {
+                    botVersionSelect.classList.remove('shake');
+                }, 500);
+                
+                setTimeout(() => {
+                    botVersionSelect.classList.remove('highlight-select');
+                    if (errorMessage) errorMessage.classList.remove('visible');
+                }, 3000);
+                return;
+            }
+
+            // Store the selected version
+            localStorage.setItem('selectedBotVersion', botVersionSelect.options[botVersionSelect.selectedIndex].text);
+
+            // Continue with existing payment modal logic
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const modal = document.getElementById('paymentModal');
+            if (!modal) return;
+            
+            modal.style.display = 'block';
+
+            // Store the clicked plan details
+            const planName = planCard.querySelector('h2')?.textContent || '';
+            const planPrice = planCard.querySelector('.price')?.textContent || '';
+            localStorage.setItem('selectedPlan', planName);
+            localStorage.setItem('selectedPrice', planPrice);
+
+            const modalContent = modal.querySelector('.modal-content');
+            if (!modalContent) return;
+
+            if (currentCurrency === 'STARS') {
+                // Show only Telegram Stars payment option
+                const starsAmount = 0; // You need to replace this with the actual stars amount for the plan
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&#xd7;</span>
+                    <h2>Enter Your Information</h2>
+                    <div class="user-info-form">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" placeholder="Enter your full name">
+                            <div class="form-error" id="fullNameError">Please enter your full name</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="Enter your email">
+                            <div class="form-error" id="emailError">Please enter a valid email</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <select id="country" style="width: 100%"></select>
+                            <div class="form-error" id="countryError">Please select your country</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone">
+                            <div class="form-error" id="phoneError">Please enter a valid phone number</div>
+                        </div>
+                        <button class="proceed-btn" onclick="submitUserInfo(event, 'telegram', '${planName}', '${starsAmount} Stars')">
+                            <i class="fas fa-check"></i> Proceed with Stars Payment
+                        </button>
+                    </div>
+                `;
+                initializeFormComponents();
+            } else {
+                // Show regular payment options
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&#xd7;</span>
+                    <h2>Choose Payment Method</h2>
+                    
+                    <div class="tabs-container">
+                        <div class="payment-tab active" onclick="showTab('platforms')">Platforms</div>
+                        <div class="payment-tab" onclick="showTab('wallets')">Wallets</div>
+                        <div class="payment-tab" onclick="showTab('traditional')">Traditional</div>
+                    </div>
+
+                    ${getPaymentSectionsHTML()}
+                `;
+                showTab('platforms');
+            }
+        }
+
+        function getPaymentSectionsHTML() {
+            return `
+                <div id="platforms" class="payment-section active">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('binance')">
+                            <img src="images/binance.png" alt="Binance">
+                            <div>Binance</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx')">
+                            <img src="images/okx.png" alt="OKX">
+                            <div>OKX</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit')">
+                            <img src="images/bybit.png" alt="BYBIT">
+                            <div>BYBIT</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wallets" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('trustwallet')">
+                            <img src="images/trustwallet.png" alt="Trust Wallet">
+                            <div>Trust Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('metamask')">
+                            <img src="images/metamask.png" alt="MetaMask">
+                            <div>MetaMask</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx-wallet')">
+                            <img src="images/okx-wallet.png" alt="OKX Wallet">
+                            <div>OKX Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('binance-wallet')">
+                            <img src="images/binance-wallet.png" alt="Binance Wallet">
+                            <div>Binance Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit-wallet')">
+                            <img src="images/bybit-wallet.png" alt="BYBIT Wallet">
+                            <div>BYBIT Wallet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="traditional" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option disabled" onclick="showDisabledMessage('mastercard')">
+                            <img src="images/mastercard.png" alt="Mastercard">
+                            <div>Mastercard</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('googleplay')">
+                            <img src="images/googleplay.png" alt="Google Play">
+                            <div>Google Play</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('paypal')">
+                            <img src="images/paypal.png" alt="PayPal">
+                            <div>PayPal</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('westernunion')">
+                            <img src="images/westernunion.png" alt="Western Union">
+                            <div>Western Union</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('moneygram')">
+                            <img src="images/moneygram.png" alt="MoneyGram">
+                            <div>MoneyGram</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('paymentModal');
+            if (!modal) return;
+            
+            const modalContent = modal.querySelector('.modal-content');
+            if (!modalContent) return;
+            
+            modalContent.classList.add('closing');
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                modalContent.classList.remove('closing');
+            }, 500);
+        }
+
+        function toggleCurrency(planName) {
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const newCurrency = currentCurrency === 'USD' ? 'STARS' : 'USD';
+            localStorage.setItem('currency', newCurrency);
+
+            const toggleButton = document.querySelector(`.plan-currency-toggle[onclick="toggleCurrency('${planName}')"]`);
+            if (toggleButton) {
+                toggleButton.innerHTML = newCurrency === 'USD' ? 
+                    `<i class="fas fa-exchange-alt"></i> <span>Switch to Stars (${planName === 'Weekly Plan' ? 750 : planName === 'Monthly Plan' ? 2300 : 10000})</span>` : 
+                    `<i class="fas fa-dollar-sign"></i> <span>Switch to USD</span>`;
+            }
+
+            const planCards = document.querySelectorAll('.plan-card');
+            planCards.forEach(card => {
+                const planNameElement = card.querySelector('h2')?.textContent || '';
+                const priceElement = card.querySelector('.price');
+                if (priceElement && planNameElement) {
+                    if (newCurrency === 'USD') {
+                        if (planNameElement === 'Weekly Plan') priceElement.textContent = '9.99';
+                        else if (planNameElement === 'Monthly Plan') priceElement.textContent = '29.99';
+                        else if (planNameElement === 'Annual Plan') priceElement.textContent = '149.99';
+                    } else {
+                        if (planNameElement === 'Weekly Plan') priceElement.textContent = '750 Stars';
+                        else if (planNameElement === 'Monthly Plan') priceElement.textContent = '2300 Stars';
+                        else if (planNameElement === 'Annual Plan') priceElement.textContent = '10000 Stars';
+                    }
+                }
+            });
+        }
+
+        function initializeFormComponents() {
+            const countrySelect = document.getElementById('country');
+            const countries = [
+                { id: 'AF', text: 'Afghanistan' },
+                { id: 'AL', text: 'Albania' },
+                { id: 'DZ', text: 'Algeria' },
+                { id: 'AD', text: 'Andorra' },
+                { id: 'AO', text: 'Angola' },
+                { id: 'AG', text: 'Antigua and Barbuda' },
+                { id: 'AR', text: 'Argentina' },
+                { id: 'AM', text: 'Armenia' },
+                { id: 'AU', text: 'Australia' },
+                { id: 'AT', text: 'Austria' },
+                { id: 'AZ', text: 'Azerbaijan' },
+                { id: 'BS', text: 'Bahamas' },
+                { id: 'BH', text: 'Bahrain' },
+                { id: 'BD', text: 'Bangladesh' },
+                { id: 'BB', text: 'Barbados' },
+                { id: 'BY', text: 'Belarus' },
+                { id: 'BE', text: 'Belgium' },
+                { id: 'BZ', text: 'Belize' },
+                { id: 'BJ', text: 'Benin' },
+                { id: 'BT', text: 'Bhutan' },
+                { id: 'BO', text: 'Bolivia' },
+                { id: 'BA', text: 'Bosnia and Herzegovina' },
+                { id: 'BW', text: 'Botswana' },
+                { id: 'BR', text: 'Brazil' },
+                { id: 'BN', text: 'Brunei' },
+                { id: 'BG', text: 'Bulgaria' },
+                { id: 'BF', text: 'Burkina Faso' },
+                { id: 'BI', text: 'Burundi' },
+                { id: 'CV', text: 'Cabo Verde' },
+                { id: 'KH', text: 'Cambodia' },
+                { id: 'CM', text: 'Cameroon' },
+                { id: 'CA', text: 'Canada' },
+                { id: 'CF', text: 'Central African Republic' },
+                { id: 'TD', text: 'Chad' },
+                { id: 'CL', text: 'Chile' },
+                { id: 'CN', text: 'China' },
+                { id: 'CO', text: 'Colombia' },
+                { id: 'KM', text: 'Comoros' },
+                { id: 'CG', text: 'Congo' },
+                { id: 'CR', text: 'Costa Rica' },
+                { id: 'HR', text: 'Croatia' },
+                { id: 'CU', text: 'Cuba' },
+                { id: 'CY', text: 'Cyprus' },
+                { id: 'CZ', text: 'Czech Republic' },
+                { id: 'DK', text: 'Denmark' },
+                { id: 'DJ', text: 'Djibouti' },
+                { id: 'DM', text: 'Dominica' },
+                { id: 'DO', text: 'Dominican Republic' },
+                { id: 'EC', text: 'Ecuador' },
+                { id: 'EG', text: 'Egypt' },
+                { id: 'SV', text: 'El Salvador' },
+                { id: 'GQ', text: 'Equatorial Guinea' },
+                { id: 'ER', text: 'Eritrea' },
+                { id: 'EE', text: 'Estonia' },
+                { id: 'ET', text: 'Ethiopia' },
+                { id: 'FJ', text: 'Fiji' },
+                { id: 'FI', text: 'Finland' },
+                { id: 'FR', text: 'France' },
+                { id: 'GA', text: 'Gabon' },
+                { id: 'GM', text: 'Gambia' },
+                { id: 'GE', text: 'Georgia' },
+                { id: 'DE', text: 'Germany' },
+                { id: 'GH', text: 'Ghana' },
+                { id: 'GR', text: 'Greece' },
+                { id: 'GD', text: 'Grenada' },
+                { id: 'GT', text: 'Guatemala' },
+                { id: 'GN', text: 'Guinea' },
+                { id: 'GW', text: 'Guinea-Bissau' },
+                { id: 'GY', text: 'Guyana' },
+                { id: 'HT', text: 'Haiti' },
+                { id: 'HN', text: 'Honduras' },
+                { id: 'HU', text: 'Hungary' },
+                { id: 'IS', text: 'Iceland' },
+                { id: 'IN', text: 'India' },
+                { id: 'ID', text: 'Indonesia' },
+                { id: 'IR', text: 'Iran' },
+                { id: 'IQ', text: 'Iraq' },
+                { id: 'IE', text: 'Ireland' },
+                { id: 'IL', text: 'Israel' },
+                { id: 'IT', text: 'Italy' },
+                { id: 'JM', text: 'Jamaica' },
+                { id: 'JP', text: 'Japan' },
+                { id: 'JO', text: 'Jordan' },
+                { id: 'KZ', text: 'Kazakhstan' },
+                { id: 'KE', text: 'Kenya' },
+                { id: 'KI', text: 'Kiribati' },
+                { id: 'KP', text: 'North Korea' },
+                { id: 'KR', text: 'South Korea' },
+                { id: 'KW', text: 'Kuwait' },
+                { id: 'KG', text: 'Kyrgyzstan' },
+                { id: 'LA', text: 'Laos' },
+                { id: 'LV', text: 'Latvia' },
+                { id: 'LB', text: 'Lebanon' },
+                { id: 'LS', text: 'Lesotho' },
+                { id: 'LR', text: 'Liberia' },
+                { id: 'LY', text: 'Libya' },
+                { id: 'LI', text: 'Liechtenstein' },
+                { id: 'LT', text: 'Lithuania' },
+                { id: 'LU', text: 'Luxembourg' },
+                { id: 'MG', text: 'Madagascar' },
+                { id: 'MW', text: 'Malawi' },
+                { id: 'MY', text: 'Malaysia' },
+                { id: 'MV', text: 'Maldives' },
+                { id: 'ML', text: 'Mali' },
+                { id: 'MT', text: 'Malta' },
+                { id: 'MH', text: 'Marshall Islands' },
+                { id: 'MR', text: 'Mauritania' },
+                { id: 'MU', text: 'Mauritius' },
+                { id: 'MX', text: 'Mexico' },
+                { id: 'FM', text: 'Micronesia' },
+                { id: 'MD', text: 'Moldova' },
+                { id: 'MC', text: 'Monaco' },
+                { id: 'MN', text: 'Mongolia' },
+                { id: 'ME', text: 'Montenegro' },
+                { id: 'MA', text: 'Morocco' },
+                { id: 'MZ', text: 'Mozambique' },
+                { id: 'MM', text: 'Myanmar' },
+                { id: 'NA', text: 'Namibia' },
+                { id: 'NR', text: 'Nauru' },
+                { id: 'NP', text: 'Nepal' },
+                { id: 'NL', text: 'Netherlands' },
+                { id: 'NZ', text: 'New Zealand' },
+                { id: 'NI', text: 'Nicaragua' },
+                { id: 'NE', text: 'Niger' },
+                { id: 'NG', text: 'Nigeria' },
+                { id: 'NO', text: 'Norway' },
+                { id: 'OM', text: 'Oman' },
+                { id: 'PK', text: 'Pakistan' },
+                { id: 'PW', text: 'Palau' },
+                { id: 'PA', text: 'Panama' },
+                { id: 'PG', text: 'Papua New Guinea' },
+                { id: 'PY', text: 'Paraguay' },
+                { id: 'PE', text: 'Peru' },
+                { id: 'PH', text: 'Philippines' },
+                { id: 'PL', text: 'Poland' },
+                { id: 'PT', text: 'Portugal' },
+                { id: 'QA', text: 'Qatar' },
+                { id: 'RO', text: 'Romania' },
+                { id: 'RU', text: 'Russia' },
+                { id: 'RW', text: 'Rwanda' },
+                { id: 'KN', text: 'Saint Kitts and Nevis' },
+                { id: 'LC', text: 'Saint Lucia' },
+                { id: 'VC', text: 'Saint Vincent and the Grenadines' },
+                { id: 'WS', text: 'Samoa' },
+                { id: 'SM', text: 'San Marino' },
+                { id: 'ST', text: 'Sao Tome and Principe' },
+                { id: 'SA', text: 'Saudi Arabia' },
+                { id: 'SN', text: 'Senegal' },
+                { id: 'RS', text: 'Serbia' },
+                { id: 'SC', text: 'Seychelles' },
+                { id: 'SL', text: 'Sierra Leone' },
+                { id: 'SG', text: 'Singapore' },
+                { id: 'SK', text: 'Slovakia' },
+                { id: 'SI', text: 'Slovenia' },
+                { id: 'SB', text: 'Solomon Islands' },
+                { id: 'SO', text: 'Somalia' },
+                { id: 'ZA', text: 'South Africa' },
+                { id: 'SS', text: 'South Sudan' },
+                { id: 'ES', text: 'Spain' },
+                { id: 'LK', text: 'Sri Lanka' },
+                { id: 'SD', text: 'Sudan' },
+                { id: 'SR', text: 'Suriname' },
+                { id: 'SE', text: 'Sweden' },
+                { id: 'CH', text: 'Switzerland' },
+                { id: 'SY', text: 'Syria' },
+                { id: 'TW', text: 'Taiwan' },
+                { id: 'TJ', text: 'Tajikistan' },
+                { id: 'TZ', text: 'Tanzania' },
+                { id: 'TH', text: 'Thailand' },
+                { id: 'TL', text: 'Timor-Leste' },
+                { id: 'TG', text: 'Togo' },
+                { id: 'TO', text: 'Tonga' },
+                { id: 'TT', text: 'Trinidad and Tobago' },
+                { id: 'TN', text: 'Tunisia' },
+                { id: 'TR', text: 'Turkey' },
+                { id: 'TM', text: 'Turkmenistan' },
+                { id: 'TV', text: 'Tuvalu' },
+                { id: 'UG', text: 'Uganda' },
+                { id: 'UA', text: 'Ukraine' },
+                { id: 'AE', text: 'United Arab Emirates' },
+                { id: 'GB', text: 'United Kingdom' },
+                { id: 'US', text: 'United States' },
+                { id: 'UY', text: 'Uruguay' },
+                { id: 'UZ', text: 'Uzbekistan' },
+                { id: 'VU', text: 'Vanuatu' },
+                { id: 'VA', text: 'Vatican City' },
+                { id: 'VE', text: 'Venezuela' },
+                { id: 'VN', text: 'Vietnam' },
+                { id: 'YE', text: 'Yemen' },
+                { id: 'ZM', text: 'Zambia' },
+                { id: 'ZW', text: 'Zimbabwe' }
+            ];
+
+            // Initialize Select2 with countries
+            $(countrySelect).select2({
+                data: countries,
+                templateResult: formatCountry,
+                templateSelection: formatCountry,
+                placeholder: 'Select your country',
+                allowClear: true
+            });
+
+            // Get user's country using IP geolocation
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(data => {
+                    const userCountry = data.country;
+                    if (userCountry) {
+                        $(countrySelect).val(userCountry).trigger('change');
+                    }
+                })
+                .catch(error => console.log('Error detecting country:', error));
+
+            // Initialize phone input
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+                window.intlTelInput(phoneInput, {
+                    initialCountry: 'auto',
+                    geoIpLookup: function(callback) {
+                        fetch('https://ipapi.co/json/')
+                            .then(response => response.json())
+                            .then(data => callback(data.country_code))
+                            .catch(() => callback(''));
+                    },
+                    separateDialCode: true,
+                    preferredCountries: ['US', 'GB', 'SA', 'AE'],
+                    utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.13/js/utils.min.js'
+                });
+            }
+        }
+
+        function formatCountry(country) {
+            if (!country.id) return country.text;
+            return $(`
+                <span>
+                    <img src="https://flagcdn.com/16x12/${country.id.toLowerCase()}.png" class="country-flag" />
+                    ${country.text}
+                </span>
+            `);
+        }
+
+        function selectPayment(method) {
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const selectedPlan = localStorage.getItem('selectedPlan') || 'Weekly Plan';
+            const selectedPrice = localStorage.getItem('selectedPrice') || '$9.99';
+
+            const modalContent = document.querySelector('.modal-content');
+            if (!modalContent) return;
+
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <button class="back-btn" onclick="handleBackButton()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Enter Your Information</h2>
+                <div class="user-info-form">
+                    <div class="form-group">
+                        <label for="fullName">Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name">
+                        <div class="form-error" id="fullNameError">Please enter your full name</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" placeholder="Enter your email">
+                        <div class="form-error" id="emailError">Please enter a valid email</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" style="width: 100%"></select>
+                        <div class="form-error" id="countryError">Please select your country</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone">
+                        <div class="form-error" id="phoneError">Please enter a valid phone number</div>
+                    </div>
+                    <button class="proceed-btn" onclick="proceedToPayment('${method}', '${selectedPlan}', '${selectedPrice}')">
+                        <i class="fas fa-check"></i> Continue
+                    </button>
+                </div>
+            `;
+            
+            initializeFormComponents();
+        }
+
+        function handleBackButton() {
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            
+            if (currentCurrency === 'STARS') {
+                // If in Stars payment mode, just close the modal
+                closeModal();
+            } else {
+                // If in regular payment mode, return to payment options
+                showPaymentModal(new Event('click'));
+            }
+        }
+
+        function proceedToPayment(method, plan, price) {
+            const fullName = document.getElementById('fullName')?.value || '';
+            const email = document.getElementById('email')?.value || '';
+            const country = $('#country').select2('data')[0]?.text || '';
+            const phoneInput = document.getElementById('phone');
+            const phone = phoneInput && window.intlTelInput(phoneInput).getNumber() || '';
+
+            if (!fullName || !email || !country || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const modalContent = document.querySelector('.modal-content');
+            if (!modalContent) return;
+
+            if (currentCurrency === 'STARS') {
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                    <div class="payment-processing">
+                        <div class="loading-spinner"></div>
+                        <h3>Processing Stars Payment...</h3>
+                        <p>You will be redirected to Telegram to complete the payment with stars.</p>
+                    </div>
+                `;
+
+                let starsAmount = 750; // Default for Weekly Plan
+                if (plan === 'Monthly Plan') starsAmount = 2300;
+                if (plan === 'Annual Plan') starsAmount = 10000;
+                
+                const message = encodeURIComponent(
+                    `New Stars Subscription Request\n\n` +
+                    `Customer Information:\n` +
+                    `- Full Name: ${fullName}\n` +
+                    `- Email: ${email}\n` +
+                    `- Country: ${country}\n` +
+                    `- Phone: ${phone}\n\n` +
+                    `Subscription Details:\n` +
+                    `- Plan: ${plan}\n` +
+                    `- Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                    `- Price: ${starsAmount} Stars\n`
+                );
+
+                setTimeout(() => {
+                    window.open(`https://t.me/Binarjoinanelytic_bot?text=${message}`, '_blank');
+                    closeModal();
+                }, 1500);
+            } else {
+                const message = encodeURIComponent(
+                    `New Subscription Request\n\n` +
+                    `Customer Information:\n` +
+                    `- Full Name: ${fullName}\n` +
+                    `- Email: ${email}\n` +
+                    `- Country: ${country}\n` +
+                    `- Phone: ${phone}\n\n` +
+                    `Subscription Details:\n` +
+                    `- Plan: ${plan}\n` +
+                    `- Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                    `- Price: ${price}\n` +
+                    `- Payment Method: ${method}`
+                );
+
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                    <div class="payment-processing">
+                        <div class="loading-spinner"></div>
+                        <h3>Processing Your Request...</h3>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    window.open(`https://t.me/Binarjoinanelytic_bot?text=${message}`, '_blank');
+                    closeModal();
+                }, 1500);
+            }
+        }
+
+        function submitUserInfo(event, method, plan, price) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('fullName')?.value || '';
+            const email = document.getElementById('email')?.value || '';
+            const country = $('#country').select2('data')[0]?.text || '';
+            const phoneInput = document.getElementById('phone');
+            const phone = phoneInput && window.intlTelInput(phoneInput).getNumber() || '';
+
+            if (!fullName || !email || !country || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const currentCurrency = localStorage.getItem('currency') || 'USD';
+            const modalContent = document.querySelector('.modal-content');
+
+            if (currentCurrency === 'STARS') {
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                    <div class="payment-processing">
+                        <div class="loading-spinner"></div>
+                        <h3>Processing Stars Payment...</h3>
+                        <p>You will be redirected to Telegram to complete the payment with stars.</p>
+                    </div>
+                `;
+
+                let starsAmount = 750; // Default for Weekly Plan
+                if (plan === 'Monthly Plan') starsAmount = 2300;
+                if (plan === 'Annual Plan') starsAmount = 10000;
+                
+                const message = encodeURIComponent(
+                    `New Stars Subscription Request\n\n` +
+                    `Customer Information:\n` +
+                    `- Full Name: ${fullName}\n` +
+                    `- Email: ${email}\n` +
+                    `- Country: ${country}\n` +
+                    `- Phone: ${phone}\n\n` +
+                    `Subscription Details:\n` +
+                    `- Plan: ${plan}\n` +
+                    `- Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                    `- Price: ${starsAmount} Stars\n`
+                );
+
+                setTimeout(() => {
+                    window.open(`https://t.me/Binarjoinanelytic_bot?text=${message}`, '_blank');
+                    closeModal();
+                }, 1500);
+            } else {
+                const message = encodeURIComponent(
+                    `New Subscription Request\n\n` +
+                    `Customer Information:\n` +
+                    `- Full Name: ${fullName}\n` +
+                    `- Email: ${email}\n` +
+                    `- Country: ${country}\n` +
+                    `- Phone: ${phone}\n\n` +
+                    `Subscription Details:\n` +
+                    `- Plan: ${plan}\n` +
+                    `- Bot Version: ${localStorage.getItem('selectedBotVersion')}\n` +
+                    `- Price: ${price}\n` +
+                    `- Payment Method: ${method}`
+                );
+
+                modalContent.innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                    <div class="payment-processing">
+                        <div class="loading-spinner"></div>
+                        <h3>Processing Your Request...</h3>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    window.open(`https://t.me/Binarjoinanelytic_bot?text=${message}`, '_blank');
+                    closeModal();
+                }, 1500);
+            }
+        }
+
+        function toggleDarkMode() {
+            const body = document.body;
+            const darkModeIcon = document.getElementById('darkModeIcon');
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                darkModeIcon.src = "images/light-mode.png";
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                darkModeIcon.src = "images/dark-mode.png";
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        function showDisabledMessage(method) {
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="payment-confirmation">
+                    <i class="fas fa-exclamation-circle" style="font-size: 4rem; color: #f59e0b; margin-bottom: 1rem;"></i>
+                    <h2>Payment Method Not Available</h2>
+                    <p>${method.charAt(0).toUpperCase() + method.slice(1)} payments are currently disabled.</p>
+                    <p>Please choose another payment method.</p>
+                    <button class="proceed-btn" onclick="returnToPaymentOptions()">Go Back</button>
+                </div>
+            `;
+        }
+
+        function returnToPaymentOptions() {
+            const modalContent = document.querySelector('.modal-content');
+            modalContent.innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <h2>Choose Payment Method</h2>
+                
+                <div class="tabs-container">
+                    <div class="payment-tab active" onclick="showTab('platforms')">Platforms</div>
+                    <div class="payment-tab" onclick="showTab('wallets')">Wallets</div>
+                    <div class="payment-tab" onclick="showTab('traditional')">Traditional</div>
+                </div>
+
+                <div id="platforms" class="payment-section active">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('binance')">
+                            <img src="images/binance.png" alt="Binance">
+                            <div>Binance</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx')">
+                            <img src="images/okx.png" alt="OKX">
+                            <div>OKX</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit')">
+                            <img src="images/bybit.png" alt="BYBIT">
+                            <div>BYBIT</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="wallets" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option" onclick="selectPayment('trustwallet')">
+                            <img src="images/trustwallet.png" alt="Trust Wallet">
+                            <div>Trust Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('metamask')">
+                            <img src="images/metamask.png" alt="MetaMask">
+                            <div>MetaMask</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('okx-wallet')">
+                            <img src="images/okx-wallet.png" alt="OKX Wallet">
+                            <div>OKX Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('binance-wallet')">
+                            <img src="images/binance-wallet.png" alt="Binance Wallet">
+                            <div>Binance Wallet</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('bybit-wallet')">
+                            <img src="images/bybit-wallet.png" alt="BYBIT Wallet">
+                            <div>BYBIT Wallet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="traditional" class="payment-section">
+                    <div class="payment-options">
+                        <div class="payment-option disabled" onclick="showDisabledMessage('mastercard')">
+                            <img src="images/mastercard.png" alt="Mastercard">
+                            <div>Mastercard</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('googleplay')">
+                            <img src="images/googleplay.png" alt="Google Play">
+                            <div>Google Play</div>
+                        </div>
+                        <div class="payment-option disabled" onclick="showDisabledMessage('paypal')">
+                            <img src="images/paypal.png" alt="PayPal">
+                            <div>PayPal</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('westernunion')">
+                            <img src="images/westernunion.png" alt="Western Union">
+                            <div>Western Union</div>
+                        </div>
+                        <div class="payment-option" onclick="selectPayment('moneygram')">
+                            <img src="images/moneygram.png" alt="MoneyGram">
+                            <div>MoneyGram</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            showTab('platforms');
+        }
+
+        function showTab(tabName) {
+            // Hide all payment sections
+            const sections = document.querySelectorAll('.payment-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.payment-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected section and activate tab
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`.payment-tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('active');
+
+            // Optional: Close sidebar when clicking outside
+            if (sidebar.classList.contains('active')) {
+                document.addEventListener('click', closeSidebarOnClickOutside);
+            } else {
+                document.removeEventListener('click', closeSidebarOnClickOutside);
+            }
+        }
+
+        function closeSidebarOnClickOutside(event) {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (!sidebar.contains(event.target) && event.target !== menuToggle) {
+                sidebar.classList.remove('active');
+                document.removeEventListener('click', closeSidebarOnClickOutside);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+            if (darkModeEnabled) {
+                document.body.classList.add('dark-mode');
+                const darkModeIcon = document.getElementById('darkModeIcon');
+                if (darkModeIcon) {
+                    darkModeIcon.src = "images/light-mode.png";
+                }
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+    <script>
+        window.botpressWebChat = window.botpressWebChat || {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                if (window.botpressWebChat && typeof window.botpressWebChat.init === 'function') {
+                    window.botpressWebChat.init({
+                        composerPlaceholder: "Chat with us",
+                        botName: "BinarJoinAnalytic Bot",
+                        botId: "20250227150359-AFRSEMVF",
+                        hostUrl: "https://cdn.botpress.cloud/webchat/v2.3/",
+                        messagingUrl: "https://messaging.botpress.cloud",
+                        clientId: "20250227150359-AFRSEMVF",
+                        styleSettings: {
+                            widgetWidth: "300px",
+                            desktopHeight: "500px",
+                            mobileHeight: "400px",
+                            containerBackground: "#f0f0f0",
+                            primaryColor: "#ffdd3d"
+                        }
+                    });
+                } else {
+                    console.error("Botpress WebChat initialization failed: method not found");
+                }
+            } catch (error) {
+                console.error("Error initializing Botpress WebChat:", error);
+            }
+        });
+
+        window.toggleChat = function() {
+            try {
+                if (window.botpressWebChat && typeof window.botpressWebChat.toggleChat === 'function') {
+                    window.botpressWebChat.toggleChat();
+                } else {
+                    console.error("Toggle chat method not available");
+                    window.open('https://cdn.botpress.cloud/webchat/v2.3/shareable.html?configUrl=https://files.bpcontent.cloud/2025/02/27/15/20250227150359-AFRSEMVF.json', '_blank');
+                }
+            } catch (error) {
+                console.error("Error toggling chat:", error);
+            }
+        };
+    </script>
+</body>
+</html>

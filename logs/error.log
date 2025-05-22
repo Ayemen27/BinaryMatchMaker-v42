@@ -1,0 +1,1377 @@
+[2025-05-19 12:50:48] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:272:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:159:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 12:51:01] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:272:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:159:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 12:51:11] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:272:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:159:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 13:04:06] [ERROR] [UserSettings] column "use_ai_for_signals" does not exist
+Stack: error: column "use_ai_for_signals" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:178:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":1}
+
+[2025-05-19 13:04:16] [ERROR] [UserSettings] column "use_ai_for_signals" does not exist
+Stack: error: column "use_ai_for_signals" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:178:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":1}
+
+[2025-05-19 13:09:47] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:91:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","userId":1,"service":"openai"}
+
+[2025-05-19 13:09:47] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:184:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"function":"generateTradingSignal","platform":"Deriv","pair":"BTC/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 13:09:47] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:200:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"userId":1,"requestBody":{"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 13:09:57] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:91:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","userId":1,"service":"openai"}
+
+[2025-05-19 13:09:57] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:184:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"function":"generateTradingSignal","platform":"Deriv","pair":"BTC/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 13:09:57] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:200:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:76:20)
+Context: {"userId":1,"requestBody":{"platform":"Deriv","pair":"BTC/USD","timeframe":"1m","useAI":false}}
+
+[2025-05-19 13:38:03] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1,"service":"openai"}
+
+[2025-05-19 13:38:03] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:192:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 13:38:03] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:208:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 13:40:05] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1,"service":"openai"}
+
+[2025-05-19 13:40:05] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح أو مفتاح API غير صالح. يرجى الاتصال بمسؤول النظام.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:192:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 13:40:05] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:208:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:105:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 15:00:54] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1,"service":"openai"}
+
+[2025-05-19 15:00:54] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:195:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 15:00:54] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 16:47:38] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2,"service":"openai"}
+
+[2025-05-19 16:47:38] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:195:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 16:47:38] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 18:01:09] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:361:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:64:22)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"ETH/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 18:01:09] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:94:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"ETH/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 18:01:09] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"ETH/USD","timeframe":"1m","useAI":false}}
+
+[2025-05-19 18:01:23] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:361:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:64:22)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 18:01:23] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:94:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 18:01:23] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":false}}
+
+[2025-05-19 18:12:57] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:361:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:64:22)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"SOL/USD","timeframe":"1d","userId":2}
+
+[2025-05-19 18:12:57] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:94:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"SOL/USD","timeframe":"1d","userId":2}
+
+[2025-05-19 18:12:57] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"SOL/USD","timeframe":"1d","useAI":false}}
+
+[2025-05-19 18:48:49] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:302:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:223:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-19 18:48:49] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:373:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:223:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
+[2025-05-19 18:49:05] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:302:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:223:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-19 18:49:05] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:373:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:223:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
+[2025-05-19 19:22:11] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2,"service":"openai"}
+
+[2025-05-19 19:22:11] [ERROR] [OpenAIService] مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+Stack: Error: مشكلة في خدمة الذكاء الاصطناعي: تم تجاوز الحد المسموح. حاول مجددًا باستخدام الخوارزميات التقليدية بدلاً من الذكاء الاصطناعي.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:195:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:22:11] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":true}}
+
+[2025-05-19 19:24:58] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:387:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:64:22)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:24:58] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:94:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:24:58] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:220:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"BTC/USD","timeframe":"1m","useAI":false}}
+
+[2025-05-19 19:33:55] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 19:35:34] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 19:35:39] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 19:35:44] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:158:24)
+Context: {"userId":2}
+
+[2025-05-19 19:35:46] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:158:24)
+Context: {"userId":2}
+
+[2025-05-19 19:36:58] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 19:37:02] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 19:37:30] [ERROR] [OpenAIService] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:43:30)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:37:30] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","useAI":true,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 19:37:42] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:387:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:86:20)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:37:42] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","userId":2}
+
+[2025-05-19 19:37:42] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"Pocket Option","pair":"ETH/USD","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 19:38:48] [ERROR] [UserSettings] column "enable_otc_trading" does not exist
+Stack: error: column "enable_otc_trading" does not exist
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:181:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:22)
+Context: {"userId":2}
+
+[2025-05-19 20:58:48] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "market_data_pkey"
+Stack: error: duplicate key value violates unique constraint "market_data_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.saveMarketData (/home/runner/workspace/server/storage.ts:847:25)
+    at async AlgorithmicSignalService.generateMarketDataPlaceholder (/home/runner/workspace/server/services/algorithmic-signal-service.ts:153:12)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:27:63)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 20:58:48] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 20:58:48] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 20:58:56] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "market_data_pkey"
+Stack: error: duplicate key value violates unique constraint "market_data_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.saveMarketData (/home/runner/workspace/server/storage.ts:847:25)
+    at async AlgorithmicSignalService.generateMarketDataPlaceholder (/home/runner/workspace/server/services/algorithmic-signal-service.ts:153:12)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:27:63)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 20:58:56] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 20:58:56] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":true,"currentPrice":null}}
+
+[2025-05-19 21:02:06] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:387:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:86:20)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 21:02:06] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 21:02:06] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 21:02:16] [ERROR] [AlgorithmicSignalService] duplicate key value violates unique constraint "signals_pkey"
+Stack: error: duplicate key value violates unique constraint "signals_pkey"
+    at file:///home/runner/workspace/node_modules/@neondatabase/serverless/index.mjs:1345:74
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async NeonPreparedQuery.execute (/home/runner/workspace/node_modules/src/neon-serverless/session.ts:102:18)
+    at async DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:387:22)
+    at async AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:86:20)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 21:02:16] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":2}
+
+[2025-05-19 21:02:16] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:106:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 22:10:39] [ERROR] [OpenAIService] مفتاح API الخاص بـ OpenAI غير متوفر. يرجى التحقق من ملف .env
+Stack: Error: مفتاح API الخاص بـ OpenAI غير متوفر. يرجى التحقق من ملف .env
+    at <anonymous> (/home/runner/workspace/server/services/openai-service.ts:13:33)
+    at ModuleJob.run (node:internal/modules/esm/module_job:234:25)
+    at async ModuleLoader.import (node:internal/modules/esm/loader:473:24)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:122:5)
+Context: {}
+
+[2025-05-19 22:25:06] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:36)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:25:10] [ERROR] [OpenAIService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:309:44)
+    at <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:42)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-19 22:25:10] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 22:25:18] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:36)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:25:22] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:158:38)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:25:30] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:158:38)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:25:36] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:36)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:27:16] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:36)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:27:19] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:158:38)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:27:33] [ERROR] [UserSettings] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:41:36)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at next (/home/runner/workspace/node_modules/express/lib/router/route.js:149:13)
+    at Route.dispatch (/home/runner/workspace/node_modules/express/lib/router/route.js:119:3)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:284:15
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at Function.handle (/home/runner/workspace/node_modules/express/lib/router/index.js:175:3)
+    at router (/home/runner/workspace/node_modules/express/lib/router/index.js:47:12)
+    at Layer.handle [as handle_request] (/home/runner/workspace/node_modules/express/lib/router/layer.js:95:5)
+    at trim_prefix (/home/runner/workspace/node_modules/express/lib/router/index.js:328:13)
+    at /home/runner/workspace/node_modules/express/lib/router/index.js:286:9
+    at Function.process_params (/home/runner/workspace/node_modules/express/lib/router/index.js:346:12)
+    at next (/home/runner/workspace/node_modules/express/lib/router/index.js:280:10)
+    at strategy.pass (/home/runner/workspace/node_modules/passport/lib/middleware/authenticate.js:355:9)
+    at /home/runner/workspace/node_modules/passport/lib/strategies/session.js:120:12
+    at pass (/home/runner/workspace/node_modules/passport/lib/authenticator.js:352:31)
+    at deserialized (/home/runner/workspace/node_modules/passport/lib/authenticator.js:364:7)
+    at <anonymous> (/home/runner/workspace/server/auth.ts:86:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"userId":1}
+
+[2025-05-19 22:27:47] [ERROR] [AlgorithmicSignalService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getMarketData (/home/runner/workspace/server/storage.ts:847:8)
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:27:40)
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:47)
+    at <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:40)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:27:47] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:27:47] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 22:27:51] [ERROR] [OpenAIService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:43:44)
+    at <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:40)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:27:51] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":true,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 22:27:53] [ERROR] [OpenAIService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.getUserSettings (/home/runner/workspace/server/storage.ts:195:8)
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:43:44)
+    at <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:40)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:27:53] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":true,"isOtcEnabled":true,"currentPrice":null}}
+
+[2025-05-19 22:31:49] [ERROR] [AlgorithmicSignalService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:464:66)
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:72:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"5m","userId":1}
+
+[2025-05-19 22:31:49] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"5m","userId":1}
+
+[2025-05-19 22:31:49] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"5m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 22:32:00] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:04] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:10] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:14] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:18] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:21] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:25] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:29] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:32:39] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-19 22:32:39] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 22:32:46] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-19 22:32:46] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 22:34:34] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:34:38] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:34:41] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:34:46] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:34:49] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:34:52] [ERROR] [UserSettings] column "updated_at" is of type timestamp without time zone but expression is of type integer
+Stack: error: column "updated_at" is of type timestamp without time zone but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:305:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:12] [ERROR] [UserSettings] bind message supplies 2 parameters, but prepared statement "" requires 1
+Stack: error: bind message supplies 2 parameters, but prepared statement "" requires 1
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:15] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:18] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:22] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:24] [ERROR] [UserSettings] column "show_trading_tips" is of type boolean but expression is of type integer
+Stack: error: column "show_trading_tips" is of type boolean but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:36:30] [ERROR] [UserSettings] column "auto_refresh_data" is of type boolean but expression is of type integer
+Stack: error: column "auto_refresh_data" is of type boolean but expression is of type integer
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:309:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:38:38] [ERROR] [UserSettings] bind message supplies 2 parameters, but prepared statement "" requires 1
+Stack: error: bind message supplies 2 parameters, but prepared statement "" requires 1
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:46] [ERROR] [UserSettings] bind message supplies 2 parameters, but prepared statement "" requires 1
+Stack: error: bind message supplies 2 parameters, but prepared statement "" requires 1
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:49] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:52] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:54] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:57] [ERROR] [UserSettings] bind message supplies 3 parameters, but prepared statement "" requires 2
+Stack: error: bind message supplies 3 parameters, but prepared statement "" requires 2
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:41:59] [ERROR] [UserSettings] bind message supplies 2 parameters, but prepared statement "" requires 1
+Stack: error: bind message supplies 2 parameters, but prepared statement "" requires 1
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:42:02] [ERROR] [UserSettings] bind message supplies 2 parameters, but prepared statement "" requires 1
+Stack: error: bind message supplies 2 parameters, but prepared statement "" requires 1
+    at /home/runner/workspace/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.query (/home/runner/workspace/server/db.ts:167:22)
+    at async DatabaseStorage.updateUserSettings (/home/runner/workspace/server/storage.ts:316:22)
+    at async <anonymous> (/home/runner/workspace/server/routes/user-settings.ts:195:22)
+Context: {"userId":1}
+
+[2025-05-19 22:47:53] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-19 22:47:53] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 22:48:05] [ERROR] [AlgorithmicSignalService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:479:66)
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:72:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:48:05] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","userId":1}
+
+[2025-05-19 22:48:05] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"IQ Option","pair":"USD/JPY","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-19 22:49:20] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-19 22:49:20] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-19 22:54:05] [ERROR] [AlgorithmicSignalService] db.select(...).from is not a function
+Stack: TypeError: db.select(...).from is not a function
+    at DatabaseStorage.createSignal (/home/runner/workspace/server/storage.ts:479:66)
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:72:32)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"Olymp Trade","pair":"SOL/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 22:54:05] [ERROR] [OpenAIService] فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول باستخدام الخوارزمية. يرجى المحاولة مرة أخرى.
+    at AlgorithmicSignalService.generateTradingSignal (/home/runner/workspace/server/services/algorithmic-signal-service.ts:121:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:38:16)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"Olymp Trade","pair":"SOL/USD","timeframe":"1m","userId":1}
+
+[2025-05-19 22:54:05] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":1,"requestBody":{"platform":"Olymp Trade","pair":"SOL/USD","timeframe":"1m","useAI":false,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-20 05:32:42] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":1}
+
+[2025-05-20 05:32:42] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":1,"pair":"BTC/USDT"}
+
+[2025-05-20 17:33:03] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:99:26)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"platform":"IQ Option","pair":"BNB/USD","timeframe":"1m","userId":2,"service":"openai"}
+
+[2025-05-20 17:33:03] [ERROR] [OpenAIService] تم تجاوز حد الاستخدام المسموح لخدمة الذكاء الاصطناعي. يمكنك اختيار إحدى الحلول التالية:
+1. استخدم خيار الخوارزميات التقليدية بتحويل زر الذكاء الاصطناعي إلى وضع الإيقاف.
+2. قم بإدخال مفتاح API خاص بك من خلال صفحة الإعدادات.
+3. قم بترقية اشتراكك للحصول على مزيد من الاستخدام.
+Stack: Error: تم تجاوز حد الاستخدام المسموح لخدمة الذكاء الاصطناعي. يمكنك اختيار إحدى الحلول التالية:
+1. استخدم خيار الخوارزميات التقليدية بتحويل زر الذكاء الاصطناعي إلى وضع الإيقاف.
+2. قم بإدخال مفتاح API خاص بك من خلال صفحة الإعدادات.
+3. قم بترقية اشتراكك للحصول على مزيد من الاستخدام.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:195:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"function":"generateTradingSignal","platform":"IQ Option","pair":"BNB/USD","timeframe":"1m","userId":2}
+
+[2025-05-20 17:33:03] [ERROR] [SignalGenerator] فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في توليد إشارة التداول. يرجى المحاولة مرة أخرى.
+    at OpenAIService.generateTradingSignal (/home/runner/workspace/server/services/openai-service.ts:276:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:109:20)
+Context: {"userId":2,"requestBody":{"platform":"IQ Option","pair":"BNB/USD","timeframe":"1m","useAI":true,"isOtcEnabled":false,"currentPrice":null}}
+
+[2025-05-20 17:33:12] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-20 17:33:12] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
+[2025-05-20 17:33:15] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-20 17:33:15] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
+[2025-05-20 17:33:21] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-20 17:33:21] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
+[2025-05-20 17:59:31] [ERROR] [OpenAIService] 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+Stack: Error: 429 You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.
+    at Function.generate (/home/runner/workspace/node_modules/openai/src/error.ts:96:14)
+    at OpenAI.makeStatusError (/home/runner/workspace/node_modules/openai/src/core.ts:462:21)
+    at OpenAI.makeRequest (/home/runner/workspace/node_modules/openai/src/core.ts:526:24)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:358:24)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"function":"analyzeMarketTrend","pair":"BTC/USDT","userId":2}
+
+[2025-05-20 17:59:31] [ERROR] [MarketAnalysis] فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+Stack: Error: فشل في تحليل اتجاه السوق. يرجى المحاولة مرة أخرى.
+    at OpenAIService.analyzeMarketTrend (/home/runner/workspace/server/services/openai-service.ts:429:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/server/routes/signal-generator.ts:268:22)
+Context: {"userId":2,"pair":"BTC/USDT"}
+
